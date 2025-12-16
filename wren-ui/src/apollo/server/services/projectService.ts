@@ -42,6 +42,7 @@ export interface ProjectData {
   displayName: string;
   type: DataSourceName;
   connectionInfo: WREN_AI_CONNECTION_INFO;
+  name?: string;
 }
 
 export interface ProjectRecommendationQuestionsResult {
@@ -70,7 +71,11 @@ export interface IProjectService {
   ) => Promise<RecommendConstraint[]>;
 
   getCurrentProject: () => Promise<Project>;
+  getActiveProject: () => Promise<Project>;
   getProjectById: (projectId: number) => Promise<Project>;
+  listProjects: () => Promise<Project[]>;
+  switchProject: (projectId: number) => Promise<Project>;
+  duplicateProject: (projectId: number, name: string) => Promise<Project>;
   writeCredentialFile: (
     credentials: JSON,
     persistCredentialDir: string,
@@ -185,8 +190,39 @@ export class ProjectService implements IProjectService {
     return await this.projectRepository.getCurrentProject();
   }
 
+  public async getActiveProject() {
+    return await this.projectRepository.getActiveProject();
+  }
+
   public async getProjectById(projectId: number) {
-    return await this.projectRepository.findOneBy({ id: projectId });
+    return await this.projectRepository.getProjectById(projectId);
+  }
+
+  public async listProjects() {
+    return await this.projectRepository.listProjects();
+  }
+
+  public async switchProject(projectId: number) {
+    return await this.projectRepository.setActiveProject(projectId);
+  }
+
+  public async duplicateProject(projectId: number, name: string) {
+    const sourceProject = await this.getProjectById(projectId);
+    if (!sourceProject) {
+      throw new Error(`Project with id ${projectId} not found`);
+    }
+
+    // Create a new project with the same configuration
+    const newProject = await this.createProject({
+      displayName: sourceProject.displayName,
+      type: sourceProject.type,
+      connectionInfo: sourceProject.connectionInfo,
+    });
+
+    // Update the name
+    await this.updateProject(newProject.id, { name });
+
+    return newProject;
   }
 
   public async getProjectDataSourceTables(
@@ -223,6 +259,9 @@ export class ProjectService implements IProjectService {
         projectData.type,
         projectData.connectionInfo,
       ),
+      name: projectData.name || projectData.displayName,
+      isActive: false, // New projects are not active by default
+      lastAccessedAt: new Date(),
     };
     logger.debug('Creating project...');
     const project = await this.projectRepository.createOne(projectValue);

@@ -1,0 +1,104 @@
+query ListProjects {
+  listProjects {
+    projects {
+      id
+      name
+      displayName
+      type
+      isActive
+      language
+      lastAccessedAt
+      createdAt
+      sampleDataset
+    }
+    activeProjectId
+  }
+}
+
+query GetActiveProject {
+  getActiveProject {
+    id
+    name
+    displayName
+    type
+    isActive
+    language
+    lastAccessedAt
+    createdAt
+    sampleDataset
+  }
+}
+
+query GetProject($projectId: Int!) {
+  getProject(projectId: $projectId) {
+    id
+    name
+    displayName
+    type
+    isActive
+    language
+    lastAccessedAt
+    createdAt
+    sampleDataset
+  }
+}
+
+mutation CreateProject($data: CreateProjectInput!) {
+  createProject(data: $data) {
+    id
+    name
+    displayName
+    type
+    isActive
+    language
+    lastAccessedAt
+    createdAt
+    sampleDataset
+  }
+}
+
+mutation UpdateProject($projectId: Int!, $data: UpdateProjectInput!) {
+  updateProject(projectId: $projectId, data: $data) {
+    id
+    name
+    displayName
+    type
+    isActive
+    language
+    lastAccessedAt
+    createdAt
+    sampleDataset
+  }
+}
+
+mutation SwitchProject($projectId: Int!) {
+  switchProject(projectId: $projectId) {
+    id
+    name
+    displayName
+    type
+    isActive
+    language
+    lastAccessedAt
+    createdAt
+    sampleDataset
+  }
+}
+
+mutation DeleteProject($projectId: Int!) {
+  deleteProject(projectId: $projectId)
+}
+
+mutation DuplicateProject($projectId: Int!, $name: String!) {
+  duplicateProject(projectId: $projectId, name: $name) {
+    id
+    name
+    displayName
+    type
+    isActive
+    language
+    lastAccessedAt
+    createdAt
+    sampleDataset
+  }
+}

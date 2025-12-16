@@ -55,6 +55,11 @@ const resolvers = {
     settings: projectResolver.getSettings,
     getMDL: modelResolver.getMDL,
 
+    // Projects
+    listProjects: projectResolver.listProjects,
+    getProject: projectResolver.getProject,
+    getActiveProject: projectResolver.getActiveProject,
+
     // Learning
     learningRecord: learningResolver.getLearningRecord,
 
@@ -146,6 +151,13 @@ const resolvers = {
     resetCurrentProject: projectResolver.resetCurrentProject,
     updateCurrentProject: projectResolver.updateCurrentProject,
     updateDataSource: projectResolver.updateDataSource,
+
+    // Projects
+    createProject: projectResolver.createProject,
+    updateProject: projectResolver.updateProject,
+    switchProject: projectResolver.switchProject,
+    deleteProject: projectResolver.deleteProject,
+    duplicateProject: projectResolver.duplicateProject,
 
     // preview
     previewSql: modelResolver.previewSql,

@@ -851,6 +851,34 @@ export const typeDefs = gql`
     language: ProjectLanguage!
   }
 
+  input CreateProjectInput {
+    name: String!
+    type: DataSourceName!
+    properties: JSON!
+  }
+
+  input UpdateProjectInput {
+    name: String
+    language: ProjectLanguage
+  }
+
+  type ProjectInfo {
+    id: Int!
+    name: String!
+    displayName: String!
+    type: DataSourceName!
+    isActive: Boolean!
+    language: ProjectLanguage!
+    lastAccessedAt: String
+    createdAt: String!
+    sampleDataset: SampleDatasetName
+  }
+
+  type ProjectListResult {
+    projects: [ProjectInfo!]!
+    activeProjectId: Int
+  }
+
   type Settings {
     productVersion: String!
     dataSource: DataSource!
@@ -1142,6 +1170,11 @@ export const typeDefs = gql`
     # Settings
     settings: Settings!
 
+    # Projects
+    listProjects: ProjectListResult!
+    getProject(projectId: Int!): ProjectInfo!
+    getActiveProject: ProjectInfo!
+
     # System
     getMDL(hash: String!): GetMDLResult!
 
@@ -1269,6 +1302,13 @@ export const typeDefs = gql`
     resetCurrentProject: Boolean!
     updateCurrentProject(data: UpdateCurrentProjectInput!): Boolean!
     updateDataSource(data: UpdateDataSourceInput!): DataSource!
+
+    # Projects
+    createProject(data: CreateProjectInput!): ProjectInfo!
+    updateProject(projectId: Int!, data: UpdateProjectInput!): ProjectInfo!
+    switchProject(projectId: Int!): ProjectInfo!
+    deleteProject(projectId: Int!): Boolean!
+    duplicateProject(projectId: Int!, name: String!): ProjectInfo!
 
     # preview
     previewSql(data: PreviewSQLDataInput): JSON!

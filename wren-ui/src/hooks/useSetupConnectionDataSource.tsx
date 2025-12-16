@@ -30,11 +30,21 @@ export default function useSetupConnectionDataSource() {
 
   const saveDataSource = useCallback(
     async (properties?: Record<string, any>) => {
+      // Get project name from sessionStorage if creating a new project
+      const projectName = sessionStorage.getItem('newProjectName');
+      const finalProperties = transformFormToProperties(properties, selected);
+      
+      // Add project name to properties if available
+      if (projectName) {
+        finalProperties.name = projectName;
+        sessionStorage.removeItem('newProjectName'); // Clean up after use
+      }
+      
       await saveDataSourceMutation({
         variables: {
           data: {
             type: selected,
-            properties: transformFormToProperties(properties, selected),
+            properties: finalProperties,
           },
         },
       });

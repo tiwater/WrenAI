@@ -13,6 +13,15 @@ const resolveAlias = {
 const nextConfig = withLess({
   output: 'standalone',
   staticPageGenerationTimeout: 1000,
+  transpilePackages: [
+    '@ant-design/icons-svg',
+    '@ant-design/icons', 
+    'rc-util',
+    'rc-pagination',
+    'rc-picker',
+    'rc-tree',
+    'rc-table'
+  ],
   compiler: {
     // Enables the styled-components SWC transform
     styledComponents: {

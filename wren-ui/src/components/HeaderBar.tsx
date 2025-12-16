@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import LogoBar from '@/components/LogoBar';
 import { Path } from '@/utils/enum';
 import Deploy from '@/components/deploy/Deploy';
+import ProjectSelector from '@/components/project/ProjectSelector';
 
 const { Header } = Layout;
 
@@ -79,14 +80,21 @@ export default function HeaderBar() {
               >
                 API
               </StyledButton>
+              <StyledButton
+                shape="round"
+                size="small"
+                $isHighlight={pathname.startsWith('/projects')}
+                onClick={() => router.push('/projects')}
+              >
+                Projects
+              </StyledButton>
             </Space>
           )}
         </Space>
-        {isModeling && (
-          <Space size={[16, 0]}>
-            <Deploy />
-          </Space>
-        )}
+        <Space size={[16, 0]}>
+          {showNav && <ProjectSelector />}
+          {isModeling && <Deploy />}
+        </Space>
       </div>
     </StyledHeader>
   );
