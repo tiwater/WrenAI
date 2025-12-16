@@ -53,6 +53,8 @@ export default function useSetupConnectionDataSource() {
   );
 
   const completedDataSourceSave = useCallback(async () => {
+    // Clear the creating new project flag
+    sessionStorage.removeItem('creatingNewProject');
     router.push(Path.OnboardingModels);
   }, [selected, router]);
 

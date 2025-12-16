@@ -293,6 +293,7 @@ export default function ProjectsPage() {
                     const projectName = nameInput?.value || 'New Project';
                     // Store the project name in sessionStorage to use during connection setup
                     sessionStorage.setItem('newProjectName', projectName);
+                    sessionStorage.setItem('creatingNewProject', 'true');
                     router.push(Path.OnboardingConnection);
                   },
                 });

@@ -11,15 +11,29 @@ export default function useSetupConnectionSampleDataset() {
   const [startSampleDatasetMutation, { loading, error }] =
     useStartSampleDatasetMutation({
       onError: (error) => console.error(error),
-      onCompleted: () => router.push(Path.Modeling),
+      onCompleted: () => {
+        // Clear the creating new project flags
+        sessionStorage.removeItem('newProjectName');
+        sessionStorage.removeItem('creatingNewProject');
+        router.push(Path.Modeling);
+      },
       refetchQueries: [{ query: ONBOARDING_STATUS }],
       awaitRefetchQueries: true,
     });
 
   const saveSampleDataset = useCallback(
     async (template: SampleDatasetName) => {
+      // Get project name from sessionStorage if creating a new project
+      const projectName = sessionStorage.getItem('newProjectName');
+      const data: any = { name: template };
+      
+      if (projectName) {
+        data.projectName = projectName;
+        // Don't remove here, will be removed after save completes
+      }
+      
       await startSampleDatasetMutation({
-        variables: { data: { name: template } },
+        variables: { data },
       });
     },
     [startSampleDatasetMutation],

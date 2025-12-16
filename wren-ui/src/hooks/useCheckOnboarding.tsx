@@ -21,6 +21,10 @@ export const useWithOnboarding = () => {
     if (onboardingStatus) {
       const newPath = redirectRoute[onboardingStatus];
       const pathname = router.pathname;
+      
+      // Check if user is creating a new project (has project name in sessionStorage)
+      const isCreatingNewProject = typeof window !== 'undefined' && 
+        (sessionStorage.getItem('newProjectName') || sessionStorage.getItem('creatingNewProject'));
 
       // redirect to new path if onboarding is not completed
       if (newPath && newPath !== Path.Modeling) {
@@ -55,6 +59,11 @@ export const useWithOnboarding = () => {
         onboardingStatus === OnboardingStatus.WITH_SAMPLE_DATASET
       ) {
         router.push(newPath);
+        return;
+      }
+
+      // Don't redirect if user is creating a new project
+      if (isCreatingNewProject) {
         return;
       }
 

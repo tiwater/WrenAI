@@ -159,6 +159,7 @@ export const typeDefs = gql`
 
   input SampleDatasetInput {
     name: SampleDatasetName!
+    projectName: String
   }
 
   type CompactTable {

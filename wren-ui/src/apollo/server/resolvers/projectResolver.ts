@@ -78,11 +78,11 @@ const toDateString = (date: Date | string | null | undefined | any): string | nu
 // Helper function to format project for GraphQL response
 const formatProjectInfo = (project: any) => ({
   id: project.id,
-  name: project.name || project.displayName,
-  displayName: project.displayName,
+  name: project.name || project.displayName || 'Unnamed Project',  // Ensure name is never null
+  displayName: project.displayName || '',
   type: project.type,
   isActive: project.isActive || false,
-  language: project.language,
+  language: project.language || 'EN',
   lastAccessedAt: toDateString(project.lastAccessedAt),
   createdAt: toDateString(project.createdAt),
   sampleDataset: project.sampleDataset,
@@ -221,7 +221,13 @@ export class ProjectResolver {
     try {
       // create duckdb datasource
       const initSql = buildInitSql(name as SampleDatasetName);
+      
+      // Get project name from sessionStorage if available
+      const projectName = _arg.data['projectName'] || name;
+      
       const duckdbDatasourceProperties = {
+        name: projectName,  // Add project name
+        displayName: name,   // Display name is the dataset name
         initSql,
         extensions: [],
         configurations: {},
