@@ -4,6 +4,7 @@ import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
 const defaultOptions = {} as const;
 export type ValidateCalculatedFieldMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   data: Types.ValidateCalculatedFieldInput;
 }>;
 
@@ -11,6 +12,7 @@ export type ValidateCalculatedFieldMutationVariables = Types.Exact<{
 export type ValidateCalculatedFieldMutation = { __typename?: 'Mutation', validateCalculatedField: { __typename?: 'CalculatedFieldValidationResponse', message?: string | null, valid: boolean } };
 
 export type CreateCalculatedFieldMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   data: Types.CreateCalculatedFieldInput;
 }>;
 
@@ -18,6 +20,7 @@ export type CreateCalculatedFieldMutationVariables = Types.Exact<{
 export type CreateCalculatedFieldMutation = { __typename?: 'Mutation', createCalculatedField: any };
 
 export type UpdateCalculatedFieldMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   where: Types.UpdateCalculatedFieldWhere;
   data: Types.UpdateCalculatedFieldInput;
 }>;
@@ -26,6 +29,7 @@ export type UpdateCalculatedFieldMutationVariables = Types.Exact<{
 export type UpdateCalculatedFieldMutation = { __typename?: 'Mutation', updateCalculatedField: any };
 
 export type DeleteCalculatedFieldMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   where: Types.UpdateCalculatedFieldWhere;
 }>;
 
@@ -34,8 +38,8 @@ export type DeleteCalculatedFieldMutation = { __typename?: 'Mutation', deleteCal
 
 
 export const ValidateCalculatedFieldDocument = gql`
-    mutation ValidateCalculatedField($data: ValidateCalculatedFieldInput!) {
-  validateCalculatedField(data: $data) {
+    mutation ValidateCalculatedField($projectId: Int!, $data: ValidateCalculatedFieldInput!) {
+  validateCalculatedField(projectId: $projectId, data: $data) {
     message
     valid
   }
@@ -56,6 +60,7 @@ export type ValidateCalculatedFieldMutationFn = Apollo.MutationFunction<Validate
  * @example
  * const [validateCalculatedFieldMutation, { data, loading, error }] = useValidateCalculatedFieldMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      data: // value for 'data'
  *   },
  * });
@@ -68,8 +73,8 @@ export type ValidateCalculatedFieldMutationHookResult = ReturnType<typeof useVal
 export type ValidateCalculatedFieldMutationResult = Apollo.MutationResult<ValidateCalculatedFieldMutation>;
 export type ValidateCalculatedFieldMutationOptions = Apollo.BaseMutationOptions<ValidateCalculatedFieldMutation, ValidateCalculatedFieldMutationVariables>;
 export const CreateCalculatedFieldDocument = gql`
-    mutation CreateCalculatedField($data: CreateCalculatedFieldInput!) {
-  createCalculatedField(data: $data)
+    mutation CreateCalculatedField($projectId: Int!, $data: CreateCalculatedFieldInput!) {
+  createCalculatedField(projectId: $projectId, data: $data)
 }
     `;
 export type CreateCalculatedFieldMutationFn = Apollo.MutationFunction<CreateCalculatedFieldMutation, CreateCalculatedFieldMutationVariables>;
@@ -87,6 +92,7 @@ export type CreateCalculatedFieldMutationFn = Apollo.MutationFunction<CreateCalc
  * @example
  * const [createCalculatedFieldMutation, { data, loading, error }] = useCreateCalculatedFieldMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      data: // value for 'data'
  *   },
  * });
@@ -99,8 +105,8 @@ export type CreateCalculatedFieldMutationHookResult = ReturnType<typeof useCreat
 export type CreateCalculatedFieldMutationResult = Apollo.MutationResult<CreateCalculatedFieldMutation>;
 export type CreateCalculatedFieldMutationOptions = Apollo.BaseMutationOptions<CreateCalculatedFieldMutation, CreateCalculatedFieldMutationVariables>;
 export const UpdateCalculatedFieldDocument = gql`
-    mutation UpdateCalculatedField($where: UpdateCalculatedFieldWhere!, $data: UpdateCalculatedFieldInput!) {
-  updateCalculatedField(where: $where, data: $data)
+    mutation UpdateCalculatedField($projectId: Int!, $where: UpdateCalculatedFieldWhere!, $data: UpdateCalculatedFieldInput!) {
+  updateCalculatedField(projectId: $projectId, where: $where, data: $data)
 }
     `;
 export type UpdateCalculatedFieldMutationFn = Apollo.MutationFunction<UpdateCalculatedFieldMutation, UpdateCalculatedFieldMutationVariables>;
@@ -118,6 +124,7 @@ export type UpdateCalculatedFieldMutationFn = Apollo.MutationFunction<UpdateCalc
  * @example
  * const [updateCalculatedFieldMutation, { data, loading, error }] = useUpdateCalculatedFieldMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      where: // value for 'where'
  *      data: // value for 'data'
  *   },
@@ -131,8 +138,8 @@ export type UpdateCalculatedFieldMutationHookResult = ReturnType<typeof useUpdat
 export type UpdateCalculatedFieldMutationResult = Apollo.MutationResult<UpdateCalculatedFieldMutation>;
 export type UpdateCalculatedFieldMutationOptions = Apollo.BaseMutationOptions<UpdateCalculatedFieldMutation, UpdateCalculatedFieldMutationVariables>;
 export const DeleteCalculatedFieldDocument = gql`
-    mutation DeleteCalculatedField($where: UpdateCalculatedFieldWhere!) {
-  deleteCalculatedField(where: $where)
+    mutation DeleteCalculatedField($projectId: Int!, $where: UpdateCalculatedFieldWhere!) {
+  deleteCalculatedField(projectId: $projectId, where: $where)
 }
     `;
 export type DeleteCalculatedFieldMutationFn = Apollo.MutationFunction<DeleteCalculatedFieldMutation, DeleteCalculatedFieldMutationVariables>;
@@ -150,6 +157,7 @@ export type DeleteCalculatedFieldMutationFn = Apollo.MutationFunction<DeleteCalc
  * @example
  * const [deleteCalculatedFieldMutation, { data, loading, error }] = useDeleteCalculatedFieldMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      where: // value for 'where'
  *   },
  * });

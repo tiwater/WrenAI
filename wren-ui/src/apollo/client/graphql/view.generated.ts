@@ -4,6 +4,7 @@ import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
 const defaultOptions = {} as const;
 export type CreateViewMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   data: Types.CreateViewInput;
 }>;
 
@@ -11,6 +12,7 @@ export type CreateViewMutationVariables = Types.Exact<{
 export type CreateViewMutation = { __typename?: 'Mutation', createView: { __typename?: 'ViewInfo', id: number, name: string, statement: string } };
 
 export type DeleteViewMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   where: Types.ViewWhereUniqueInput;
 }>;
 
@@ -18,18 +20,22 @@ export type DeleteViewMutationVariables = Types.Exact<{
 export type DeleteViewMutation = { __typename?: 'Mutation', deleteView: boolean };
 
 export type GetViewQueryVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   where: Types.ViewWhereUniqueInput;
 }>;
 
 
 export type GetViewQuery = { __typename?: 'Query', view: { __typename?: 'ViewInfo', id: number, name: string, statement: string } };
 
-export type ListViewsQueryVariables = Types.Exact<{ [key: string]: never; }>;
+export type ListViewsQueryVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
+}>;
 
 
 export type ListViewsQuery = { __typename?: 'Query', listViews: Array<{ __typename?: 'ViewInfo', id: number, name: string, displayName: string, statement: string }> };
 
 export type PreviewViewDataMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   where: Types.PreviewViewDataInput;
 }>;
 
@@ -37,6 +43,7 @@ export type PreviewViewDataMutationVariables = Types.Exact<{
 export type PreviewViewDataMutation = { __typename?: 'Mutation', previewViewData: any };
 
 export type ValidateViewMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   data: Types.ValidateViewInput;
 }>;
 
@@ -45,8 +52,8 @@ export type ValidateViewMutation = { __typename?: 'Mutation', validateView: { __
 
 
 export const CreateViewDocument = gql`
-    mutation CreateView($data: CreateViewInput!) {
-  createView(data: $data) {
+    mutation CreateView($projectId: Int!, $data: CreateViewInput!) {
+  createView(projectId: $projectId, data: $data) {
     id
     name
     statement
@@ -68,6 +75,7 @@ export type CreateViewMutationFn = Apollo.MutationFunction<CreateViewMutation, C
  * @example
  * const [createViewMutation, { data, loading, error }] = useCreateViewMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      data: // value for 'data'
  *   },
  * });
@@ -80,8 +88,8 @@ export type CreateViewMutationHookResult = ReturnType<typeof useCreateViewMutati
 export type CreateViewMutationResult = Apollo.MutationResult<CreateViewMutation>;
 export type CreateViewMutationOptions = Apollo.BaseMutationOptions<CreateViewMutation, CreateViewMutationVariables>;
 export const DeleteViewDocument = gql`
-    mutation DeleteView($where: ViewWhereUniqueInput!) {
-  deleteView(where: $where)
+    mutation DeleteView($projectId: Int!, $where: ViewWhereUniqueInput!) {
+  deleteView(projectId: $projectId, where: $where)
 }
     `;
 export type DeleteViewMutationFn = Apollo.MutationFunction<DeleteViewMutation, DeleteViewMutationVariables>;
@@ -99,6 +107,7 @@ export type DeleteViewMutationFn = Apollo.MutationFunction<DeleteViewMutation, D
  * @example
  * const [deleteViewMutation, { data, loading, error }] = useDeleteViewMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      where: // value for 'where'
  *   },
  * });
@@ -111,8 +120,8 @@ export type DeleteViewMutationHookResult = ReturnType<typeof useDeleteViewMutati
 export type DeleteViewMutationResult = Apollo.MutationResult<DeleteViewMutation>;
 export type DeleteViewMutationOptions = Apollo.BaseMutationOptions<DeleteViewMutation, DeleteViewMutationVariables>;
 export const GetViewDocument = gql`
-    query GetView($where: ViewWhereUniqueInput!) {
-  view(where: $ViewWhereUniqueInput) {
+    query GetView($projectId: Int!, $where: ViewWhereUniqueInput!) {
+  view(projectId: $projectId, where: $where) {
     id
     name
     statement
@@ -132,6 +141,7 @@ export const GetViewDocument = gql`
  * @example
  * const { data, loading, error } = useGetViewQuery({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      where: // value for 'where'
  *   },
  * });
@@ -148,8 +158,8 @@ export type GetViewQueryHookResult = ReturnType<typeof useGetViewQuery>;
 export type GetViewLazyQueryHookResult = ReturnType<typeof useGetViewLazyQuery>;
 export type GetViewQueryResult = Apollo.QueryResult<GetViewQuery, GetViewQueryVariables>;
 export const ListViewsDocument = gql`
-    query ListViews {
-  listViews {
+    query ListViews($projectId: Int!) {
+  listViews(projectId: $projectId) {
     id
     name
     displayName
@@ -170,10 +180,11 @@ export const ListViewsDocument = gql`
  * @example
  * const { data, loading, error } = useListViewsQuery({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *   },
  * });
  */
-export function useListViewsQuery(baseOptions?: Apollo.QueryHookOptions<ListViewsQuery, ListViewsQueryVariables>) {
+export function useListViewsQuery(baseOptions: Apollo.QueryHookOptions<ListViewsQuery, ListViewsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<ListViewsQuery, ListViewsQueryVariables>(ListViewsDocument, options);
       }
@@ -185,8 +196,8 @@ export type ListViewsQueryHookResult = ReturnType<typeof useListViewsQuery>;
 export type ListViewsLazyQueryHookResult = ReturnType<typeof useListViewsLazyQuery>;
 export type ListViewsQueryResult = Apollo.QueryResult<ListViewsQuery, ListViewsQueryVariables>;
 export const PreviewViewDataDocument = gql`
-    mutation PreviewViewData($where: PreviewViewDataInput!) {
-  previewViewData(where: $where)
+    mutation PreviewViewData($projectId: Int!, $where: PreviewViewDataInput!) {
+  previewViewData(projectId: $projectId, where: $where)
 }
     `;
 export type PreviewViewDataMutationFn = Apollo.MutationFunction<PreviewViewDataMutation, PreviewViewDataMutationVariables>;
@@ -204,6 +215,7 @@ export type PreviewViewDataMutationFn = Apollo.MutationFunction<PreviewViewDataM
  * @example
  * const [previewViewDataMutation, { data, loading, error }] = usePreviewViewDataMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      where: // value for 'where'
  *   },
  * });
@@ -216,8 +228,8 @@ export type PreviewViewDataMutationHookResult = ReturnType<typeof usePreviewView
 export type PreviewViewDataMutationResult = Apollo.MutationResult<PreviewViewDataMutation>;
 export type PreviewViewDataMutationOptions = Apollo.BaseMutationOptions<PreviewViewDataMutation, PreviewViewDataMutationVariables>;
 export const ValidateViewDocument = gql`
-    mutation ValidateView($data: ValidateViewInput!) {
-  validateView(data: $data) {
+    mutation ValidateView($projectId: Int!, $data: ValidateViewInput!) {
+  validateView(projectId: $projectId, data: $data) {
     valid
     message
   }
@@ -238,6 +250,7 @@ export type ValidateViewMutationFn = Apollo.MutationFunction<ValidateViewMutatio
  * @example
  * const [validateViewMutation, { data, loading, error }] = useValidateViewMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      data: // value for 'data'
  *   },
  * });

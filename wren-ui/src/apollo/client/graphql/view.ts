@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client';
 
 export const CREATE_VIEW = gql`
-  mutation CreateView($data: CreateViewInput!) {
-    createView(data: $data) {
+  mutation CreateView($projectId: Int!, $data: CreateViewInput!) {
+    createView(projectId: $projectId, data: $data) {
       id
       name
       statement
@@ -11,14 +11,14 @@ export const CREATE_VIEW = gql`
 `;
 
 export const DELETE_VIEW = gql`
-  mutation DeleteView($where: ViewWhereUniqueInput!) {
-    deleteView(where: $where)
+  mutation DeleteView($projectId: Int!, $where: ViewWhereUniqueInput!) {
+    deleteView(projectId: $projectId, where: $where)
   }
 `;
 
 export const GET_VIEW = gql`
-  query GetView($where: ViewWhereUniqueInput!) {
-    view(where: $ViewWhereUniqueInput) {
+  query GetView($projectId: Int!, $where: ViewWhereUniqueInput!) {
+    view(projectId: $projectId, where: $where) {
       id
       name
       statement
@@ -27,8 +27,8 @@ export const GET_VIEW = gql`
 `;
 
 export const LIST_VIEWS = gql`
-  query ListViews {
-    listViews {
+  query ListViews($projectId: Int!) {
+    listViews(projectId: $projectId) {
       id
       name
       displayName
@@ -38,14 +38,14 @@ export const LIST_VIEWS = gql`
 `;
 
 export const PREVIEW_VIEW_DATA = gql`
-  mutation PreviewViewData($where: PreviewViewDataInput!) {
-    previewViewData(where: $where)
+  mutation PreviewViewData($projectId: Int!, $where: PreviewViewDataInput!) {
+    previewViewData(projectId: $projectId, where: $where)
   }
 `;
 
 export const VALIDATE_CREATE_VIEW = gql`
-  mutation ValidateView($data: ValidateViewInput!) {
-    validateView(data: $data) {
+  mutation ValidateView($projectId: Int!, $data: ValidateViewInput!) {
+    validateView(projectId: $projectId, data: $data) {
       valid
       message
     }

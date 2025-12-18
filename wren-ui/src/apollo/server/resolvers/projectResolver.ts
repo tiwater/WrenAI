@@ -81,7 +81,6 @@ const formatProjectInfo = (project: any) => ({
   name: project.name || project.displayName || 'Unnamed Project',  // Ensure name is never null
   displayName: project.displayName || '',
   type: project.type,
-  isActive: project.isActive || false,
   language: project.language || 'EN',
   lastAccessedAt: toDateString(project.lastAccessedAt),
   createdAt: toDateString(project.createdAt),
@@ -110,16 +109,15 @@ export class ProjectResolver {
     // New multi-project methods
     this.listProjects = this.listProjects.bind(this);
     this.getProject = this.getProject.bind(this);
-    this.getActiveProject = this.getActiveProject.bind(this);
     this.createProject = this.createProject.bind(this);
     this.updateProject = this.updateProject.bind(this);
-    this.switchProject = this.switchProject.bind(this);
     this.deleteProject = this.deleteProject.bind(this);
     this.duplicateProject = this.duplicateProject.bind(this);
   }
 
   public async getSettings(_root: any, _arg: any, ctx: IContext) {
-    const project = await ctx.projectService.getActiveProject();
+    // TODO: This should receive projectId as a parameter
+    const project = await ctx.projectService.getCurrentProject();
     const generalConnectionInfo =
       ctx.projectService.getGeneralConnectionInfo(project);
     const dataSourceType = project.type;
@@ -164,10 +162,10 @@ export class ProjectResolver {
     return true;
   }
 
-  public async resetCurrentProject(_root: any, _arg: any, ctx: IContext) {
+  public async resetCurrentProject(_root: any, arg: { projectId: number }, ctx: IContext) {
     let project;
     try {
-      project = await ctx.projectService.getActiveProject();
+      project = await ctx.projectService.getProjectById(arg.projectId);
     } catch {
       // no project found
       return true;
@@ -332,8 +330,8 @@ export class ProjectResolver {
     } as ProjectData);
     logger.debug(`Project created.`);
     
-    // Set the new project as active
-    await ctx.projectRepository.setActiveProject(project.id);
+    // Update last accessed time for the new project
+    await ctx.projectRepository.updateLastAccessed(project.id);
 
     // init dashboard
     logger.debug('Dashboard init...');
@@ -859,13 +857,10 @@ export class ProjectResolver {
   // New multi-project resolver methods
   public async listProjects(_root: any, _arg: any, ctx: IContext) {
     const projects = await ctx.projectService.listProjects();
-    const activeProject = await ctx.projectService.getActiveProject();
-    
     const projectInfos = projects.map(formatProjectInfo);
 
     return {
       projects: projectInfos,
-      activeProjectId: activeProject?.id,
     };
   }
 
@@ -874,10 +869,7 @@ export class ProjectResolver {
     return formatProjectInfo(project);
   }
 
-  public async getActiveProject(_root: any, _arg: any, ctx: IContext) {
-    const project = await ctx.projectService.getActiveProject();
-    return formatProjectInfo(project);
-  }
+  // getActiveProject removed - project selection is now handled on client side
 
   public async createProject(
     _root: any,
@@ -894,8 +886,8 @@ export class ProjectResolver {
       connectionInfo,
     } as ProjectData);
 
-    // Set the new project as active
-    await ctx.projectRepository.setActiveProject(project.id);
+    // Update last accessed time for the new project
+    await ctx.projectRepository.updateLastAccessed(project.id);
 
     // Initialize dashboard for new project
     await ctx.dashboardService.initDashboard();
@@ -913,23 +905,10 @@ export class ProjectResolver {
     return formatProjectInfo(project);
   }
 
-  public async switchProject(_root: any, arg: { projectId: number }, ctx: IContext) {
-    const project = await ctx.projectService.switchProject(arg.projectId);
-    
-    // Clear any cached data for the previous project
-    await ctx.askingService.clearCache?.();
-    
-    return formatProjectInfo(project);
-  }
+  // switchProject removed - project selection is now handled on client side
 
   public async deleteProject(_root: any, arg: { projectId: number }, ctx: IContext) {
     const { projectId } = arg;
-    
-    // Don't allow deleting the active project
-    const activeProject = await ctx.projectService.getActiveProject();
-    if (activeProject.id === projectId) {
-      throw new Error('Cannot delete the active project. Please switch to another project first.');
-    }
 
     // Delete all related data
     await ctx.schemaChangeRepository.deleteAllBy({ projectId });

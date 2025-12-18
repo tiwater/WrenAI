@@ -5,12 +5,15 @@ import * as Apollo from '@apollo/client';
 const defaultOptions = {} as const;
 export type InstructionFragment = { __typename?: 'Instruction', id: number, projectId: number, instruction: string, questions: Array<string>, isDefault: boolean, createdAt: string, updatedAt: string };
 
-export type InstructionsQueryVariables = Types.Exact<{ [key: string]: never; }>;
+export type InstructionsQueryVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
+}>;
 
 
 export type InstructionsQuery = { __typename?: 'Query', instructions: Array<{ __typename?: 'Instruction', id: number, projectId: number, instruction: string, questions: Array<string>, isDefault: boolean, createdAt: string, updatedAt: string } | null> };
 
 export type CreateInstructionMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   data: Types.CreateInstructionInput;
 }>;
 
@@ -18,6 +21,7 @@ export type CreateInstructionMutationVariables = Types.Exact<{
 export type CreateInstructionMutation = { __typename?: 'Mutation', createInstruction: { __typename?: 'Instruction', id: number, projectId: number, instruction: string, questions: Array<string>, isDefault: boolean, createdAt: string, updatedAt: string } };
 
 export type UpdateInstructionMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   where: Types.InstructionWhereInput;
   data: Types.UpdateInstructionInput;
 }>;
@@ -26,6 +30,7 @@ export type UpdateInstructionMutationVariables = Types.Exact<{
 export type UpdateInstructionMutation = { __typename?: 'Mutation', updateInstruction: { __typename?: 'Instruction', id: number, projectId: number, instruction: string, questions: Array<string>, isDefault: boolean, createdAt: string, updatedAt: string } };
 
 export type DeleteInstructionMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   where: Types.InstructionWhereInput;
 }>;
 
@@ -44,8 +49,8 @@ export const InstructionFragmentDoc = gql`
 }
     `;
 export const InstructionsDocument = gql`
-    query Instructions {
-  instructions {
+    query Instructions($projectId: Int!) {
+  instructions(projectId: $projectId) {
     ...Instruction
   }
 }
@@ -63,10 +68,11 @@ export const InstructionsDocument = gql`
  * @example
  * const { data, loading, error } = useInstructionsQuery({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *   },
  * });
  */
-export function useInstructionsQuery(baseOptions?: Apollo.QueryHookOptions<InstructionsQuery, InstructionsQueryVariables>) {
+export function useInstructionsQuery(baseOptions: Apollo.QueryHookOptions<InstructionsQuery, InstructionsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<InstructionsQuery, InstructionsQueryVariables>(InstructionsDocument, options);
       }
@@ -78,8 +84,8 @@ export type InstructionsQueryHookResult = ReturnType<typeof useInstructionsQuery
 export type InstructionsLazyQueryHookResult = ReturnType<typeof useInstructionsLazyQuery>;
 export type InstructionsQueryResult = Apollo.QueryResult<InstructionsQuery, InstructionsQueryVariables>;
 export const CreateInstructionDocument = gql`
-    mutation CreateInstruction($data: CreateInstructionInput!) {
-  createInstruction(data: $data) {
+    mutation CreateInstruction($projectId: Int!, $data: CreateInstructionInput!) {
+  createInstruction(projectId: $projectId, data: $data) {
     ...Instruction
   }
 }
@@ -99,6 +105,7 @@ export type CreateInstructionMutationFn = Apollo.MutationFunction<CreateInstruct
  * @example
  * const [createInstructionMutation, { data, loading, error }] = useCreateInstructionMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      data: // value for 'data'
  *   },
  * });
@@ -111,8 +118,8 @@ export type CreateInstructionMutationHookResult = ReturnType<typeof useCreateIns
 export type CreateInstructionMutationResult = Apollo.MutationResult<CreateInstructionMutation>;
 export type CreateInstructionMutationOptions = Apollo.BaseMutationOptions<CreateInstructionMutation, CreateInstructionMutationVariables>;
 export const UpdateInstructionDocument = gql`
-    mutation UpdateInstruction($where: InstructionWhereInput!, $data: UpdateInstructionInput!) {
-  updateInstruction(where: $where, data: $data) {
+    mutation UpdateInstruction($projectId: Int!, $where: InstructionWhereInput!, $data: UpdateInstructionInput!) {
+  updateInstruction(projectId: $projectId, where: $where, data: $data) {
     ...Instruction
   }
 }
@@ -132,6 +139,7 @@ export type UpdateInstructionMutationFn = Apollo.MutationFunction<UpdateInstruct
  * @example
  * const [updateInstructionMutation, { data, loading, error }] = useUpdateInstructionMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      where: // value for 'where'
  *      data: // value for 'data'
  *   },
@@ -145,8 +153,8 @@ export type UpdateInstructionMutationHookResult = ReturnType<typeof useUpdateIns
 export type UpdateInstructionMutationResult = Apollo.MutationResult<UpdateInstructionMutation>;
 export type UpdateInstructionMutationOptions = Apollo.BaseMutationOptions<UpdateInstructionMutation, UpdateInstructionMutationVariables>;
 export const DeleteInstructionDocument = gql`
-    mutation DeleteInstruction($where: InstructionWhereInput!) {
-  deleteInstruction(where: $where)
+    mutation DeleteInstruction($projectId: Int!, $where: InstructionWhereInput!) {
+  deleteInstruction(projectId: $projectId, where: $where)
 }
     `;
 export type DeleteInstructionMutationFn = Apollo.MutationFunction<DeleteInstructionMutation, DeleteInstructionMutationVariables>;
@@ -164,6 +172,7 @@ export type DeleteInstructionMutationFn = Apollo.MutationFunction<DeleteInstruct
  * @example
  * const [deleteInstructionMutation, { data, loading, error }] = useDeleteInstructionMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      where: // value for 'where'
  *   },
  * });

@@ -211,6 +211,12 @@ export type CreateModelInput = {
   sourceTableName: Scalars['String'];
 };
 
+export type CreateProjectInput = {
+  name: Scalars['String'];
+  properties: Scalars['JSON'];
+  type: DataSourceName;
+};
+
 export type CreateSimpleMetricInput = {
   cached: Scalars['Boolean'];
   description?: InputMaybe<Scalars['String']>;
@@ -687,6 +693,7 @@ export type Mutation = {
   createInstantRecommendedQuestions: Task;
   createInstruction: Instruction;
   createModel: Scalars['JSON'];
+  createProject: ProjectInfo;
   createRelation: Scalars['JSON'];
   createSqlPair: SqlPair;
   createThread: Thread;
@@ -696,11 +703,13 @@ export type Mutation = {
   deleteDashboardItem: Scalars['Boolean'];
   deleteInstruction: Scalars['Boolean'];
   deleteModel: Scalars['Boolean'];
+  deleteProject: Scalars['Boolean'];
   deleteRelation: Scalars['Boolean'];
   deleteSqlPair: Scalars['Boolean'];
   deleteThread: Scalars['Boolean'];
   deleteView: Scalars['Boolean'];
   deploy: Scalars['JSON'];
+  duplicateProject: ProjectInfo;
   generateProjectRecommendationQuestions: Scalars['Boolean'];
   generateQuestion: Scalars['String'];
   generateThreadRecommendationQuestions: Scalars['Boolean'];
@@ -733,6 +742,7 @@ export type Mutation = {
   updateInstruction: Instruction;
   updateModel: Scalars['JSON'];
   updateModelMetadata: Scalars['Boolean'];
+  updateProject: ProjectInfo;
   updateRelation: Scalars['JSON'];
   updateSqlPair: SqlPair;
   updateThread: Thread;
@@ -795,6 +805,11 @@ export type MutationCreateModelArgs = {
 };
 
 
+export type MutationCreateProjectArgs = {
+  data: CreateProjectInput;
+};
+
+
 export type MutationCreateRelationArgs = {
   data: RelationInput;
 };
@@ -841,6 +856,11 @@ export type MutationDeleteModelArgs = {
 };
 
 
+export type MutationDeleteProjectArgs = {
+  projectId: Scalars['Int'];
+};
+
+
 export type MutationDeleteRelationArgs = {
   where: WhereIdInput;
 };
@@ -866,12 +886,24 @@ export type MutationDeployArgs = {
 };
 
 
+export type MutationDuplicateProjectArgs = {
+  name: Scalars['String'];
+  projectId: Scalars['Int'];
+};
+
+
+export type MutationGenerateProjectRecommendationQuestionsArgs = {
+  projectId: Scalars['Int'];
+};
+
+
 export type MutationGenerateQuestionArgs = {
   data: GenerateQuestionInput;
 };
 
 
 export type MutationGenerateThreadRecommendationQuestionsArgs = {
+  projectId: Scalars['Int'];
   threadId: Scalars['Int'];
 };
 
@@ -918,6 +950,7 @@ export type MutationPreviewModelDataArgs = {
 
 export type MutationPreviewSqlArgs = {
   data?: InputMaybe<PreviewSqlDataInput>;
+  projectId: Scalars['Int'];
 };
 
 
@@ -948,6 +981,7 @@ export type MutationSaveDataSourceArgs = {
 
 export type MutationSaveLearningRecordArgs = {
   data: SaveLearningRecordInput;
+  projectId: Scalars['Int'];
 };
 
 
@@ -1013,6 +1047,12 @@ export type MutationUpdateModelArgs = {
 export type MutationUpdateModelMetadataArgs = {
   data: UpdateModelMetadataInput;
   where: ModelWhereInput;
+};
+
+
+export type MutationUpdateProjectArgs = {
+  data: UpdateProjectInput;
+  projectId: Scalars['Int'];
 };
 
 
@@ -1120,6 +1160,18 @@ export type PreviewViewDataInput = {
   limit?: InputMaybe<Scalars['Int']>;
 };
 
+export type ProjectInfo = {
+  __typename?: 'ProjectInfo';
+  createdAt: Scalars['String'];
+  displayName: Scalars['String'];
+  id: Scalars['Int'];
+  language: ProjectLanguage;
+  lastAccessedAt?: Maybe<Scalars['String']>;
+  name: Scalars['String'];
+  sampleDataset?: Maybe<SampleDatasetName>;
+  type: DataSourceName;
+};
+
 export enum ProjectLanguage {
   AR = 'AR',
   AZ_AZ = 'AZ_AZ',
@@ -1139,6 +1191,11 @@ export enum ProjectLanguage {
   ZH_TW = 'ZH_TW'
 }
 
+export type ProjectListResult = {
+  __typename?: 'ProjectListResult';
+  projects: Array<ProjectInfo>;
+};
+
 export type Query = {
   __typename?: 'Query';
   adjustmentTask?: Maybe<AdjustmentTask>;
@@ -1149,6 +1206,7 @@ export type Query = {
   dashboardItems: Array<DashboardItem>;
   diagram: Diagram;
   getMDL: GetMdlResult;
+  getProject: ProjectInfo;
   getProjectRecommendationQuestions: RecommendedQuestionsTask;
   getThreadRecommendationQuestions: RecommendedQuestionsTask;
   instantRecommendedQuestions: RecommendedQuestionsTask;
@@ -1156,6 +1214,7 @@ export type Query = {
   learningRecord: LearningRecord;
   listDataSourceTables: Array<CompactTable>;
   listModels: Array<ModelInfo>;
+  listProjects: ProjectListResult;
   listViews: Array<ViewInfo>;
   model: DetailedModel;
   modelSync: ModelSyncResponse;
@@ -1188,12 +1247,43 @@ export type QueryAskingTaskArgs = {
 };
 
 
+export type QueryAutoGenerateRelationArgs = {
+  projectId: Scalars['Int'];
+};
+
+
+export type QueryDashboardArgs = {
+  projectId: Scalars['Int'];
+};
+
+
+export type QueryDashboardItemsArgs = {
+  projectId: Scalars['Int'];
+};
+
+
+export type QueryDiagramArgs = {
+  projectId: Scalars['Int'];
+};
+
+
 export type QueryGetMdlArgs = {
   hash: Scalars['String'];
 };
 
 
+export type QueryGetProjectArgs = {
+  projectId: Scalars['Int'];
+};
+
+
+export type QueryGetProjectRecommendationQuestionsArgs = {
+  projectId: Scalars['Int'];
+};
+
+
 export type QueryGetThreadRecommendationQuestionsArgs = {
+  projectId: Scalars['Int'];
   threadId: Scalars['Int'];
 };
 
@@ -1203,27 +1293,87 @@ export type QueryInstantRecommendedQuestionsArgs = {
 };
 
 
+export type QueryInstructionsArgs = {
+  projectId: Scalars['Int'];
+};
+
+
+export type QueryListDataSourceTablesArgs = {
+  projectId: Scalars['Int'];
+};
+
+
+export type QueryListModelsArgs = {
+  projectId: Scalars['Int'];
+};
+
+
+export type QueryListViewsArgs = {
+  projectId: Scalars['Int'];
+};
+
+
 export type QueryModelArgs = {
+  projectId: Scalars['Int'];
   where: ModelWhereInput;
 };
 
 
+export type QueryModelSyncArgs = {
+  projectId: Scalars['Int'];
+};
+
+
 export type QueryNativeSqlArgs = {
+  projectId: Scalars['Int'];
   responseId: Scalars['Int'];
 };
 
 
+export type QueryOnboardingStatusArgs = {
+  projectId: Scalars['Int'];
+};
+
+
+export type QuerySchemaChangeArgs = {
+  projectId: Scalars['Int'];
+};
+
+
+export type QuerySettingsArgs = {
+  projectId: Scalars['Int'];
+};
+
+
+export type QuerySqlPairsArgs = {
+  projectId: Scalars['Int'];
+};
+
+
+export type QuerySuggestedQuestionsArgs = {
+  projectId: Scalars['Int'];
+};
+
+
 export type QueryThreadArgs = {
+  projectId: Scalars['Int'];
   threadId: Scalars['Int'];
 };
 
 
 export type QueryThreadResponseArgs = {
+  projectId: Scalars['Int'];
   responseId: Scalars['Int'];
 };
 
 
+export type QueryThreadsArgs = {
+  projectId: Scalars['Int'];
+};
+
+
 export type QueryViewArgs = {
+  projectId: Scalars['Int'];
   where: ViewWhereUniqueInput;
 };
 
@@ -1309,6 +1459,7 @@ export type ResultQuestion = {
 
 export type SampleDatasetInput = {
   name: SampleDatasetName;
+  projectName?: InputMaybe<Scalars['String']>;
 };
 
 export enum SampleDatasetName {
@@ -1562,6 +1713,11 @@ export type UpdateNestedColumnMetadataInput = {
   description?: InputMaybe<Scalars['String']>;
   displayName?: InputMaybe<Scalars['String']>;
   id: Scalars['Int'];
+};
+
+export type UpdateProjectInput = {
+  language?: InputMaybe<ProjectLanguage>;
+  name?: InputMaybe<Scalars['String']>;
 };
 
 export type UpdateRelationInput = {

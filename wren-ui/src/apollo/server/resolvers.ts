@@ -58,7 +58,6 @@ const resolvers = {
     // Projects
     listProjects: projectResolver.listProjects,
     getProject: projectResolver.getProject,
-    getActiveProject: projectResolver.getActiveProject,
 
     // Learning
     learningRecord: learningResolver.getLearningRecord,
@@ -155,7 +154,7 @@ const resolvers = {
     // Projects
     createProject: projectResolver.createProject,
     updateProject: projectResolver.updateProject,
-    switchProject: projectResolver.switchProject,
+    // switchProject removed - project selection is now handled on client side
     deleteProject: projectResolver.deleteProject,
     duplicateProject: projectResolver.duplicateProject,
 

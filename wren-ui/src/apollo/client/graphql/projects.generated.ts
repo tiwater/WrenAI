@@ -12,13 +12,11 @@ const LIST_PROJECTS = gql`
         name
         displayName
         type
-        isActive
         language
         lastAccessedAt
         createdAt
         sampleDataset
       }
-      activeProjectId
     }
   }
 `;
@@ -43,25 +41,26 @@ export function useGetProjectQuery(options?: any) {
   };
 }
 
-export function useCreateProjectMutation(options?: any) {
-  return [
-    () => Promise.resolve(),
-    { loading: false },
-  ];
-}
-
-
-const SWITCH_PROJECT = gql`
-  mutation SwitchProject($projectId: Int!) {
-    switchProject(projectId: $projectId) {
+const CREATE_PROJECT = gql`
+  mutation CreateProject($data: CreateProjectInput!) {
+    createProject(data: $data) {
       id
       name
       displayName
       type
-      isActive
+      language
+      lastAccessedAt
+      createdAt
+      sampleDataset
     }
   }
 `;
+
+export function useCreateProjectMutation(options?: any) {
+  return useMutation(CREATE_PROJECT, options);
+}
+
+
 
 const DELETE_PROJECT = gql`
   mutation DeleteProject($projectId: Int!) {
@@ -76,7 +75,6 @@ const DUPLICATE_PROJECT = gql`
       name
       displayName
       type
-      isActive
     }
   }
 `;
@@ -88,14 +86,10 @@ const UPDATE_PROJECT = gql`
       name
       displayName
       type
-      isActive
     }
   }
 `;
 
-export function useSwitchProjectMutation(options?: any) {
-  return useMutation(SWITCH_PROJECT, options);
-}
 
 export function useDeleteProjectMutation(options?: any) {
   return useMutation(DELETE_PROJECT, options);

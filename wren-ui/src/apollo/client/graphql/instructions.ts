@@ -13,8 +13,8 @@ const INSTRUCTION = gql`
 `;
 
 export const LIST_INSTRUCTIONS = gql`
-  query Instructions {
-    instructions {
+  query Instructions($projectId: Int!) {
+    instructions(projectId: $projectId) {
       ...Instruction
     }
   }
@@ -23,8 +23,8 @@ export const LIST_INSTRUCTIONS = gql`
 `;
 
 export const CREATE_INSTRUCTION = gql`
-  mutation CreateInstruction($data: CreateInstructionInput!) {
-    createInstruction(data: $data) {
+  mutation CreateInstruction($projectId: Int!, $data: CreateInstructionInput!) {
+    createInstruction(projectId: $projectId, data: $data) {
       ...Instruction
     }
   }
@@ -34,10 +34,11 @@ export const CREATE_INSTRUCTION = gql`
 
 export const UPDATE_INSTRUCTION = gql`
   mutation UpdateInstruction(
+    $projectId: Int!
     $where: InstructionWhereInput!
     $data: UpdateInstructionInput!
   ) {
-    updateInstruction(where: $where, data: $data) {
+    updateInstruction(projectId: $projectId, where: $where, data: $data) {
       ...Instruction
     }
   }
@@ -46,7 +47,7 @@ export const UPDATE_INSTRUCTION = gql`
 `;
 
 export const DELETE_INSTRUCTION = gql`
-  mutation DeleteInstruction($where: InstructionWhereInput!) {
-    deleteInstruction(where: $where)
+  mutation DeleteInstruction($projectId: Int!, $where: InstructionWhereInput!) {
+    deleteInstruction(projectId: $projectId, where: $where)
   }
 `;

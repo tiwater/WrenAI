@@ -175,7 +175,6 @@ export interface Project {
   connectionInfo: WREN_AI_CONNECTION_INFO;
   language?: string; // Project language
   name?: string; // Project name for identification
-  isActive?: boolean; // Is this the active project
   lastAccessedAt?: Date; // Last time this project was accessed
   createdAt?: Date; // Creation timestamp
   updatedAt?: Date; // Update timestamp
@@ -188,11 +187,9 @@ export interface Project {
 }
 
 export interface IProjectRepository extends IBasicRepository<Project> {
-  getCurrentProject: () => Promise<Project>;
-  getActiveProject: () => Promise<Project>;
-  setActiveProject: (projectId: number) => Promise<Project>;
   listProjects: () => Promise<Project[]>;
   getProjectById: (projectId: number) => Promise<Project>;
+  updateLastAccessed: (projectId: number) => Promise<Project>;
 }
 
 export class ProjectRepository
@@ -205,36 +202,8 @@ export class ProjectRepository
     super({ knexPg, tableName: 'project' });
   }
 
-  public async getCurrentProject() {
-    // For backward compatibility, get the active project
-    return this.getActiveProject();
-  }
-
-  public async getActiveProject() {
-    const projects = await this.findAllBy({ isActive: true });
-    if (!projects.length) {
-      // If no active project, try to get the first project
-      const allProjects = await this.findAll({
-        order: 'id',
-        limit: 1,
-      });
-      if (!allProjects.length) {
-        throw new Error('No project found');
-      }
-      // Set the first project as active
-      await this.updateOne(allProjects[0].id, { isActive: true });
-      return allProjects[0];
-    }
-    return projects[0];
-  }
-
-  public async setActiveProject(projectId: number) {
-    // First, set all projects as inactive
-    await this.knex.from('project').update({ is_active: false });
-    
-    // Then set the specified project as active
+  public async updateLastAccessed(projectId: number) {
     const updated = await this.updateOne(projectId, { 
-      isActive: true,
       lastAccessedAt: new Date()
     });
     return updated;
@@ -257,6 +226,16 @@ export class ProjectRepository
     }
     return project;
   }
+
+  // Get first project - only used when projectId is not provided (for migration)
+  public async getCurrentProject() {
+    const projects = await this.listProjects();
+    if (projects.length === 0) {
+      throw new Error('No projects found');
+    }
+    return projects[0];
+  }
+
 
   public override transformFromDBData: (data: any) => Project = (data: any) => {
     if (!isPlainObject(data)) {

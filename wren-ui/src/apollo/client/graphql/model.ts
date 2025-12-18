@@ -38,8 +38,8 @@ const COMMON_RELATION = gql`
 `;
 
 export const LIST_MODELS = gql`
-  query ListModels {
-    listModels {
+  query ListModels($projectId: Int!) {
+    listModels(projectId: $projectId) {
       id
       displayName
       referenceName

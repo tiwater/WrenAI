@@ -868,7 +868,6 @@ export const typeDefs = gql`
     name: String!
     displayName: String!
     type: DataSourceName!
-    isActive: Boolean!
     language: ProjectLanguage!
     lastAccessedAt: String
     createdAt: String!
@@ -877,7 +876,6 @@ export const typeDefs = gql`
 
   type ProjectListResult {
     projects: [ProjectInfo!]!
-    activeProjectId: Int
   }
 
   type Settings {
@@ -1142,39 +1140,38 @@ export const typeDefs = gql`
   # Query and Mutation
   type Query {
     # On Boarding Steps
-    listDataSourceTables: [CompactTable!]!
-    autoGenerateRelation: [RecommendRelations!]!
-    onboardingStatus: OnboardingStatusResponse!
+    listDataSourceTables(projectId: Int!): [CompactTable!]!
+    autoGenerateRelation(projectId: Int!): [RecommendRelations!]!
+    onboardingStatus(projectId: Int!): OnboardingStatusResponse!
 
     # Modeling Page
-    listModels: [ModelInfo!]!
-    model(where: ModelWhereInput!): DetailedModel!
-    modelSync: ModelSyncResponse!
-    diagram: Diagram!
-    schemaChange: SchemaChange!
+    listModels(projectId: Int!): [ModelInfo!]!
+    model(projectId: Int!, where: ModelWhereInput!): DetailedModel!
+    modelSync(projectId: Int!): ModelSyncResponse!
+    diagram(projectId: Int!): Diagram!
+    schemaChange(projectId: Int!): SchemaChange!
 
     # View
-    listViews: [ViewInfo!]!
-    view(where: ViewWhereUniqueInput!): ViewInfo!
+    listViews(projectId: Int!): [ViewInfo!]!
+    view(projectId: Int!, where: ViewWhereUniqueInput!): ViewInfo!
 
     # Ask
     askingTask(taskId: String!): AskingTask
-    suggestedQuestions: SuggestedQuestionResponse!
-    threads: [Thread!]!
-    thread(threadId: Int!): DetailedThread!
-    threadResponse(responseId: Int!): ThreadResponse!
-    nativeSql(responseId: Int!): String!
+    suggestedQuestions(projectId: Int!): SuggestedQuestionResponse!
+    threads(projectId: Int!): [Thread!]!
+    thread(projectId: Int!, threadId: Int!): DetailedThread!
+    threadResponse(projectId: Int!, responseId: Int!): ThreadResponse!
+    nativeSql(projectId: Int!, responseId: Int!): String!
 
     # Adjustment
     adjustmentTask(taskId: String!): AdjustmentTask
 
     # Settings
-    settings: Settings!
+    settings(projectId: Int!): Settings!
 
     # Projects
     listProjects: ProjectListResult!
     getProject(projectId: Int!): ProjectInfo!
-    getActiveProject: ProjectInfo!
 
     # System
     getMDL(hash: String!): GetMDLResult!
@@ -1183,18 +1180,18 @@ export const typeDefs = gql`
     learningRecord: LearningRecord!
 
     # Recommendation questions
-    getThreadRecommendationQuestions(threadId: Int!): RecommendedQuestionsTask!
-    getProjectRecommendationQuestions: RecommendedQuestionsTask!
+    getThreadRecommendationQuestions(projectId: Int!, threadId: Int!): RecommendedQuestionsTask!
+    getProjectRecommendationQuestions(projectId: Int!): RecommendedQuestionsTask!
     instantRecommendedQuestions(taskId: String!): RecommendedQuestionsTask!
 
     # Dashboard
-    dashboardItems: [DashboardItem!]!
-    dashboard: DetailedDashboard!
+    dashboardItems(projectId: Int!): [DashboardItem!]!
+    dashboard(projectId: Int!): DetailedDashboard!
 
     # SQL Pairs
-    sqlPairs: [SqlPair]!
+    sqlPairs(projectId: Int!): [SqlPair]!
     # Instructions
-    instructions: [Instruction]!
+    instructions(projectId: Int!): [Instruction]!
 
     # Api History
     apiHistory(
@@ -1307,19 +1304,18 @@ export const typeDefs = gql`
     # Projects
     createProject(data: CreateProjectInput!): ProjectInfo!
     updateProject(projectId: Int!, data: UpdateProjectInput!): ProjectInfo!
-    switchProject(projectId: Int!): ProjectInfo!
     deleteProject(projectId: Int!): Boolean!
     duplicateProject(projectId: Int!, name: String!): ProjectInfo!
 
     # preview
-    previewSql(data: PreviewSQLDataInput): JSON!
+    previewSql(projectId: Int!, data: PreviewSQLDataInput): JSON!
 
     # Learning
-    saveLearningRecord(data: SaveLearningRecordInput!): LearningRecord!
+    saveLearningRecord(projectId: Int!, data: SaveLearningRecordInput!): LearningRecord!
 
     # Recommendation questions
-    generateThreadRecommendationQuestions(threadId: Int!): Boolean!
-    generateProjectRecommendationQuestions: Boolean!
+    generateThreadRecommendationQuestions(projectId: Int!, threadId: Int!): Boolean!
+    generateProjectRecommendationQuestions(projectId: Int!): Boolean!
     createInstantRecommendedQuestions(
       data: InstantRecommendedQuestionsInput!
     ): Task!

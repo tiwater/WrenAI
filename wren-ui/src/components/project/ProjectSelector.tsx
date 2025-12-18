@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Select, Button, Space, Modal, Form, Input, message, Tag } from 'antd';
 import { PlusOutlined, DatabaseOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { useRouter } from 'next/router';
 import { 
-  useListProjectsQuery, 
-  useSwitchProjectMutation,
+  useListProjectsQuery,
   useCreateProjectMutation 
 } from '@/apollo/client/graphql/projects.generated';
 import { Path } from '@/utils/enum';
 import { DataSourceName } from '@/apollo/client/graphql/__types__';
+import { useProject } from '@/contexts/ProjectContext';
 
 const { Option } = Select;
 
@@ -20,22 +20,19 @@ export default function ProjectSelector({ className }: ProjectSelectorProps) {
   const router = useRouter();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
+  const { selectedProjectId, setSelectedProjectId } = useProject();
   
   const { data, loading, refetch } = useListProjectsQuery({
     fetchPolicy: 'cache-and-network',
   });
   
-  const [switchProject, { loading: switchingProject }] = useSwitchProjectMutation({
-    onCompleted: () => {
-      message.success('Project switched successfully');
-      refetch();
-      // Refresh the page to reload context
-      router.reload();
-    },
-    onError: (error) => {
-      message.error(`Failed to switch project: ${error.message}`);
-    },
-  });
+  // Set initial selected project if not set
+  useEffect(() => {
+    if (!selectedProjectId && data?.listProjects?.projects?.length > 0) {
+      const firstProject = data.listProjects.projects[0];
+      setSelectedProjectId(firstProject.id);
+    }
+  }, [data, selectedProjectId, setSelectedProjectId]);
 
   const [createProject] = useCreateProjectMutation({
     onCompleted: () => {
@@ -52,13 +49,18 @@ export default function ProjectSelector({ className }: ProjectSelectorProps) {
   });
 
   const handleProjectChange = (projectId: number) => {
-    if (projectId === data?.listProjects?.activeProjectId) return;
+    if (projectId === selectedProjectId) return;
     
     Modal.confirm({
       title: 'Switch Project',
       content: 'Are you sure you want to switch to this project? Any unsaved changes will be lost.',
       onOk: () => {
-        switchProject({ variables: { projectId } });
+        setSelectedProjectId(projectId);
+        // Update last accessed time for the new project
+        // This will be handled by the resolver when queries are made with this projectId
+        message.success('Project switched successfully');
+        // Refresh the page to load new project data
+        router.reload();
       },
     });
   };
@@ -80,8 +82,7 @@ export default function ProjectSelector({ className }: ProjectSelectorProps) {
   };
 
   const projects = data?.listProjects?.projects || [];
-  const activeProjectId = data?.listProjects?.activeProjectId;
-  const activeProject = projects.find(p => p.id === activeProjectId);
+  const activeProject = projects.find(p => p.id === selectedProjectId);
 
   const getDataSourceIcon = (type: DataSourceName) => {
     // You can add more specific icons for different data sources
@@ -93,9 +94,9 @@ export default function ProjectSelector({ className }: ProjectSelectorProps) {
       <Space className={className}>
         <Select
           style={{ minWidth: 200 }}
-          value={activeProjectId}
+          value={selectedProjectId}
           onChange={handleProjectChange}
-          loading={loading || switchingProject}
+          loading={loading}
           placeholder="Select a project"
           suffixIcon={<DatabaseOutlined />}
         >
@@ -104,7 +105,7 @@ export default function ProjectSelector({ className }: ProjectSelectorProps) {
               <Space>
                 {getDataSourceIcon(project.type)}
                 <span>{project.name}</span>
-                {project.id === activeProjectId && (
+                {project.id === selectedProjectId && (
                   <CheckCircleOutlined style={{ color: '#52c41a', marginLeft: 4 }} />
                 )}
                 {project.sampleDataset && (

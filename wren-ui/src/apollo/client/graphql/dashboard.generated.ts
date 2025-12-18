@@ -5,12 +5,15 @@ import * as Apollo from '@apollo/client';
 const defaultOptions = {} as const;
 export type CommonDashboardItemFragment = { __typename?: 'DashboardItem', id: number, dashboardId: number, type: Types.DashboardItemType, displayName?: string | null, layout: { __typename?: 'DashboardItemLayout', x: number, y: number, w: number, h: number }, detail: { __typename?: 'DashboardItemDetail', sql: string, chartSchema?: any | null } };
 
-export type DashboardItemsQueryVariables = Types.Exact<{ [key: string]: never; }>;
+export type DashboardItemsQueryVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
+}>;
 
 
 export type DashboardItemsQuery = { __typename?: 'Query', dashboardItems: Array<{ __typename?: 'DashboardItem', id: number, dashboardId: number, type: Types.DashboardItemType, displayName?: string | null, layout: { __typename?: 'DashboardItemLayout', x: number, y: number, w: number, h: number }, detail: { __typename?: 'DashboardItemDetail', sql: string, chartSchema?: any | null } }> };
 
 export type CreateDashboardItemMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   data: Types.CreateDashboardItemInput;
 }>;
 
@@ -18,6 +21,7 @@ export type CreateDashboardItemMutationVariables = Types.Exact<{
 export type CreateDashboardItemMutation = { __typename?: 'Mutation', createDashboardItem: { __typename?: 'DashboardItem', id: number, dashboardId: number, type: Types.DashboardItemType, displayName?: string | null, layout: { __typename?: 'DashboardItemLayout', x: number, y: number, w: number, h: number }, detail: { __typename?: 'DashboardItemDetail', sql: string, chartSchema?: any | null } } };
 
 export type UpdateDashboardItemMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   where: Types.DashboardItemWhereInput;
   data: Types.UpdateDashboardItemInput;
 }>;
@@ -26,6 +30,7 @@ export type UpdateDashboardItemMutationVariables = Types.Exact<{
 export type UpdateDashboardItemMutation = { __typename?: 'Mutation', updateDashboardItem: { __typename?: 'DashboardItem', id: number, dashboardId: number, type: Types.DashboardItemType, displayName?: string | null, layout: { __typename?: 'DashboardItemLayout', x: number, y: number, w: number, h: number }, detail: { __typename?: 'DashboardItemDetail', sql: string, chartSchema?: any | null } } };
 
 export type UpdateDashboardItemLayoutsMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   data: Types.UpdateDashboardItemLayoutsInput;
 }>;
 
@@ -33,6 +38,7 @@ export type UpdateDashboardItemLayoutsMutationVariables = Types.Exact<{
 export type UpdateDashboardItemLayoutsMutation = { __typename?: 'Mutation', updateDashboardItemLayouts: Array<{ __typename?: 'DashboardItem', id: number, dashboardId: number, type: Types.DashboardItemType, displayName?: string | null, layout: { __typename?: 'DashboardItemLayout', x: number, y: number, w: number, h: number }, detail: { __typename?: 'DashboardItemDetail', sql: string, chartSchema?: any | null } }> };
 
 export type DeleteDashboardItemMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   where: Types.DashboardItemWhereInput;
 }>;
 
@@ -40,6 +46,7 @@ export type DeleteDashboardItemMutationVariables = Types.Exact<{
 export type DeleteDashboardItemMutation = { __typename?: 'Mutation', deleteDashboardItem: boolean };
 
 export type PreviewItemSqlMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   data: Types.PreviewItemSqlInput;
 }>;
 
@@ -47,13 +54,16 @@ export type PreviewItemSqlMutationVariables = Types.Exact<{
 export type PreviewItemSqlMutation = { __typename?: 'Mutation', previewItemSQL: { __typename?: 'PreviewItemResponse', data: any, cacheHit: boolean, cacheCreatedAt?: string | null, cacheOverrodeAt?: string | null, override: boolean } };
 
 export type SetDashboardScheduleMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   data: Types.SetDashboardScheduleInput;
 }>;
 
 
 export type SetDashboardScheduleMutation = { __typename?: 'Mutation', setDashboardSchedule: { __typename?: 'Dashboard', id: number, projectId: number, name: string, cacheEnabled: boolean, scheduleFrequency?: Types.ScheduleFrequencyEnum | null, scheduleTimezone?: string | null, scheduleCron?: string | null, nextScheduledAt?: string | null } };
 
-export type DashboardQueryVariables = Types.Exact<{ [key: string]: never; }>;
+export type DashboardQueryVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
+}>;
 
 
 export type DashboardQuery = { __typename?: 'Query', dashboard: { __typename?: 'DetailedDashboard', id: number, name: string, description?: string | null, cacheEnabled: boolean, nextScheduledAt?: string | null, schedule?: { __typename?: 'DashboardSchedule', frequency?: Types.ScheduleFrequencyEnum | null, hour?: number | null, minute?: number | null, day?: Types.CacheScheduleDayEnum | null, timezone?: string | null, cron?: string | null } | null, items: Array<{ __typename?: 'DashboardItem', id: number, dashboardId: number, type: Types.DashboardItemType, displayName?: string | null, layout: { __typename?: 'DashboardItemLayout', x: number, y: number, w: number, h: number }, detail: { __typename?: 'DashboardItemDetail', sql: string, chartSchema?: any | null } }> } };
@@ -77,8 +87,8 @@ export const CommonDashboardItemFragmentDoc = gql`
 }
     `;
 export const DashboardItemsDocument = gql`
-    query DashboardItems {
-  dashboardItems {
+    query DashboardItems($projectId: Int!) {
+  dashboardItems(projectId: $projectId) {
     ...CommonDashboardItem
   }
 }
@@ -96,10 +106,11 @@ export const DashboardItemsDocument = gql`
  * @example
  * const { data, loading, error } = useDashboardItemsQuery({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *   },
  * });
  */
-export function useDashboardItemsQuery(baseOptions?: Apollo.QueryHookOptions<DashboardItemsQuery, DashboardItemsQueryVariables>) {
+export function useDashboardItemsQuery(baseOptions: Apollo.QueryHookOptions<DashboardItemsQuery, DashboardItemsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<DashboardItemsQuery, DashboardItemsQueryVariables>(DashboardItemsDocument, options);
       }
@@ -111,8 +122,8 @@ export type DashboardItemsQueryHookResult = ReturnType<typeof useDashboardItemsQ
 export type DashboardItemsLazyQueryHookResult = ReturnType<typeof useDashboardItemsLazyQuery>;
 export type DashboardItemsQueryResult = Apollo.QueryResult<DashboardItemsQuery, DashboardItemsQueryVariables>;
 export const CreateDashboardItemDocument = gql`
-    mutation CreateDashboardItem($data: CreateDashboardItemInput!) {
-  createDashboardItem(data: $data) {
+    mutation CreateDashboardItem($projectId: Int!, $data: CreateDashboardItemInput!) {
+  createDashboardItem(projectId: $projectId, data: $data) {
     ...CommonDashboardItem
   }
 }
@@ -132,6 +143,7 @@ export type CreateDashboardItemMutationFn = Apollo.MutationFunction<CreateDashbo
  * @example
  * const [createDashboardItemMutation, { data, loading, error }] = useCreateDashboardItemMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      data: // value for 'data'
  *   },
  * });
@@ -144,8 +156,8 @@ export type CreateDashboardItemMutationHookResult = ReturnType<typeof useCreateD
 export type CreateDashboardItemMutationResult = Apollo.MutationResult<CreateDashboardItemMutation>;
 export type CreateDashboardItemMutationOptions = Apollo.BaseMutationOptions<CreateDashboardItemMutation, CreateDashboardItemMutationVariables>;
 export const UpdateDashboardItemDocument = gql`
-    mutation UpdateDashboardItem($where: DashboardItemWhereInput!, $data: UpdateDashboardItemInput!) {
-  updateDashboardItem(where: $where, data: $data) {
+    mutation UpdateDashboardItem($projectId: Int!, $where: DashboardItemWhereInput!, $data: UpdateDashboardItemInput!) {
+  updateDashboardItem(projectId: $projectId, where: $where, data: $data) {
     ...CommonDashboardItem
   }
 }
@@ -165,6 +177,7 @@ export type UpdateDashboardItemMutationFn = Apollo.MutationFunction<UpdateDashbo
  * @example
  * const [updateDashboardItemMutation, { data, loading, error }] = useUpdateDashboardItemMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      where: // value for 'where'
  *      data: // value for 'data'
  *   },
@@ -178,8 +191,8 @@ export type UpdateDashboardItemMutationHookResult = ReturnType<typeof useUpdateD
 export type UpdateDashboardItemMutationResult = Apollo.MutationResult<UpdateDashboardItemMutation>;
 export type UpdateDashboardItemMutationOptions = Apollo.BaseMutationOptions<UpdateDashboardItemMutation, UpdateDashboardItemMutationVariables>;
 export const UpdateDashboardItemLayoutsDocument = gql`
-    mutation UpdateDashboardItemLayouts($data: UpdateDashboardItemLayoutsInput!) {
-  updateDashboardItemLayouts(data: $data) {
+    mutation UpdateDashboardItemLayouts($projectId: Int!, $data: UpdateDashboardItemLayoutsInput!) {
+  updateDashboardItemLayouts(projectId: $projectId, data: $data) {
     ...CommonDashboardItem
   }
 }
@@ -199,6 +212,7 @@ export type UpdateDashboardItemLayoutsMutationFn = Apollo.MutationFunction<Updat
  * @example
  * const [updateDashboardItemLayoutsMutation, { data, loading, error }] = useUpdateDashboardItemLayoutsMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      data: // value for 'data'
  *   },
  * });
@@ -211,8 +225,8 @@ export type UpdateDashboardItemLayoutsMutationHookResult = ReturnType<typeof use
 export type UpdateDashboardItemLayoutsMutationResult = Apollo.MutationResult<UpdateDashboardItemLayoutsMutation>;
 export type UpdateDashboardItemLayoutsMutationOptions = Apollo.BaseMutationOptions<UpdateDashboardItemLayoutsMutation, UpdateDashboardItemLayoutsMutationVariables>;
 export const DeleteDashboardItemDocument = gql`
-    mutation DeleteDashboardItem($where: DashboardItemWhereInput!) {
-  deleteDashboardItem(where: $where)
+    mutation DeleteDashboardItem($projectId: Int!, $where: DashboardItemWhereInput!) {
+  deleteDashboardItem(projectId: $projectId, where: $where)
 }
     `;
 export type DeleteDashboardItemMutationFn = Apollo.MutationFunction<DeleteDashboardItemMutation, DeleteDashboardItemMutationVariables>;
@@ -230,6 +244,7 @@ export type DeleteDashboardItemMutationFn = Apollo.MutationFunction<DeleteDashbo
  * @example
  * const [deleteDashboardItemMutation, { data, loading, error }] = useDeleteDashboardItemMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      where: // value for 'where'
  *   },
  * });
@@ -242,8 +257,8 @@ export type DeleteDashboardItemMutationHookResult = ReturnType<typeof useDeleteD
 export type DeleteDashboardItemMutationResult = Apollo.MutationResult<DeleteDashboardItemMutation>;
 export type DeleteDashboardItemMutationOptions = Apollo.BaseMutationOptions<DeleteDashboardItemMutation, DeleteDashboardItemMutationVariables>;
 export const PreviewItemSqlDocument = gql`
-    mutation PreviewItemSQL($data: PreviewItemSQLInput!) {
-  previewItemSQL(data: $data) {
+    mutation PreviewItemSQL($projectId: Int!, $data: PreviewItemSQLInput!) {
+  previewItemSQL(projectId: $projectId, data: $data) {
     data
     cacheHit
     cacheCreatedAt
@@ -267,6 +282,7 @@ export type PreviewItemSqlMutationFn = Apollo.MutationFunction<PreviewItemSqlMut
  * @example
  * const [previewItemSqlMutation, { data, loading, error }] = usePreviewItemSqlMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      data: // value for 'data'
  *   },
  * });
@@ -279,8 +295,8 @@ export type PreviewItemSqlMutationHookResult = ReturnType<typeof usePreviewItemS
 export type PreviewItemSqlMutationResult = Apollo.MutationResult<PreviewItemSqlMutation>;
 export type PreviewItemSqlMutationOptions = Apollo.BaseMutationOptions<PreviewItemSqlMutation, PreviewItemSqlMutationVariables>;
 export const SetDashboardScheduleDocument = gql`
-    mutation SetDashboardSchedule($data: SetDashboardScheduleInput!) {
-  setDashboardSchedule(data: $data) {
+    mutation SetDashboardSchedule($projectId: Int!, $data: SetDashboardScheduleInput!) {
+  setDashboardSchedule(projectId: $projectId, data: $data) {
     id
     projectId
     name
@@ -307,6 +323,7 @@ export type SetDashboardScheduleMutationFn = Apollo.MutationFunction<SetDashboar
  * @example
  * const [setDashboardScheduleMutation, { data, loading, error }] = useSetDashboardScheduleMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      data: // value for 'data'
  *   },
  * });
@@ -319,8 +336,8 @@ export type SetDashboardScheduleMutationHookResult = ReturnType<typeof useSetDas
 export type SetDashboardScheduleMutationResult = Apollo.MutationResult<SetDashboardScheduleMutation>;
 export type SetDashboardScheduleMutationOptions = Apollo.BaseMutationOptions<SetDashboardScheduleMutation, SetDashboardScheduleMutationVariables>;
 export const DashboardDocument = gql`
-    query Dashboard {
-  dashboard {
+    query Dashboard($projectId: Int!) {
+  dashboard(projectId: $projectId) {
     id
     name
     description
@@ -353,10 +370,11 @@ export const DashboardDocument = gql`
  * @example
  * const { data, loading, error } = useDashboardQuery({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *   },
  * });
  */
-export function useDashboardQuery(baseOptions?: Apollo.QueryHookOptions<DashboardQuery, DashboardQueryVariables>) {
+export function useDashboardQuery(baseOptions: Apollo.QueryHookOptions<DashboardQuery, DashboardQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<DashboardQuery, DashboardQueryVariables>(DashboardDocument, options);
       }

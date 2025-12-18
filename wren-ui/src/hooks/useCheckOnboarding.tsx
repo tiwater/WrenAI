@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { useOnboardingStatusQuery } from '@/apollo/client/graphql/onboarding.generated';
 import { OnboardingStatus } from '@/apollo/client/graphql/__types__';
 import { Path } from '@/utils/enum';
+import { useProject } from '@/contexts/ProjectContext';
 
 const redirectRoute = {
   [OnboardingStatus.DATASOURCE_SAVED]: Path.OnboardingModels,
@@ -13,7 +14,11 @@ const redirectRoute = {
 
 export const useWithOnboarding = () => {
   const router = useRouter();
-  const { data, loading } = useOnboardingStatusQuery();
+  const { selectedProjectId } = useProject();
+  const { data, loading } = useOnboardingStatusQuery({
+    variables: { projectId: selectedProjectId || 0 },
+    skip: !selectedProjectId,
+  });
 
   const onboardingStatus = data?.onboardingStatus?.status;
 
@@ -86,7 +91,11 @@ export const useWithOnboarding = () => {
 };
 
 export default function useOnboardingStatus() {
-  const { data, loading, error, refetch } = useOnboardingStatusQuery();
+  const { selectedProjectId } = useProject();
+  const { data, loading, error, refetch } = useOnboardingStatusQuery({
+    variables: { projectId: selectedProjectId || 0 },
+    skip: !selectedProjectId,
+  });
 
   return {
     loading,

@@ -5,29 +5,15 @@ query ListProjects {
       name
       displayName
       type
-      isActive
       language
       lastAccessedAt
       createdAt
       sampleDataset
     }
-    activeProjectId
   }
 }
 
-query GetActiveProject {
-  getActiveProject {
-    id
-    name
-    displayName
-    type
-    isActive
-    language
-    lastAccessedAt
-    createdAt
-    sampleDataset
-  }
-}
+# GetActiveProject query removed - project selection is now handled on client side
 
 query GetProject($projectId: Int!) {
   getProject(projectId: $projectId) {
@@ -35,7 +21,6 @@ query GetProject($projectId: Int!) {
     name
     displayName
     type
-    isActive
     language
     lastAccessedAt
     createdAt
@@ -49,7 +34,6 @@ mutation CreateProject($data: CreateProjectInput!) {
     name
     displayName
     type
-    isActive
     language
     lastAccessedAt
     createdAt
@@ -63,7 +47,6 @@ mutation UpdateProject($projectId: Int!, $data: UpdateProjectInput!) {
     name
     displayName
     type
-    isActive
     language
     lastAccessedAt
     createdAt
@@ -71,19 +54,7 @@ mutation UpdateProject($projectId: Int!, $data: UpdateProjectInput!) {
   }
 }
 
-mutation SwitchProject($projectId: Int!) {
-  switchProject(projectId: $projectId) {
-    id
-    name
-    displayName
-    type
-    isActive
-    language
-    lastAccessedAt
-    createdAt
-    sampleDataset
-  }
-}
+# SwitchProject mutation removed - project selection is now handled on client side
 
 mutation DeleteProject($projectId: Int!) {
   deleteProject(projectId: $projectId)
@@ -95,7 +66,6 @@ mutation DuplicateProject($projectId: Int!, $name: String!) {
     name
     displayName
     type
-    isActive
     language
     lastAccessedAt
     createdAt

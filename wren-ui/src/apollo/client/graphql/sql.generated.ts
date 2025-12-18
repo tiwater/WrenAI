@@ -4,6 +4,7 @@ import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
 const defaultOptions = {} as const;
 export type PreviewSqlMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   data: Types.PreviewSqlDataInput;
 }>;
 
@@ -11,6 +12,7 @@ export type PreviewSqlMutationVariables = Types.Exact<{
 export type PreviewSqlMutation = { __typename?: 'Mutation', previewSql: any };
 
 export type GenerateQuestionMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   data: Types.GenerateQuestionInput;
 }>;
 
@@ -18,6 +20,7 @@ export type GenerateQuestionMutationVariables = Types.Exact<{
 export type GenerateQuestionMutation = { __typename?: 'Mutation', generateQuestion: string };
 
 export type ModelSubstituteMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   data: Types.ModelSubstituteInput;
 }>;
 
@@ -26,8 +29,8 @@ export type ModelSubstituteMutation = { __typename?: 'Mutation', modelSubstitute
 
 
 export const PreviewSqlDocument = gql`
-    mutation PreviewSQL($data: PreviewSQLDataInput!) {
-  previewSql(data: $data)
+    mutation PreviewSQL($projectId: Int!, $data: PreviewSQLDataInput!) {
+  previewSql(projectId: $projectId, data: $data)
 }
     `;
 export type PreviewSqlMutationFn = Apollo.MutationFunction<PreviewSqlMutation, PreviewSqlMutationVariables>;
@@ -45,6 +48,7 @@ export type PreviewSqlMutationFn = Apollo.MutationFunction<PreviewSqlMutation, P
  * @example
  * const [previewSqlMutation, { data, loading, error }] = usePreviewSqlMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      data: // value for 'data'
  *   },
  * });
@@ -57,8 +61,8 @@ export type PreviewSqlMutationHookResult = ReturnType<typeof usePreviewSqlMutati
 export type PreviewSqlMutationResult = Apollo.MutationResult<PreviewSqlMutation>;
 export type PreviewSqlMutationOptions = Apollo.BaseMutationOptions<PreviewSqlMutation, PreviewSqlMutationVariables>;
 export const GenerateQuestionDocument = gql`
-    mutation GenerateQuestion($data: GenerateQuestionInput!) {
-  generateQuestion(data: $data)
+    mutation GenerateQuestion($projectId: Int!, $data: GenerateQuestionInput!) {
+  generateQuestion(projectId: $projectId, data: $data)
 }
     `;
 export type GenerateQuestionMutationFn = Apollo.MutationFunction<GenerateQuestionMutation, GenerateQuestionMutationVariables>;
@@ -76,6 +80,7 @@ export type GenerateQuestionMutationFn = Apollo.MutationFunction<GenerateQuestio
  * @example
  * const [generateQuestionMutation, { data, loading, error }] = useGenerateQuestionMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      data: // value for 'data'
  *   },
  * });
@@ -88,8 +93,8 @@ export type GenerateQuestionMutationHookResult = ReturnType<typeof useGenerateQu
 export type GenerateQuestionMutationResult = Apollo.MutationResult<GenerateQuestionMutation>;
 export type GenerateQuestionMutationOptions = Apollo.BaseMutationOptions<GenerateQuestionMutation, GenerateQuestionMutationVariables>;
 export const ModelSubstituteDocument = gql`
-    mutation ModelSubstitute($data: ModelSubstituteInput!) {
-  modelSubstitute(data: $data)
+    mutation ModelSubstitute($projectId: Int!, $data: ModelSubstituteInput!) {
+  modelSubstitute(projectId: $projectId, data: $data)
 }
     `;
 export type ModelSubstituteMutationFn = Apollo.MutationFunction<ModelSubstituteMutation, ModelSubstituteMutationVariables>;
@@ -107,6 +112,7 @@ export type ModelSubstituteMutationFn = Apollo.MutationFunction<ModelSubstituteM
  * @example
  * const [modelSubstituteMutation, { data, loading, error }] = useModelSubstituteMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      data: // value for 'data'
  *   },
  * });
