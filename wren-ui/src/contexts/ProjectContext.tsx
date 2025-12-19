@@ -55,3 +55,9 @@ export function useSelectedProject() {
   
   return selectedProjectId;
 }
+
+// Optional hook that returns null instead of throwing when no project selected
+export function useOptionalSelectedProject() {
+  const { selectedProjectId } = useProject();
+  return selectedProjectId;
+}
