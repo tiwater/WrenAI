@@ -229,9 +229,10 @@ export class ProjectResolver {
         extensions: [],
         configurations: {},
       };
-      await this.saveDataSource(
+      const dataSourceResult = await this.saveDataSource(
         _root,
         {
+          projectId: 0, // Will create a new project
           data: {
             type: DataSourceName.DUCKDB,
             properties: duckdbDatasourceProperties,
@@ -239,10 +240,10 @@ export class ProjectResolver {
         },
         ctx,
       );
-      const project = await ctx.projectService.getActiveProject();
+      const project = await ctx.projectService.getProjectById(dataSourceResult.projectId);
 
       // list all the tables in the data source
-      const tables = await this.listDataSourceTables(_root, _arg, ctx);
+      const tables = await this.listDataSourceTables(_root, { projectId: project.id }, ctx);
       const tableNames = tables.map((table) => table.name);
 
       // save tables as model and modelColumns
@@ -270,7 +271,7 @@ export class ProjectResolver {
       await this.deploy(ctx, project.id);
       // telemetry
       ctx.telemetry.sendEvent(eventName, eventProperties);
-      return { name };
+      return { name, projectId: project.id };
     } catch (err: any) {
       ctx.telemetry.sendEvent(
         eventName,
@@ -386,6 +387,7 @@ export class ProjectResolver {
         displayName: project.displayName,
         ...ctx.projectService.getGeneralConnectionInfo(project),
       },
+      projectId: project.id,
     };
   }
 
@@ -440,8 +442,8 @@ export class ProjectResolver {
     };
   }
 
-  public async listDataSourceTables(_root: any, _arg, ctx: IContext) {
-    return await ctx.projectService.getProjectDataSourceTables();
+  public async listDataSourceTables(_root: any, arg: { projectId: number }, ctx: IContext) {
+    return await ctx.projectService.getProjectDataSourceTables(null, arg.projectId);
   }
 
   public async saveTables(

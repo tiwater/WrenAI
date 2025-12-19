@@ -45,6 +45,7 @@ export const SAVE_DATA_SOURCE = gql`
     saveDataSource(projectId: $projectId, data: $data) {
       type
       properties
+      projectId
     }
   }
 `;

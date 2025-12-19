@@ -7,18 +7,30 @@ import {
 } from '@/utils/enum';
 import { useSaveDataSourceMutation } from '@/apollo/client/graphql/dataSource.generated';
 import { DataSourceName } from '@/apollo/client/graphql/__types__';
-import { useOptionalSelectedProject } from '@/contexts/ProjectContext';
+import { useOptionalSelectedProject, useProject } from '@/contexts/ProjectContext';
 const PASSWORD_PLACEHOLDER = '************';
 
 export default function useSetupConnectionDataSource() {
   const projectId = useOptionalSelectedProject();
+  const { setSelectedProjectId } = useProject();
   const router = useRouter();
   const [selected, setSelected] = useState<DataSourceName>();
 
   const [saveDataSourceMutation, { loading, error }] =
     useSaveDataSourceMutation({
       onError: (error) => console.error(error),
-      onCompleted: () => completedDataSourceSave(),
+      onCompleted: (data) => {
+        // Set the newly created project ID
+        if (data?.saveDataSource?.projectId) {
+          setSelectedProjectId(data.saveDataSource.projectId);
+          // Navigate after setting the project ID
+          setTimeout(() => {
+            completedDataSourceSave();
+          }, 100);
+        } else {
+          completedDataSourceSave();
+        }
+      },
     });
 
   const selectDataSourceNext = useCallback(

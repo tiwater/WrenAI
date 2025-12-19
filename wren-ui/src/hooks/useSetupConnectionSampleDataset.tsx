@@ -4,16 +4,21 @@ import { Path } from '@/utils/enum';
 import { ONBOARDING_STATUS } from '@/apollo/client/graphql/onboarding';
 import { useStartSampleDatasetMutation } from '@/apollo/client/graphql/dataSource.generated';
 import { SampleDatasetName } from '@/apollo/client/graphql/__types__';
-import { useOptionalSelectedProject } from '@/contexts/ProjectContext';
+import { useOptionalSelectedProject, useProject } from '@/contexts/ProjectContext';
 
 export default function useSetupConnectionSampleDataset() {
   const projectId = useOptionalSelectedProject();
+  const { setSelectedProjectId } = useProject();
   const router = useRouter();
 
   const [startSampleDatasetMutation, { loading, error }] =
     useStartSampleDatasetMutation({
       onError: (error) => console.error(error),
-      onCompleted: () => {
+      onCompleted: (data) => {
+        // Set the newly created project ID
+        if (data?.startSampleDataset?.projectId) {
+          setSelectedProjectId(data.startSampleDataset.projectId);
+        }
         // Clear the creating new project flags
         sessionStorage.removeItem('newProjectName');
         sessionStorage.removeItem('creatingNewProject');

@@ -322,6 +322,7 @@ export type DashboardSchedule = {
 
 export type DataSource = {
   __typename?: 'DataSource';
+  projectId?: Maybe<Scalars['Int']>;
   properties: Scalars['JSON'];
   sampleDataset?: Maybe<SampleDatasetName>;
   type: DataSourceName;

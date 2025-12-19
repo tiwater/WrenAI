@@ -31,7 +31,7 @@ export type SaveDataSourceMutationVariables = Types.Exact<{
 }>;
 
 
-export type SaveDataSourceMutation = { __typename?: 'Mutation', saveDataSource: { __typename?: 'DataSource', type: Types.DataSourceName, properties: any } };
+export type SaveDataSourceMutation = { __typename?: 'Mutation', saveDataSource: { __typename?: 'DataSource', type: Types.DataSourceName, properties: any, projectId?: number | null } };
 
 export type UpdateDataSourceMutationVariables = Types.Exact<{
   projectId: Types.Scalars['Int'];
@@ -205,6 +205,7 @@ export const SaveDataSourceDocument = gql`
   saveDataSource(projectId: $projectId, data: $data) {
     type
     properties
+    projectId
   }
 }
     `;

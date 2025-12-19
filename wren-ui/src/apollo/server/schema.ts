@@ -146,6 +146,7 @@ export const typeDefs = gql`
     properties: JSON!
     # Show the name if the data source setup comes from a sample
     sampleDataset: SampleDatasetName
+    projectId: Int
   }
 
   input WhereIdInput {
