@@ -1202,19 +1202,19 @@ export const typeDefs = gql`
 
   type Mutation {
     # On Boarding Steps
-    saveDataSource(data: DataSourceInput!): DataSource!
-    startSampleDataset(data: SampleDatasetInput!): JSON!
-    saveTables(data: SaveTablesInput!): JSON!
-    saveRelations(data: SaveRelationInput!): JSON!
-    deploy(force: Boolean): JSON!
+    saveDataSource(projectId: Int!, data: DataSourceInput!): DataSource!
+    startSampleDataset(projectId: Int!, data: SampleDatasetInput!): JSON!
+    saveTables(projectId: Int!, data: SaveTablesInput!): JSON!
+    saveRelations(projectId: Int!, data: SaveRelationInput!): JSON!
+    deploy(projectId: Int!, force: Boolean): JSON!
 
     # Modeling Page
     createModel(data: CreateModelInput!): JSON!
     updateModel(where: ModelWhereInput!, data: UpdateModelInput!): JSON!
     deleteModel(where: ModelWhereInput!): Boolean!
     previewModelData(where: WhereIdInput!): JSON!
-    triggerDataSourceDetection: Boolean!
-    resolveSchemaChange(where: ResolveSchemaChangeWhereInput!): Boolean!
+    triggerDataSourceDetection(projectId: Int!): Boolean!
+    resolveSchemaChange(projectId: Int!, where: ResolveSchemaChangeWhereInput!): Boolean!
 
     # Metadata
     updateModelMetadata(
@@ -1297,9 +1297,9 @@ export const typeDefs = gql`
     rerunAdjustmentTask(responseId: Int!): Boolean!
 
     # Settings
-    resetCurrentProject: Boolean!
-    updateCurrentProject(data: UpdateCurrentProjectInput!): Boolean!
-    updateDataSource(data: UpdateDataSourceInput!): DataSource!
+    resetCurrentProject(projectId: Int!): Boolean!
+    updateCurrentProject(projectId: Int!, data: UpdateCurrentProjectInput!): Boolean!
+    updateDataSource(projectId: Int!, data: UpdateDataSourceInput!): DataSource!
 
     # Projects
     createProject(data: CreateProjectInput!): ProjectInfo!

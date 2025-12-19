@@ -24,6 +24,7 @@ import {
   DataSourceName,
   ItemLayoutInput,
 } from '@/apollo/client/graphql/__types__';
+import { useSelectedProject } from '@/contexts/ProjectContext';
 
 const isSupportCachedSettings = (dataSource: DataSource) => {
   // DuckDB not supported, sample dataset as well
@@ -34,10 +35,13 @@ const isSupportCachedSettings = (dataSource: DataSource) => {
 
 export default function Dashboard() {
   const router = useRouter();
+  const projectId = useSelectedProject();
   const dashboardGridRef = useRef<{ onRefreshAll: () => void }>(null);
   const homeSidebar = useHomeSidebar();
   const cacheSettingsDrawer = useDrawerAction();
-  const { data: settingsResult } = useGetSettingsQuery();
+  const { data: settingsResult } = useGetSettingsQuery({
+    variables: { projectId },
+  });
   const settings = settingsResult?.settings;
   const isSupportCached = useMemo(
     () => isSupportCachedSettings(settings?.dataSource),
@@ -49,6 +53,7 @@ export default function Dashboard() {
     loading,
     updateQuery: updateDashboardQuery,
   } = useDashboardQuery({
+    variables: { projectId },
     fetchPolicy: 'cache-and-network',
     onError: () => {
       message.error('Failed to fetch dashboard items.');
@@ -61,7 +66,7 @@ export default function Dashboard() {
   );
 
   const [setDashboardSchedule] = useSetDashboardScheduleMutation({
-    refetchQueries: ['Dashboard'],
+    refetchQueries: [{ query: 'Dashboard', variables: { projectId } }],
     onCompleted: () => {
       message.success('Successfully updated dashboard schedule.');
     },

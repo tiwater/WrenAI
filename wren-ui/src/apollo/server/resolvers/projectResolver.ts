@@ -115,9 +115,8 @@ export class ProjectResolver {
     this.duplicateProject = this.duplicateProject.bind(this);
   }
 
-  public async getSettings(_root: any, _arg: any, ctx: IContext) {
-    // TODO: This should receive projectId as a parameter
-    const project = await ctx.projectService.getCurrentProject();
+  public async getSettings(_root: any, _arg: { projectId: number }, ctx: IContext) {
+    const project = await ctx.projectService.getProjectById(_arg.projectId);
     const generalConnectionInfo =
       ctx.projectService.getGeneralConnectionInfo(project);
     const dataSourceType = project.type;
@@ -201,7 +200,7 @@ export class ProjectResolver {
 
   public async startSampleDataset(
     _root: any,
-    _arg: { data: SampleDatasetData },
+    _arg: { projectId: number; data: SampleDatasetData },
     ctx: IContext,
   ) {
     const { name } = _arg.data;
@@ -268,7 +267,7 @@ export class ProjectResolver {
       await ctx.projectRepository.updateOne(project.id, {
         sampleDataset: name,
       });
-      await this.deploy(ctx);
+      await this.deploy(ctx, project.id);
       // telemetry
       ctx.telemetry.sendEvent(eventName, eventProperties);
       return { name };
@@ -313,6 +312,7 @@ export class ProjectResolver {
   public async saveDataSource(
     _root: any,
     args: {
+      projectId: number;
       data: DataSource;
     },
     ctx: IContext,
@@ -335,7 +335,7 @@ export class ProjectResolver {
 
     // init dashboard
     logger.debug('Dashboard init...');
-    await ctx.dashboardService.initDashboard();
+    await ctx.dashboardService.initDashboard(project.id);
     logger.debug('Dashboard created.');
 
     const eventName = TelemetryEvent.CONNECTION_SAVE_DATA_SOURCE;

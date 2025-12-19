@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useGetSettingsQuery } from '@/apollo/client/graphql/settings.generated';
-import { useSelectedProject } from '@/contexts/ProjectContext';import { useGetNativeSqlLazyQuery } from '@/apollo/client/graphql/home.generated';
-import { useSelectedProject } from '@/contexts/ProjectContext';import { DataSourceName } from '@/apollo/client/graphql/__types__';
+import { useGetNativeSqlLazyQuery } from '@/apollo/client/graphql/home.generated';
+import { DataSourceName } from '@/apollo/client/graphql/__types__';
 import { useSelectedProject } from '@/contexts/ProjectContext';
 export interface NativeSQLResult {
   data: string;

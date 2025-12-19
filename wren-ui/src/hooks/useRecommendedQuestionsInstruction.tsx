@@ -2,10 +2,11 @@ import { useMemo, useState, useEffect } from 'react';
 import { groupBy, orderBy, flatMap } from 'lodash';
 import { message } from 'antd';
 import Icon from '@/import/icon';
-import { useSelectedProject } from '@/contexts/ProjectContext';import ReloadOutlined from '@ant-design/icons/ReloadOutlined';
+import ReloadOutlined from '@ant-design/icons/ReloadOutlined';
 import { CopilotSVG } from '@/utils/svgs';
-import { useSelectedProject } from '@/contexts/ProjectContext';import { isRecommendedFinished } from '@/hooks/useAskPrompt';
-import { useSelectedProject } from '@/contexts/ProjectContext';import {
+import { isRecommendedFinished } from '@/hooks/useAskPrompt';
+import { useSelectedProject } from '@/contexts/ProjectContext';
+import {
   ResultQuestion,
   RecommendedQuestionsTaskStatus,
 } from '@/apollo/client/graphql/__types__';
@@ -32,7 +33,8 @@ const getGroupedQuestions = (
 };
 
 export default function useRecommendedQuestionsInstruction() {
-  const projectId = useSelectedProject();  const [showRetry, setShowRetry] = useState<boolean>(false);
+  const projectId = useSelectedProject();
+  const [showRetry, setShowRetry] = useState<boolean>(false);
   const [generating, setGenerating] = useState<boolean>(false);
   const [isRegenerate, setIsRegenerate] = useState<boolean>(false);
   const [
@@ -61,7 +63,9 @@ export default function useRecommendedQuestionsInstruction() {
 
   useEffect(() => {
     const fetchRecommendationQuestionsData = async () => {
-      const result = await fetchRecommendationQuestions();
+      const result = await fetchRecommendationQuestions({
+        variables: { projectId }
+      });
       const data = result.data?.getProjectRecommendationQuestions;
 
       // for existing projects that do not have to generate recommended questions yet
@@ -112,8 +116,12 @@ export default function useRecommendedQuestionsInstruction() {
     setGenerating(true);
     setIsRegenerate(true);
     try {
-      await generateProjectRecommendationQuestions();
-      fetchRecommendationQuestions();
+      await generateProjectRecommendationQuestions({
+        variables: { projectId }
+      });
+      fetchRecommendationQuestions({
+        variables: { projectId }
+      });
     } catch (error) {
       console.error(error);
     }

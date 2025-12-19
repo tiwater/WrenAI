@@ -883,6 +883,7 @@ export type MutationDeleteViewArgs = {
 
 export type MutationDeployArgs = {
   force?: InputMaybe<Scalars['Boolean']>;
+  projectId: Scalars['Int'];
 };
 
 
@@ -969,13 +970,20 @@ export type MutationRerunAskingTaskArgs = {
 };
 
 
+export type MutationResetCurrentProjectArgs = {
+  projectId: Scalars['Int'];
+};
+
+
 export type MutationResolveSchemaChangeArgs = {
+  projectId: Scalars['Int'];
   where: ResolveSchemaChangeWhereInput;
 };
 
 
 export type MutationSaveDataSourceArgs = {
   data: DataSourceInput;
+  projectId: Scalars['Int'];
 };
 
 
@@ -987,11 +995,13 @@ export type MutationSaveLearningRecordArgs = {
 
 export type MutationSaveRelationsArgs = {
   data: SaveRelationInput;
+  projectId: Scalars['Int'];
 };
 
 
 export type MutationSaveTablesArgs = {
   data: SaveTablesInput;
+  projectId: Scalars['Int'];
 };
 
 
@@ -1002,6 +1012,12 @@ export type MutationSetDashboardScheduleArgs = {
 
 export type MutationStartSampleDatasetArgs = {
   data: SampleDatasetInput;
+  projectId: Scalars['Int'];
+};
+
+
+export type MutationTriggerDataSourceDetectionArgs = {
+  projectId: Scalars['Int'];
 };
 
 
@@ -1013,6 +1029,7 @@ export type MutationUpdateCalculatedFieldArgs = {
 
 export type MutationUpdateCurrentProjectArgs = {
   data: UpdateCurrentProjectInput;
+  projectId: Scalars['Int'];
 };
 
 
@@ -1029,6 +1046,7 @@ export type MutationUpdateDashboardItemLayoutsArgs = {
 
 export type MutationUpdateDataSourceArgs = {
   data: UpdateDataSourceInput;
+  projectId: Scalars['Int'];
 };
 
 

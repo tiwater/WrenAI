@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { useOnboardingStatusQuery } from '@/apollo/client/graphql/onboarding.generated';
 import { OnboardingStatus } from '@/apollo/client/graphql/__types__';
 import { Path } from '@/utils/enum';
-import { useProject } from '@/contexts/ProjectContext';
+import { useProject, useSelectedProject } from '@/contexts/ProjectContext';
 
 const redirectRoute = {
   [OnboardingStatus.DATASOURCE_SAVED]: Path.OnboardingModels,
@@ -15,6 +15,14 @@ const redirectRoute = {
 export const useWithOnboarding = () => {
   const router = useRouter();
   const { selectedProjectId } = useProject();
+  
+  // If no project selected, redirect to projects page
+  useEffect(() => {
+    if (!selectedProjectId && router.pathname !== Path.Projects) {
+      router.push(Path.Projects);
+    }
+  }, [selectedProjectId, router]);
+  
   const { data, loading } = useOnboardingStatusQuery({
     variables: { projectId: selectedProjectId || 0 },
     skip: !selectedProjectId,
@@ -23,7 +31,7 @@ export const useWithOnboarding = () => {
   const onboardingStatus = data?.onboardingStatus?.status;
 
   useEffect(() => {
-    if (onboardingStatus) {
+    if (selectedProjectId && onboardingStatus) {
       const newPath = redirectRoute[onboardingStatus];
       const pathname = router.pathname;
       
@@ -91,7 +99,7 @@ export const useWithOnboarding = () => {
 };
 
 export default function useOnboardingStatus() {
-  const projectId = useSelectedProject();  const { selectedProjectId } = useProject();
+  const { selectedProjectId } = useProject();
   const { data, loading, error, refetch } = useOnboardingStatusQuery({
     variables: { projectId: selectedProjectId || 0 },
     skip: !selectedProjectId,
