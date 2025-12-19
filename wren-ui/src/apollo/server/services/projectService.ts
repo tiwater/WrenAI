@@ -187,16 +187,6 @@ export class ProjectService implements IProjectService {
     return await this.projectRepository.getProjectById(projectId);
   }
 
-  // Temporary - for gradual migration
-  public async getCurrentProject() {
-    return await this.projectRepository.getCurrentProject();
-  }
-
-  // Temporary - for gradual migration
-  public async getActiveProject() {
-    return await this.getCurrentProject();
-  }
-
   public async listProjects() {
     return await this.projectRepository.listProjects();
   }

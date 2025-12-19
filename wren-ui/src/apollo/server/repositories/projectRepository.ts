@@ -227,16 +227,6 @@ export class ProjectRepository
     return project;
   }
 
-  // Get first project - only used when projectId is not provided (for migration)
-  public async getCurrentProject() {
-    const projects = await this.listProjects();
-    if (projects.length === 0) {
-      throw new Error('No projects found');
-    }
-    return projects[0];
-  }
-
-
   public override transformFromDBData: (data: any) => Project = (data: any) => {
     if (!isPlainObject(data)) {
       throw new Error('Unexpected db data');

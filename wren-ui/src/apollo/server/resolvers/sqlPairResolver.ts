@@ -17,17 +17,17 @@ export class SqlPairResolver {
 
   public async getProjectSqlPairs(
     _root: unknown,
-    _arg: any,
+    args: { projectId: number },
     ctx: IContext,
   ): Promise<SqlPair[]> {
-    const project = await ctx.projectService.getCurrentProject();
-    return ctx.sqlPairService.getProjectSqlPairs(project.id);
+    return ctx.sqlPairService.getProjectSqlPairs(args.projectId);
   }
 
   @TrackTelemetry(TelemetryEvent.KNOWLEDGE_CREATE_SQL_PAIR)
   public async createSqlPair(
     _root: unknown,
     arg: {
+      projectId: number;
       data: {
         sql: string;
         question: string;
@@ -35,15 +35,15 @@ export class SqlPairResolver {
     },
     ctx: IContext,
   ): Promise<SqlPair> {
-    const project = await ctx.projectService.getCurrentProject();
-    await this.validateSql(arg.data.sql, ctx);
-    return await ctx.sqlPairService.createSqlPair(project.id, arg.data);
+    await this.validateSql(arg.data.sql, arg.projectId, ctx);
+    return await ctx.sqlPairService.createSqlPair(arg.projectId, arg.data);
   }
 
   @TrackTelemetry(TelemetryEvent.KNOWLEDGE_UPDATE_SQL_PAIR)
   public async updateSqlPair(
     _root: unknown,
     arg: {
+      projectId: number;
       data: {
         sql?: string;
         question?: string;
@@ -54,35 +54,38 @@ export class SqlPairResolver {
     },
     ctx: IContext,
   ): Promise<SqlPair> {
-    const project = await ctx.projectService.getCurrentProject();
-    await this.validateSql(arg.data.sql, ctx);
-    return ctx.sqlPairService.editSqlPair(project.id, arg.where.id, arg.data);
+    await this.validateSql(arg.data.sql, arg.projectId, ctx);
+    return ctx.sqlPairService.editSqlPair(arg.projectId, arg.where.id, arg.data);
   }
 
   @TrackTelemetry(TelemetryEvent.KNOWLEDGE_DELETE_SQL_PAIR)
   public async deleteSqlPair(
     _root: unknown,
     arg: {
+      projectId: number;
       where: {
         id: number;
       };
     },
     ctx: IContext,
   ): Promise<boolean> {
-    const project = await ctx.projectService.getCurrentProject();
-    return ctx.sqlPairService.deleteSqlPair(project.id, arg.where.id);
+    return ctx.sqlPairService.deleteSqlPair(arg.projectId, arg.where.id);
   }
 
   public async generateQuestion(
     _root: unknown,
     arg: {
+      projectId: number;
       data: {
         sql: string;
       };
     },
     ctx: IContext,
   ) {
-    const project = await ctx.projectService.getCurrentProject();
+    const project = await ctx.projectRepository.findOneBy({ id: arg.projectId });
+    if (!project) {
+      throw new Error('Project not found');
+    }
     const questions = await ctx.sqlPairService.generateQuestions(project, [
       arg.data.sql,
     ]);
@@ -92,13 +95,17 @@ export class SqlPairResolver {
   public async modelSubstitute(
     _root: unknown,
     arg: {
+      projectId: number;
       data: {
         sql: DialectSQL;
       };
     },
     ctx: IContext,
   ): Promise<WrenSQL> {
-    const project = await ctx.projectService.getCurrentProject();
+    const project = await ctx.projectRepository.findOneBy({ id: arg.projectId });
+    if (!project) {
+      throw new Error('Project not found');
+    }
     const lastDeployment = await ctx.deployService.getLastDeployment(
       project.id,
     );
@@ -114,8 +121,11 @@ export class SqlPairResolver {
     return safeFormatSQL(wrenSQL, { language: 'postgresql' }) as WrenSQL;
   }
 
-  private async validateSql(sql: string, ctx: IContext) {
-    const project = await ctx.projectService.getCurrentProject();
+  private async validateSql(sql: string, projectId: number, ctx: IContext) {
+    const project = await ctx.projectRepository.findOneBy({ id: projectId });
+    if (!project) {
+      throw new Error('Project not found');
+    }
     const lastDeployment = await ctx.deployService.getLastDeployment(
       project.id,
     );

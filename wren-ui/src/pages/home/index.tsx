@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { Button, Typography } from 'antd';
 import { Logo } from '@/components/Logo';
 import { Path } from '@/utils/enum';
+import { useSelectedProject } from '@/contexts/ProjectContext';
 import SiderLayout from '@/components/layouts/SiderLayout';
 import Prompt from '@/components/pages/home/prompt';
 import DemoPrompt from '@/components/pages/home/prompt/DemoPrompt';
@@ -90,10 +91,12 @@ function RecommendedQuestionsInstruction(props) {
 export default function Home() {
   const $prompt = useRef<ComponentRef<typeof Prompt>>(null);
   const router = useRouter();
+  const projectId = useSelectedProject();
   const homeSidebar = useHomeSidebar();
   const askPrompt = useAskPrompt();
 
   const { data: suggestedQuestionsData } = useSuggestedQuestionsQuery({
+    variables: { projectId },
     fetchPolicy: 'cache-and-network',
   });
   const [createThread, { loading: threadCreating }] = useCreateThreadMutation({
@@ -104,7 +107,9 @@ export default function Home() {
     fetchPolicy: 'cache-and-network',
   });
 
-  const { data: settingsResult } = useGetSettingsQuery();
+  const { data: settingsResult } = useGetSettingsQuery({
+    variables: { projectId },
+  });
   const settings = settingsResult?.settings;
   const isSampleDataset = useMemo(
     () => Boolean(settings?.dataSource?.sampleDataset),
@@ -123,9 +128,19 @@ export default function Home() {
   const onCreateResponse = async (payload: CreateThreadInput) => {
     try {
       askPrompt.onStopPolling();
-      const response = await createThread({ variables: { data: payload } });
+      const response = await createThread({ 
+        variables: { 
+          projectId,
+          data: payload 
+        } 
+      });
       const threadId = response.data.createThread.id;
-      await preloadThread({ variables: { threadId } });
+      await preloadThread({ 
+        variables: { 
+          projectId,
+          threadId 
+        } 
+      });
       router.push(Path.Home + `/${threadId}`);
     } catch (error) {
       console.error(error);

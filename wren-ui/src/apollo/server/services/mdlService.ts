@@ -14,7 +14,7 @@ export interface MakeCurrentModelMDLResult {
   mdlBuilder: MDLBuilder;
 }
 export interface IMDLService {
-  makeCurrentModelMDL(): Promise<MakeCurrentModelMDLResult>;
+  makeCurrentModelMDL(projectId: number): Promise<MakeCurrentModelMDLResult>;
 }
 
 export class MDLService implements IMDLService {
@@ -48,9 +48,11 @@ export class MDLService implements IMDLService {
     this.viewRepository = viewRepository;
   }
 
-  public async makeCurrentModelMDL() {
-    const project = await this.projectRepository.getCurrentProject();
-    const projectId = project.id;
+  public async makeCurrentModelMDL(projectId: number) {
+    const project = await this.projectRepository.findOneBy({ id: projectId });
+    if (!project) {
+      throw new Error('Project not found');
+    }
     const models = await this.modelRepository.findAllBy({ projectId });
     const modelIds = models.map((m) => m.id);
     const columns =

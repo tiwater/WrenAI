@@ -17,7 +17,7 @@ export class LearningResolver {
 
   public async getLearningRecord(
     _root: any,
-    _args: any,
+    args: { projectId: number },
     ctx: IContext,
   ): Promise<any> {
     const result = await ctx.learningRepository.findAll();
@@ -26,7 +26,7 @@ export class LearningResolver {
 
   public async saveLearningRecord(
     _root: any,
-    args: any,
+    args: { projectId: number; data: any },
     ctx: IContext,
   ): Promise<any> {
     const { path } = args.data;

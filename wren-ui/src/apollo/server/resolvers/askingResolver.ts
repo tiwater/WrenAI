@@ -129,16 +129,16 @@ export class AskingResolver {
 
   public async generateProjectRecommendationQuestions(
     _root: any,
-    _args: any,
+    args: { projectId: number },
     ctx: IContext,
   ): Promise<boolean> {
-    await ctx.projectService.generateProjectRecommendationQuestions();
+    await ctx.projectService.generateProjectRecommendationQuestions(args.projectId);
     return true;
   }
 
   public async generateThreadRecommendationQuestions(
     _root: any,
-    args: { threadId: number },
+    args: { projectId: number; threadId: number },
     ctx: IContext,
   ): Promise<boolean> {
     const { threadId } = args;
@@ -149,7 +149,7 @@ export class AskingResolver {
 
   public async getThreadRecommendationQuestions(
     _root: any,
-    args: { threadId: number },
+    args: { projectId: number; threadId: number },
     ctx: IContext,
   ): Promise<ThreadRecommendQuestionResult> {
     const { threadId } = args;
@@ -159,10 +159,13 @@ export class AskingResolver {
 
   public async getSuggestedQuestions(
     _root: any,
-    _args: any,
+    args: { projectId: number },
     ctx: IContext,
   ): Promise<SuggestedQuestionResponse> {
-    const project = await ctx.projectService.getCurrentProject();
+    const project = await ctx.projectRepository.findOneBy({ id: args.projectId });
+    if (!project) {
+      throw new Error('Project not found');
+    }
     const { sampleDataset } = project;
     if (!sampleDataset) {
       return { questions: [] };
@@ -173,11 +176,14 @@ export class AskingResolver {
 
   public async createAskingTask(
     _root: any,
-    args: { data: { question: string; threadId?: number } },
+    args: { projectId: number; data: { question: string; threadId?: number } },
     ctx: IContext,
   ): Promise<Task> {
     const { question, threadId } = args.data;
-    const project = await ctx.projectService.getCurrentProject();
+    const project = await ctx.projectRepository.findOneBy({ id: args.projectId });
+    if (!project) {
+      throw new Error('Project not found');
+    }
 
     const askingService = ctx.askingService;
     const data = { question };
@@ -244,6 +250,7 @@ export class AskingResolver {
   public async createThread(
     _root: any,
     args: {
+      projectId: number;
       data: {
         question?: string;
         taskId?: string;
@@ -294,7 +301,7 @@ export class AskingResolver {
 
   public async getThread(
     _root: any,
-    args: { threadId: number },
+    args: { projectId: number; threadId: number },
     ctx: IContext,
   ): Promise<DetailedThread> {
     const { threadId } = args;
@@ -334,7 +341,7 @@ export class AskingResolver {
 
   public async updateThread(
     _root: any,
-    args: { where: { id: number }; data: { summary: string } },
+    args: { projectId: number; where: { id: number }; data: { summary: string } },
     ctx: IContext,
   ): Promise<Thread> {
     const { where, data } = args;
@@ -364,7 +371,7 @@ export class AskingResolver {
 
   public async deleteThread(
     _root: any,
-    args: { where: { id: number } },
+    args: { projectId: number; where: { id: number } },
     ctx: IContext,
   ): Promise<boolean> {
     const { where } = args;
@@ -376,7 +383,7 @@ export class AskingResolver {
 
   public async listThreads(
     _root: any,
-    _args: any,
+    args: { projectId: number },
     ctx: IContext,
   ): Promise<Thread[]> {
     const threads = await ctx.askingService.listThreads();
@@ -386,6 +393,7 @@ export class AskingResolver {
   public async createThreadResponse(
     _root: any,
     args: {
+      projectId: number;
       threadId: number;
       data: {
         question?: string;
@@ -439,7 +447,7 @@ export class AskingResolver {
 
   public async updateThreadResponse(
     _root: any,
-    args: { where: { id: number }; data: { sql: string } },
+    args: { projectId: number; where: { id: number }; data: { sql: string } },
     ctx: IContext,
   ): Promise<ThreadResponse> {
     const { where, data } = args;
@@ -450,12 +458,15 @@ export class AskingResolver {
 
   public async rerunAskingTask(
     _root: any,
-    args: { responseId: number },
+    args: { projectId: number; responseId: number },
     ctx: IContext,
   ): Promise<Task> {
     const { responseId } = args;
     const askingService = ctx.askingService;
-    const project = await ctx.projectService.getCurrentProject();
+    const project = await ctx.projectRepository.findOneBy({ id: args.projectId });
+    if (!project) {
+      throw new Error('Project not found');
+    }
 
     const task = await askingService.rerunAskingTask(responseId, {
       language: WrenAILanguage[project.language] || WrenAILanguage.EN,
@@ -469,6 +480,7 @@ export class AskingResolver {
   public async adjustThreadResponse(
     _root: any,
     args: {
+      projectId: number;
       responseId: number;
       data: {
         tables?: string[];
@@ -478,9 +490,12 @@ export class AskingResolver {
     },
     ctx: IContext,
   ): Promise<ThreadResponse> {
-    const { responseId, data } = args;
+    const { responseId, data, projectId } = args;
     const askingService = ctx.askingService;
-    const project = await ctx.projectService.getCurrentProject();
+    const project = await ctx.projectRepository.findOneBy({ id: projectId });
+    if (!project) {
+      throw new Error('Project not found');
+    }
 
     if (data.sql) {
       const response = await askingService.adjustThreadResponseWithSQL(
@@ -525,12 +540,15 @@ export class AskingResolver {
 
   public async rerunAdjustThreadResponseAnswer(
     _root: any,
-    args: { responseId: number },
+    args: { projectId: number; responseId: number },
     ctx: IContext,
   ): Promise<boolean> {
-    const { responseId } = args;
+    const { responseId, projectId } = args;
     const askingService = ctx.askingService;
-    const project = await ctx.projectService.getCurrentProject();
+    const project = await ctx.projectRepository.findOneBy({ id: projectId });
+    if (!project) {
+      throw new Error('Project not found');
+    }
     await askingService.rerunAdjustThreadResponseAnswer(
       responseId,
       project.id,
@@ -563,10 +581,13 @@ export class AskingResolver {
 
   public async generateThreadResponseBreakdown(
     _root: any,
-    args: { responseId: number },
+    args: { projectId: number; responseId: number },
     ctx: IContext,
   ): Promise<ThreadResponse> {
-    const project = await ctx.projectService.getCurrentProject();
+    const project = await ctx.projectRepository.findOneBy({ id: args.projectId });
+    if (!project) {
+      throw new Error('Project not found');
+    }
     const { responseId } = args;
     const askingService = ctx.askingService;
     const breakdownDetail = await askingService.generateThreadResponseBreakdown(
@@ -578,10 +599,13 @@ export class AskingResolver {
 
   public async generateThreadResponseAnswer(
     _root: any,
-    args: { responseId: number },
+    args: { projectId: number; responseId: number },
     ctx: IContext,
   ): Promise<ThreadResponse> {
-    const project = await ctx.projectService.getCurrentProject();
+    const project = await ctx.projectRepository.findOneBy({ id: args.projectId });
+    if (!project) {
+      throw new Error('Project not found');
+    }
     const { responseId } = args;
     const askingService = ctx.askingService;
     return askingService.generateThreadResponseAnswer(responseId, {
@@ -591,10 +615,13 @@ export class AskingResolver {
 
   public async generateThreadResponseChart(
     _root: any,
-    args: { responseId: number },
+    args: { projectId: number; responseId: number },
     ctx: IContext,
   ): Promise<ThreadResponse> {
-    const project = await ctx.projectService.getCurrentProject();
+    const project = await ctx.projectRepository.findOneBy({ id: args.projectId });
+    if (!project) {
+      throw new Error('Project not found');
+    }
     const { responseId } = args;
     const askingService = ctx.askingService;
     return askingService.generateThreadResponseChart(responseId, {
@@ -604,10 +631,13 @@ export class AskingResolver {
 
   public async adjustThreadResponseChart(
     _root: any,
-    args: { responseId: number; data: ChartAdjustmentOption },
+    args: { projectId: number; responseId: number; data: ChartAdjustmentOption },
     ctx: IContext,
   ): Promise<ThreadResponse> {
-    const project = await ctx.projectService.getCurrentProject();
+    const project = await ctx.projectRepository.findOneBy({ id: args.projectId });
+    if (!project) {
+      throw new Error('Project not found');
+    }
     const { responseId, data } = args;
     const askingService = ctx.askingService;
     return askingService.adjustThreadResponseChart(responseId, data, {
@@ -617,7 +647,7 @@ export class AskingResolver {
 
   public async getResponse(
     _root: any,
-    args: { responseId: number },
+    args: { projectId: number; responseId: number },
     ctx: IContext,
   ): Promise<ThreadResponse> {
     const { responseId } = args;
@@ -629,7 +659,7 @@ export class AskingResolver {
 
   public async previewData(
     _root: any,
-    args: { where: { responseId: number; stepIndex?: number; limit?: number } },
+    args: { projectId: number; where: { responseId: number; stepIndex?: number; limit?: number } },
     ctx: IContext,
   ): Promise<any> {
     const { responseId, limit } = args.where;
@@ -640,7 +670,7 @@ export class AskingResolver {
 
   public async previewBreakdownData(
     _root: any,
-    args: { where: { responseId: number; stepIndex?: number; limit?: number } },
+    args: { projectId: number; where: { responseId: number; stepIndex?: number; limit?: number } },
     ctx: IContext,
   ): Promise<any> {
     const { responseId, stepIndex, limit } = args.where;
@@ -655,7 +685,7 @@ export class AskingResolver {
 
   public async createInstantRecommendedQuestions(
     _root: any,
-    args: { data: { previousQuestions?: string[] } },
+    args: { projectId: number; data: { previousQuestions?: string[] } },
     ctx: IContext,
   ): Promise<Task> {
     const { data } = args;

@@ -234,11 +234,10 @@ export class ModelService implements IModelService {
     return updatedColumn;
   }
 
-  public async updatePrimaryKeys(tables: SampleDatasetTable[]) {
+  public async updatePrimaryKeys(projectId: number, tables: SampleDatasetTable[]) {
     logger.debug('start update primary keys');
-    const { id } = await this.projectService.getCurrentProject();
     const models = await this.modelRepository.findAllBy({
-      projectId: id,
+      projectId,
     });
     const tableToUpdate = tables.filter((t) => t.primaryKey);
     for (const table of tableToUpdate) {
@@ -253,11 +252,10 @@ export class ModelService implements IModelService {
     }
   }
 
-  public async batchUpdateModelProperties(tables: SampleDatasetTable[]) {
+  public async batchUpdateModelProperties(projectId: number, tables: SampleDatasetTable[]) {
     logger.debug('start batch update model description');
-    const { id } = await this.projectService.getCurrentProject();
     const models = await this.modelRepository.findAllBy({
-      projectId: id,
+      projectId,
     });
 
     await Promise.all([
@@ -278,11 +276,10 @@ export class ModelService implements IModelService {
     ]);
   }
 
-  public async batchUpdateColumnProperties(tables: SampleDatasetTable[]) {
+  public async batchUpdateColumnProperties(projectId: number, tables: SampleDatasetTable[]) {
     logger.debug('start batch update column description');
-    const { id } = await this.projectService.getCurrentProject();
     const models = await this.modelRepository.findAllBy({
-      projectId: id,
+      projectId,
     });
     const sourceColumns =
       (await this.modelColumnRepository.findColumnsByModelIds(
@@ -338,14 +335,13 @@ export class ModelService implements IModelService {
     return `${sourceTableName}_${existedReferenceNames.length + 1}`;
   }
 
-  public async saveRelations(relations: RelationData[]) {
+  public async saveRelations(projectId: number, relations: RelationData[]) {
     if (isEmpty(relations)) {
       return [];
     }
-    const { id } = await this.projectService.getCurrentProject();
 
     const models = await this.modelRepository.findAllBy({
-      projectId: id,
+      projectId,
     });
 
     const columnIds = relations
@@ -368,7 +364,7 @@ export class ModelService implements IModelService {
       }
       const relationName = this.generateRelationName(relation, models, columns);
       return {
-        projectId: id,
+        projectId,
         name: relationName,
         fromColumnId: relation.fromColumnId,
         toColumnId: relation.toColumnId,
@@ -385,8 +381,7 @@ export class ModelService implements IModelService {
     return savedRelations;
   }
 
-  public async createRelation(relation: RelationData): Promise<Relation> {
-    const { id } = await this.projectService.getCurrentProject();
+  public async createRelation(projectId: number, relation: RelationData): Promise<Relation> {
     const modelIds = [relation.fromModelId, relation.toModelId];
     const models = await this.modelRepository.findAllByIds(modelIds);
     const columnIds = [relation.fromColumnId, relation.toColumnId];
@@ -403,7 +398,7 @@ export class ModelService implements IModelService {
     }
     const relationName = this.generateRelationName(relation, models, columns);
     const savedRelation = await this.relationRepository.createOne({
-      projectId: id,
+      projectId,
       name: relationName,
       fromColumnId: relation.fromColumnId,
       toColumnId: relation.toColumnId,
@@ -601,12 +596,13 @@ export class ModelService implements IModelService {
   }
 
   private async checkCalculatedFieldCanQuery(
+    projectId: number,
     modelId: number,
     modelName: string,
     data: CheckCalculatedFieldCanQueryData,
   ) {
-    const project = await this.projectService.getCurrentProject();
-    const { mdlBuilder } = await this.mdlService.makeCurrentModelMDL();
+    const project = await this.projectService.getProjectById(projectId);
+    const { mdlBuilder } = await this.mdlService.makeCurrentModelMDL(projectId);
     const { referenceName, expression, lineage } = data;
     const inputFieldId = lineage[lineage.length - 1];
     const dataType = await this.inferCalculatedFieldDataType(

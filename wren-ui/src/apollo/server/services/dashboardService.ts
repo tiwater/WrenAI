@@ -37,8 +37,9 @@ export type UpdateDashboardItemLayouts = (DashboardItemLayout & {
 })[];
 
 export interface IDashboardService {
-  initDashboard(): Promise<Dashboard>;
-  getCurrentDashboard(): Promise<Dashboard>;
+  initDashboard(projectId: number): Promise<Dashboard>;
+  getCurrentDashboard(projectId: number): Promise<Dashboard>;
+  getDashboardByProjectId(projectId: number): Promise<Dashboard>;
   getDashboardItem(dashboardItemId: number): Promise<DashboardItem>;
   getDashboardItems(dashboardId: number): Promise<DashboardItem[]>;
   createDashboardItem(input: CreateDashboardItemInput): Promise<DashboardItem>;
@@ -125,24 +126,36 @@ export class DashboardService implements IDashboardService {
     }
   }
 
-  public async initDashboard(): Promise<Dashboard> {
-    const project = await this.projectService.getCurrentProject();
+  public async initDashboard(projectId: number): Promise<Dashboard> {
     const existingDashboard = await this.dashboardRepository.findOneBy({
-      projectId: project.id,
+      projectId,
     });
     if (existingDashboard) return existingDashboard;
     // only support one dashboard for oss
     return await this.dashboardRepository.createOne({
       name: 'Dashboard',
-      projectId: project.id,
+      projectId,
     });
   }
 
-  public async getCurrentDashboard(): Promise<Dashboard> {
-    const project = await this.projectService.getCurrentProject();
+  public async getCurrentDashboard(projectId: number): Promise<Dashboard> {
     const dashboard = await this.dashboardRepository.findOneBy({
-      projectId: project.id,
+      projectId,
     });
+    return { ...dashboard };
+  }
+
+  public async getDashboardByProjectId(projectId: number): Promise<Dashboard> {
+    let dashboard = await this.dashboardRepository.findOneBy({
+      projectId,
+    });
+    if (!dashboard) {
+      // Create dashboard if it doesn't exist
+      dashboard = await this.dashboardRepository.createOne({
+        name: 'Dashboard',
+        projectId,
+      });
+    }
     return { ...dashboard };
   }
 

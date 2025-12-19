@@ -91,7 +91,7 @@ export const useWithOnboarding = () => {
 };
 
 export default function useOnboardingStatus() {
-  const { selectedProjectId } = useProject();
+  const projectId = useSelectedProject();  const { selectedProjectId } = useProject();
   const { data, loading, error, refetch } = useOnboardingStatusQuery({
     variables: { projectId: selectedProjectId || 0 },
     skip: !selectedProjectId,

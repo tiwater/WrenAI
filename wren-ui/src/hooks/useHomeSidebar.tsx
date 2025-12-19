@@ -1,14 +1,14 @@
 import { useMemo } from 'react';
 import { useRouter } from 'next/router';
 import { Path } from '@/utils/enum';
-import {
+import { useSelectedProject } from '@/contexts/ProjectContext';import {
   useDeleteThreadMutation,
   useThreadsQuery,
   useUpdateThreadMutation,
 } from '@/apollo/client/graphql/home.generated';
 
 export default function useHomeSidebar() {
-  const router = useRouter();
+  const projectId = useSelectedProject();  const router = useRouter();
   const { data, refetch } = useThreadsQuery({
     fetchPolicy: 'cache-and-network',
   });

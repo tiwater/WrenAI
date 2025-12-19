@@ -30,10 +30,13 @@ export class DiagramResolver {
 
   public async getDiagram(
     _root: any,
-    _args: any,
+    args: { projectId: number },
     ctx: IContext,
   ): Promise<Diagram> {
-    const project = await ctx.projectRepository.getCurrentProject();
+    const project = await ctx.projectRepository.findOneBy({ id: args.projectId });
+    if (!project) {
+      throw new Error('Project not found');
+    }
     const models = await ctx.modelRepository.findAllBy({
       projectId: project.id,
     });

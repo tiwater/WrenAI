@@ -517,6 +517,7 @@ export class AskingService implements IAskingService {
   }
 
   public async generateThreadRecommendationQuestions(
+    projectId: number,
     threadId: number,
   ): Promise<void> {
     const thread = await this.threadRepository.findOneBy({ id: threadId });
@@ -531,8 +532,8 @@ export class AskingService implements IAskingService {
       return;
     }
 
-    const project = await this.projectService.getCurrentProject();
-    const { manifest } = await this.mdlService.makeCurrentModelMDL();
+    const project = await this.projectService.getProjectById(projectId);
+    const { manifest } = await this.mdlService.makeCurrentModelMDL(projectId);
 
     const threadResponses = await this.threadResponseRepository.findAllBy({
       threadId,
@@ -926,13 +927,13 @@ export class AskingService implements IAskingService {
     return this.threadResponseRepository.findOneBy({ id: responseId });
   }
 
-  public async previewData(responseId: number, limit?: number) {
+  public async previewData(projectId: number, responseId: number, limit?: number) {
     const response = await this.getResponse(responseId);
     if (!response) {
       throw new Error(`Thread response ${responseId} not found`);
     }
-    const project = await this.projectService.getCurrentProject();
-    const deployment = await this.deployService.getLastDeployment(project.id);
+    const project = await this.projectService.getProjectById(projectId);
+    const deployment = await this.deployService.getLastDeployment(projectId);
     const mdl = deployment.manifest;
     const eventName = TelemetryEvent.HOME_PREVIEW_ANSWER;
     try {
@@ -963,6 +964,7 @@ export class AskingService implements IAskingService {
    * @returns Promise<QueryResponse>
    */
   public async previewBreakdownData(
+    projectId: number,
     responseId: number,
     stepIndex?: number,
     limit?: number,
@@ -971,8 +973,8 @@ export class AskingService implements IAskingService {
     if (!response) {
       throw new Error(`Thread response ${responseId} not found`);
     }
-    const project = await this.projectService.getCurrentProject();
-    const deployment = await this.deployService.getLastDeployment(project.id);
+    const project = await this.projectService.getProjectById(projectId);
+    const deployment = await this.deployService.getLastDeployment(projectId);
     const mdl = deployment.manifest;
     const steps = response?.breakdownDetail?.steps;
     const sql = safeFormatSQL(constructCteSql(steps, stepIndex));
@@ -997,10 +999,11 @@ export class AskingService implements IAskingService {
   }
 
   public async createInstantRecommendedQuestions(
+    projectId: number,
     input: InstantRecommendedQuestionsInput,
   ): Promise<Task> {
-    const project = await this.projectService.getCurrentProject();
-    const { manifest } = await this.deployService.getLastDeployment(project.id);
+    const project = await this.projectService.getProjectById(projectId);
+    const { manifest } = await this.deployService.getLastDeployment(projectId);
 
     const response = await this.wrenAIAdaptor.generateRecommendationQuestions({
       manifest,

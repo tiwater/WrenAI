@@ -20,9 +20,9 @@ import {
 } from '@/apollo/client/graphql/home.generated';
 import useAskingStreamTask from './useAskingStreamTask';
 import { THREAD } from '@/apollo/client/graphql/home';
-import { ApolloClient, NormalizedCacheObject } from '@apollo/client';
+import { useSelectedProject } from '@/contexts/ProjectContext';import { ApolloClient, NormalizedCacheObject } from '@apollo/client';
 import { nextTick } from '@/utils/time';
-
+import { useSelectedProject } from '@/contexts/ProjectContext';
 export interface AskPromptData {
   originalQuestion: string;
   askingTask?: AskingTask;
@@ -158,7 +158,7 @@ const handleUpdateRerunAskingTaskCache = (
 };
 
 export default function useAskPrompt(threadId?: number) {
-  const [originalQuestion, setOriginalQuestion] = useState<string>('');
+  const projectId = useSelectedProject();  const [originalQuestion, setOriginalQuestion] = useState<string>('');
   const [threadQuestions, setThreadQuestions] = useState<string[]>([]);
   // Handle errors via try/catch blocks rather than onError callback
   const [createAskingTask, createAskingTaskResult] =

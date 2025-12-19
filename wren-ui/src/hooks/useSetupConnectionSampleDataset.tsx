@@ -4,8 +4,10 @@ import { Path } from '@/utils/enum';
 import { ONBOARDING_STATUS } from '@/apollo/client/graphql/onboarding';
 import { useStartSampleDatasetMutation } from '@/apollo/client/graphql/dataSource.generated';
 import { SampleDatasetName } from '@/apollo/client/graphql/__types__';
+import { useSelectedProject } from '@/contexts/ProjectContext';
 
 export default function useSetupConnectionSampleDataset() {
+  const projectId = useSelectedProject();
   const router = useRouter();
 
   const [startSampleDatasetMutation, { loading, error }] =

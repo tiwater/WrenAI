@@ -17,12 +17,11 @@ export class InstructionResolver {
 
   public async getInstructions(
     _root: any,
-    _args: any,
+    args: { projectId: number },
     ctx: IContext,
   ): Promise<Instruction[]> {
     try {
-      const project = await ctx.projectService.getCurrentProject();
-      return await ctx.instructionService.getInstructions(project.id);
+      return await ctx.instructionService.getInstructions(args.projectId);
     } catch (error) {
       logger.error(`Error getting instructions: ${error}`);
       throw error;
@@ -33,6 +32,7 @@ export class InstructionResolver {
   public async createInstruction(
     _root: any,
     args: {
+      projectId: number;
       data: {
         instruction: string;
         questions: string[];
@@ -42,12 +42,11 @@ export class InstructionResolver {
     ctx: IContext,
   ): Promise<Instruction> {
     const { instruction, questions, isDefault } = args.data;
-    const project = await ctx.projectService.getCurrentProject();
     return await ctx.instructionService.createInstruction({
       instruction,
       questions,
       isDefault,
-      projectId: project.id,
+      projectId: args.projectId,
     });
   }
 
@@ -55,6 +54,7 @@ export class InstructionResolver {
   public async updateInstruction(
     _root: any,
     args: {
+      projectId: number;
       data: Pick<
         UpdateInstructionInput,
         'instruction' | 'questions' | 'isDefault'
@@ -68,10 +68,9 @@ export class InstructionResolver {
     if (!id) {
       throw new Error('Instruction ID is required.');
     }
-    const project = await ctx.projectService.getCurrentProject();
     return await ctx.instructionService.updateInstruction({
       id,
-      projectId: project.id,
+      projectId: args.projectId,
       instruction,
       questions,
       isDefault,
@@ -81,12 +80,11 @@ export class InstructionResolver {
   @TrackTelemetry(TelemetryEvent.KNOWLEDGE_DELETE_INSTRUCTION)
   public async deleteInstruction(
     _root: any,
-    args: { where: { id: number } },
+    args: { projectId: number; where: { id: number } },
     ctx: IContext,
   ): Promise<boolean> {
     const { id } = args.where;
-    const project = await ctx.projectService.getCurrentProject();
-    await ctx.instructionService.deleteInstruction(id, project.id);
+    await ctx.instructionService.deleteInstruction(id, args.projectId);
     return true;
   }
 }
