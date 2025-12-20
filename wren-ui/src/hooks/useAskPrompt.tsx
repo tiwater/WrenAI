@@ -214,13 +214,15 @@ export default function useAskPrompt(threadId?: number) {
       ...uniq(threadQuestions).slice(-5),
       originalQuestion,
     ];
-    const response = await createInstantRecommendedQuestions({
-      variables: { data: { previousQuestions } },
-    });
-    fetchInstantRecommendedQuestions({
-      variables: { taskId: response.data.createInstantRecommendedQuestions.id },
-    });
-  }, [originalQuestion]);
+    if (projectId) {
+      const response = await createInstantRecommendedQuestions({
+        variables: { projectId, data: { previousQuestions } },
+      });
+      fetchInstantRecommendedQuestions({
+        variables: { taskId: response.data.createInstantRecommendedQuestions.id },
+      });
+    }
+  }, [originalQuestion, projectId]);
 
   const checkFetchAskingStreamTask = useCallback(
     (task: AskingTask) => {
@@ -277,9 +279,11 @@ export default function useAskPrompt(threadId?: number) {
   const onReRun = async (threadResponse: ThreadResponse) => {
     askingStreamTaskResult.reset();
     setOriginalQuestion(threadResponse.question);
+    if (!projectId) return;
+
     try {
       const response = await rerunAskingTask({
-        variables: { responseId: threadResponse.id },
+        variables: { projectId, responseId: threadResponse.id },
       });
       const { data } = await fetchAskingTask({
         variables: { taskId: response.data.rerunAskingTask.id },
@@ -299,9 +303,11 @@ export default function useAskPrompt(threadId?: number) {
   const onSubmit = async (value) => {
     askingStreamTaskResult.reset();
     setOriginalQuestion(value);
+    if (!projectId) return;
+
     try {
       const response = await createAskingTask({
-        variables: { data: { question: value, threadId } },
+        variables: { projectId, data: { question: value, threadId } },
       });
       await fetchAskingTask({
         variables: { taskId: response.data.createAskingTask.id },

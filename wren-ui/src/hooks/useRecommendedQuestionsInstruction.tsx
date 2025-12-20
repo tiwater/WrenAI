@@ -63,10 +63,12 @@ export default function useRecommendedQuestionsInstruction() {
 
   useEffect(() => {
     const fetchRecommendationQuestionsData = async () => {
+      if (!projectId) return;
       const result = await fetchRecommendationQuestions({
         variables: { projectId }
       });
       const data = result.data?.getProjectRecommendationQuestions;
+      if (!data) return;
 
       // for existing projects that do not have to generate recommended questions yet
       if (isRecommendedFinished(data.status)) {
@@ -80,7 +82,7 @@ export default function useRecommendedQuestionsInstruction() {
     };
 
     fetchRecommendationQuestionsData();
-  }, []);
+  }, [projectId]);
 
   useEffect(() => {
     if (isRecommendedFinished(recommendedQuestionsTask?.status)) {
@@ -92,7 +94,7 @@ export default function useRecommendedQuestionsInstruction() {
         if (
           showRecommendedQuestionsPromptMode &&
           recommendedQuestionsTask.status ===
-            RecommendedQuestionsTaskStatus.FAILED
+          RecommendedQuestionsTaskStatus.FAILED
         ) {
           message.error(
             `We couldn't regenerate questions right now. Let's try again later.`,
@@ -116,12 +118,14 @@ export default function useRecommendedQuestionsInstruction() {
     setGenerating(true);
     setIsRegenerate(true);
     try {
-      await generateProjectRecommendationQuestions({
-        variables: { projectId }
-      });
-      fetchRecommendationQuestions({
-        variables: { projectId }
-      });
+      if (projectId) {
+        await generateProjectRecommendationQuestions({
+          variables: { projectId }
+        });
+        fetchRecommendationQuestions({
+          variables: { projectId }
+        });
+      }
     } catch (error) {
       console.error(error);
     }

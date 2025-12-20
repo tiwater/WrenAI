@@ -12,6 +12,8 @@ export default function useHomeSidebar() {
   const projectId = useSelectedProject();
   const router = useRouter();
   const { data, refetch } = useThreadsQuery({
+    variables: { projectId: projectId! },
+    skip: !projectId,
     fetchPolicy: 'cache-and-network',
   });
   const [updateThread] = useUpdateThreadMutation({
@@ -36,13 +38,13 @@ export default function useHomeSidebar() {
 
   const onRename = async (id: string, newName: string) => {
     await updateThread({
-      variables: { where: { id: Number(id) }, data: { summary: newName } },
+      variables: { projectId: projectId!, where: { id: Number(id) }, data: { summary: newName } },
     });
     refetch();
   };
 
   const onDelete = async (id) => {
-    await deleteThread({ variables: { where: { id: Number(id) } } });
+    await deleteThread({ variables: { projectId: projectId!, where: { id: Number(id) } } });
     refetch();
   };
 

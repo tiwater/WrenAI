@@ -1256,50 +1256,55 @@ export const typeDefs = gql`
     # Ask
     createAskingTask(projectId: Int!, data: AskingTaskInput!): Task!
     cancelAskingTask(taskId: String!): Boolean!
-    rerunAskingTask(responseId: Int!): Task!
+    rerunAskingTask(projectId: Int!, responseId: Int!): Task!
 
     # Thread
-    createThread(data: CreateThreadInput!): Thread!
+    createThread(projectId: Int!, data: CreateThreadInput!): Thread!
     updateThread(
+      projectId: Int!
       where: ThreadUniqueWhereInput!
       data: UpdateThreadInput!
     ): Thread!
-    deleteThread(where: ThreadUniqueWhereInput!): Boolean!
+    deleteThread(projectId: Int!, where: ThreadUniqueWhereInput!): Boolean!
 
     # Thread Response
     createThreadResponse(
+      projectId: Int!
       threadId: Int!
       data: CreateThreadResponseInput!
     ): ThreadResponse!
     updateThreadResponse(
+      projectId: Int!
       where: ThreadResponseUniqueWhereInput!
       data: UpdateThreadResponseInput!
     ): ThreadResponse!
-    previewData(where: PreviewDataInput!): JSON!
-    previewBreakdownData(where: PreviewDataInput!): JSON!
+    previewData(projectId: Int!, where: PreviewDataInput!): JSON!
+    previewBreakdownData(projectId: Int!, where: PreviewDataInput!): JSON!
 
     # Generate Thread Response Breakdown
-    generateThreadResponseBreakdown(responseId: Int!): ThreadResponse!
+    generateThreadResponseBreakdown(projectId: Int!, responseId: Int!): ThreadResponse!
 
     # Generate Thread Response Answer
-    generateThreadResponseAnswer(responseId: Int!): ThreadResponse!
+    generateThreadResponseAnswer(projectId: Int!, responseId: Int!): ThreadResponse!
 
     # Generate Thread Response Chart
-    generateThreadResponseChart(responseId: Int!): ThreadResponse!
+    generateThreadResponseChart(projectId: Int!, responseId: Int!): ThreadResponse!
 
     # Adjust Thread Response Chart
     adjustThreadResponseChart(
+      projectId: Int!
       responseId: Int!
       data: AdjustThreadResponseChartInput!
     ): ThreadResponse!
 
     # Adjustment
     adjustThreadResponse(
+      projectId: Int!
       responseId: Int!
       data: AdjustThreadResponseInput!
     ): ThreadResponse!
     cancelAdjustmentTask(taskId: String!): Boolean!
-    rerunAdjustmentTask(responseId: Int!): Boolean!
+    rerunAdjustmentTask(projectId: Int!, responseId: Int!): Boolean!
 
     # Settings
     resetCurrentProject(projectId: Int!): Boolean!
@@ -1327,32 +1332,36 @@ export const typeDefs = gql`
 
     # Dashboard
     updateDashboardItemLayouts(
+      projectId: Int!
       data: UpdateDashboardItemLayoutsInput!
     ): [DashboardItem!]!
-    createDashboardItem(data: CreateDashboardItemInput!): DashboardItem!
+    createDashboardItem(projectId: Int!, data: CreateDashboardItemInput!): DashboardItem!
     updateDashboardItem(
+      projectId: Int!
       where: DashboardItemWhereInput!
       data: UpdateDashboardItemInput!
     ): DashboardItem!
-    deleteDashboardItem(where: DashboardItemWhereInput!): Boolean!
-    previewItemSQL(data: PreviewItemSQLInput!): PreviewItemResponse!
-    setDashboardSchedule(data: SetDashboardScheduleInput!): Dashboard!
+    deleteDashboardItem(projectId: Int!, where: DashboardItemWhereInput!): Boolean!
+    previewItemSQL(projectId: Int!, data: PreviewItemSQLInput!): PreviewItemResponse!
+    setDashboardSchedule(projectId: Int!, data: SetDashboardScheduleInput!): Dashboard!
 
     # SQL Pairs
-    createSqlPair(data: CreateSqlPairInput!): SqlPair!
+    createSqlPair(projectId: Int!, data: CreateSqlPairInput!): SqlPair!
     updateSqlPair(
+      projectId: Int!
       where: SqlPairWhereUniqueInput!
       data: UpdateSqlPairInput!
     ): SqlPair!
-    deleteSqlPair(where: SqlPairWhereUniqueInput!): Boolean!
-    generateQuestion(data: GenerateQuestionInput!): String!
-    modelSubstitute(data: ModelSubstituteInput!): String!
+    deleteSqlPair(projectId: Int!, where: SqlPairWhereUniqueInput!): Boolean!
+    generateQuestion(projectId: Int!, data: GenerateQuestionInput!): String!
+    modelSubstitute(projectId: Int!, data: ModelSubstituteInput!): String!
     # Instructions
-    createInstruction(data: CreateInstructionInput!): Instruction!
+    createInstruction(projectId: Int!, data: CreateInstructionInput!): Instruction!
     updateInstruction(
+      projectId: Int!
       where: InstructionWhereInput!
       data: UpdateInstructionInput!
     ): Instruction!
-    deleteInstruction(where: InstructionWhereInput!): Boolean!
+    deleteInstruction(projectId: Int!, where: InstructionWhereInput!): Boolean!
   }
 `;

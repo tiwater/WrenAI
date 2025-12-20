@@ -96,7 +96,8 @@ export default function Home() {
   const askPrompt = useAskPrompt();
 
   const { data: suggestedQuestionsData } = useSuggestedQuestionsQuery({
-    variables: { projectId },
+    variables: { projectId: projectId! },
+    skip: !projectId,
     fetchPolicy: 'cache-and-network',
   });
   const [createThread, { loading: threadCreating }] = useCreateThreadMutation({
@@ -108,7 +109,8 @@ export default function Home() {
   });
 
   const { data: settingsResult } = useGetSettingsQuery({
-    variables: { projectId },
+    variables: { projectId: projectId! },
+    skip: !projectId,
   });
   const settings = settingsResult?.settings;
   const isSampleDataset = useMemo(
@@ -128,18 +130,18 @@ export default function Home() {
   const onCreateResponse = async (payload: CreateThreadInput) => {
     try {
       askPrompt.onStopPolling();
-      const response = await createThread({ 
-        variables: { 
+      const response = await createThread({
+        variables: {
           projectId,
-          data: payload 
-        } 
+          data: payload
+        }
       });
       const threadId = response.data.createThread.id;
-      await preloadThread({ 
-        variables: { 
+      await preloadThread({
+        variables: {
           projectId,
-          threadId 
-        } 
+          threadId
+        }
       });
       router.push(Path.Home + `/${threadId}`);
     } catch (error) {

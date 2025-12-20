@@ -22,7 +22,11 @@ export const useWithOnboarding = () => {
     const isCreatingNewProject = typeof window !== 'undefined' &&
       (sessionStorage.getItem('newProjectName') || sessionStorage.getItem('creatingNewProject') === 'true');
 
-    if (!selectedProjectId && router.pathname !== Path.Projects && !isCreatingNewProject) {
+    if (!selectedProjectId && router.pathname !== Path.Projects) {
+      // If creating new project, only allow staying on setup pages
+      if (isCreatingNewProject && router.pathname.startsWith(Path.Onboarding)) {
+        return;
+      }
       router.push(Path.Projects);
     }
   }, [selectedProjectId, router]);

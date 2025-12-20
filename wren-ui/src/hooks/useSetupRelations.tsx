@@ -22,6 +22,12 @@ export default function useSetupRelations() {
   const autoGenerateRelation = data?.autoGenerateRelation;
 
   const onFinish = () => {
+    // Clear creating new project flags
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('newProjectName');
+      sessionStorage.removeItem('creatingNewProject');
+    }
+
     router.push(Path.Modeling);
     refetchOnboardingStatus();
   };
@@ -63,9 +69,9 @@ export default function useSetupRelations() {
     }
 
     await saveRelationsMutation({
-      variables: { 
+      variables: {
         projectId,
-        data: { relations } 
+        data: { relations }
       },
     });
   };
