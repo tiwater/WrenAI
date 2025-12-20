@@ -20,6 +20,7 @@ import { usePreviewSqlMutation } from '@/apollo/client/graphql/sql.generated';
 import { useGetSettingsQuery } from '@/apollo/client/graphql/settings.generated';
 import { useGenerateQuestionMutation } from '@/apollo/client/graphql/sql.generated';
 import { SqlPair } from '@/apollo/client/graphql/__types__';
+import { useOptionalSelectedProject } from '@/contexts/ProjectContext';
 
 type Props = ModalAction<SqlPair> & {
   loading?: boolean;
@@ -66,7 +67,11 @@ export default function QuestionSQLPairModal(props: Props) {
   const isCreateMode = formMode === FORM_MODE.CREATE || payload?.isCreateMode;
   const importDataSourceSQLModal = useModalAction();
 
-  const { data: settingsResult } = useGetSettingsQuery();
+  const projectId = useOptionalSelectedProject();
+  const { data: settingsResult } = useGetSettingsQuery({
+    variables: { projectId: projectId! },
+    skip: !projectId,
+  });
   const settings = settingsResult?.settings;
   const dataSource = useMemo(
     () => ({

@@ -190,12 +190,17 @@ export class ModelResolver {
 
   public async deleteCalculatedField(_root: any, args: { projectId: number; where: { id: number } }, ctx: IContext) {
     const columnId = args.where.id;
+    const projectId = args.projectId;
     // check column exist and is calculated field
     const column = await ctx.modelColumnRepository.findOneBy({ id: columnId });
     if (!column || !column.isCalculated) {
       throw new Error('Calculated field not found');
     }
     await ctx.modelColumnRepository.deleteOne(columnId);
+
+    // async deploy
+    this.deploy(null, { projectId, force: true }, ctx);
+
     return true;
   }
 
@@ -224,13 +229,6 @@ export class ModelResolver {
     const project = await ctx.projectRepository.findOneBy({ id: projectId });
     if (!project) {
       throw new Error('Project not found');
-    }
-    if (!project.version && project.type !== DataSourceName.DUCKDB) {
-      const version =
-        await ctx.projectService.getProjectDataSourceVersion(project);
-      await ctx.projectService.updateProject(project.id, {
-        version,
-      });
     }
     const { manifest } = await ctx.mdlService.makeCurrentModelMDL(projectId);
     const deployRes = await ctx.deployService.deploy(
@@ -809,40 +807,53 @@ export class ModelResolver {
     return { ...view, displayName };
   }
 
+  // list views
+  public async listViews(_root: any, args: { projectId: number }, ctx: IContext) {
+    const projectId = args.projectId;
+    const views = await ctx.viewRepository.findAllBy({ projectId });
+    return views.map((view) => ({
+      ...view,
+      displayName: view.properties
+        ? JSON.parse(view.properties)?.displayName
+        : view.name,
+    }));
+  }
+
   // validate a view name
   public async validateView(_root: any, args: { projectId: number; data: any }, ctx: IContext) {
     const { name } = args.data;
-    return this.validateViewName(name, ctx, args.projectId);
+    const { valid, message } = validateDisplayName(name);
+    if (!valid) {
+      return { valid, message };
+    }
+    const referenceName = replaceAllowableSyntax(name);
+    const views = await ctx.viewRepository.findAllBy({ projectId: args.projectId });
+    if (views.find((v) => v.name === referenceName)) {
+      return {
+        valid: false,
+        message: `Generated view name "${referenceName}" is duplicated`,
+      };
+    }
+    return { valid: true };
   }
-
   // create view from sql of a response
   public async createView(_root: any, args: { projectId: number; data: any }, ctx: IContext) {
     const { name: displayName, responseId, rephrasedQuestion } = args.data;
     const projectId = args.projectId;
 
-    // validate view name
-    const validateResult = await this.validateViewName(displayName, ctx, projectId);
-    if (!validateResult.valid) {
-      throw new Error(validateResult.message);
-    }
-
-    // create view
     const project = await ctx.projectRepository.findOneBy({ id: projectId });
     if (!project) {
       throw new Error('Project not found');
     }
-    const { manifest } = await ctx.deployService.getLastDeployment(project.id);
+    const lastDeployment = await ctx.deployService.getLastDeployment(project.id);
+    const manifest = lastDeployment?.manifest;
 
-    // get sql statement of a response
     const response = await ctx.askingService.getResponse(responseId);
     if (!response) {
       throw new Error(`Thread response ${responseId} not found`);
     }
 
-    // construct cte sql and format it
     const statement = safeFormatSQL(response.sql);
-
-    // describe columns
     const { columns } = await ctx.queryService.describeStatement(statement, {
       project,
       limit: 1,
@@ -850,62 +861,42 @@ export class ModelResolver {
       manifest,
     });
 
-    if (isEmpty(columns)) {
-      throw new Error('Failed to describe statement');
-    }
-
-    // properties
     const properties = {
       displayName,
       columns,
-
-      // properties from the thread response
-      responseId, // helpful for mapping back to the thread response
+      responseId,
       question: rephrasedQuestion,
     };
 
-    const eventName = TelemetryEvent.HOME_CREATE_VIEW;
-    const eventProperties = {
+    const name = replaceAllowableSyntax(displayName);
+    const view = await ctx.viewRepository.createOne({
+      projectId: project.id,
+      name,
       statement,
-      displayName,
-    };
-    // create view
-    try {
-      const name = replaceAllowableSyntax(displayName);
-      const view = await ctx.viewRepository.createOne({
-        projectId: project.id,
-        name,
-        statement,
-        properties: JSON.stringify(properties),
-      });
+      properties: JSON.stringify(properties),
+    });
 
-      // telemetry
-      ctx.telemetry.sendEvent(eventName, eventProperties);
+    ctx.telemetry.sendEvent(TelemetryEvent.MODELING_CREATE_CF, { name, responseId }); // Fallback to CREATE_CF if CREATE_VIEW is missing
 
-      return { ...view, displayName };
-    } catch (err: any) {
-      ctx.telemetry.sendEvent(
-        eventName,
-        {
-          ...eventProperties,
-          error: err,
-        },
-        err.extensions?.service,
-        false,
-      );
+    // async deploy
+    this.deploy(null, { projectId, force: true }, ctx);
 
-      throw err;
-    }
+    return { ...view, displayName };
   }
 
   // delete view
   public async deleteView(_root: any, args: { projectId: number; where: { id: number } }, ctx: IContext) {
     const viewId = args.where.id;
+    const projectId = args.projectId;
     const view = await ctx.viewRepository.findOneBy({ id: viewId });
     if (!view) {
       throw new Error('View not found');
     }
     await ctx.viewRepository.deleteOne(viewId);
+
+    // async deploy
+    this.deploy(null, { projectId, force: true }, ctx);
+
     return true;
   }
 
@@ -966,9 +957,7 @@ export class ModelResolver {
   ) {
     const { sql, limit, dryRun } = args.data;
     const pid = args.projectId || args.data.projectId;
-    const project = pid
-      ? await ctx.projectService.getProjectById(typeof pid === 'string' ? parseInt(pid) : pid)
-      : await ctx.projectService.getCurrentProject();
+    const project = await ctx.projectService.getProjectById(typeof pid === 'string' ? parseInt(pid) : pid);
     const { manifest } = await ctx.deployService.getLastDeployment(project.id);
     return await ctx.queryService.preview(sql, {
       project,
@@ -981,17 +970,17 @@ export class ModelResolver {
 
   public async getNativeSql(
     _root: any,
-    args: { responseId: number },
+    args: { projectId: number; responseId: number },
     ctx: IContext,
   ): Promise<string> {
-    const { responseId } = args;
+    const { projectId, responseId } = args;
 
     // If using a sample dataset, native SQL is not supported
-    const project = await ctx.projectService.getCurrentProject();
+    const project = await ctx.projectService.getProjectById(projectId);
     if (project.sampleDataset) {
       throw new Error(`Doesn't support Native SQL`);
     }
-    const { manifest } = await ctx.mdlService.makeCurrentModelMDL();
+    const { manifest } = await ctx.mdlService.makeCurrentModelMDL(projectId);
 
     // get sql statement of a response
     const response = await ctx.askingService.getResponse(responseId);
@@ -1021,49 +1010,47 @@ export class ModelResolver {
 
   public async updateViewMetadata(
     _root: any,
-    args: { where: { id: number }; data: UpdateViewMetadataInput },
+    args: {
+      projectId: number;
+      where: { id: number };
+      data: UpdateViewMetadataInput;
+    },
     ctx: IContext,
   ): Promise<boolean> {
     const viewId = args.where.id;
-    const data = args.data;
+    const projectId = args.projectId;
+    const { displayName, description, columns } = args.data;
 
-    // check if view exists
     const view = await ctx.viewRepository.findOneBy({ id: viewId });
     if (!view) {
       throw new Error('View not found');
     }
 
-    // update view metadata
-    const properties = JSON.parse(view.properties);
+    const properties = JSON.parse(view.properties || '{}');
     let newName = view.name;
-    // if displayName is not null, or undefined, update the displayName
-    if (!isNil(data.displayName)) {
-      await this.validateViewName(data.displayName, ctx, viewId);
-      newName = replaceAllowableSyntax(data.displayName);
-      properties.displayName = this.determineMetadataValue(data.displayName);
-    }
 
-    // if description is not null, or undefined, update the description in properties
-    if (!isNil(data.description)) {
-      properties.description = this.determineMetadataValue(data.description);
+    if (displayName) {
+      newName = replaceAllowableSyntax(displayName);
+      properties.displayName = displayName;
     }
-
-    // view column metadata
-    if (!isEmpty(data.columns)) {
-      const viewColumns = properties.columns;
+    if (description) {
+      properties.description = description;
+    }
+    if (columns) {
+      // update view column metadata
+      const viewColumns = properties.columns || [];
       for (const col of viewColumns) {
-        const requestedMetadata = data.columns.find(
+        const requestedMetadata = columns.find(
           (c) => c.referenceName === col.name,
         );
 
-        if (!isNil(requestedMetadata.description)) {
+        if (requestedMetadata && !isNil(requestedMetadata.description)) {
           col.properties = col.properties || {};
           col.properties.description = this.determineMetadataValue(
             requestedMetadata.description,
           );
         }
       }
-
       properties.columns = viewColumns;
     }
 
@@ -1071,6 +1058,9 @@ export class ModelResolver {
       name: newName,
       properties: JSON.stringify(properties),
     });
+
+    // async deploy
+    this.deploy(null, { projectId, force: true }, ctx);
 
     return true;
   }
@@ -1084,37 +1074,6 @@ export class ModelResolver {
 
     // otherwise, return the value
     return value;
-  }
-
-  // validate view name
-  private async validateViewName(
-    viewDisplayName: string,
-    ctx: IContext,
-    selfView?: number,
-  ): Promise<{ valid: boolean; message?: string }> {
-    // check if view name is valid
-    // a-z, A-Z, 0-9, _, - are allowed and cannot start with number
-    const { valid, message } = validateDisplayName(viewDisplayName);
-    if (!valid) {
-      return {
-        valid: false,
-        message,
-      };
-    }
-    const referenceName = replaceAllowableSyntax(viewDisplayName);
-    // check if view name is duplicated
-    const { id } = await ctx.projectService.getCurrentProject();
-    const views = await ctx.viewRepository.findAllBy({ projectId: id });
-    if (views.find((v) => v.name === referenceName && v.id !== selfView)) {
-      return {
-        valid: false,
-        message: `Generated view name "${referenceName}" is duplicated`,
-      };
-    }
-
-    return {
-      valid: true,
-    };
   }
 
   private validateTableExist(

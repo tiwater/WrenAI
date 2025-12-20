@@ -22,6 +22,7 @@ import {
 import { nextTick } from '@/utils/time';
 import { ProjectLanguage } from '@/apollo/client/graphql/__types__';
 import { useUpdateCurrentProjectMutation } from '@/apollo/client/graphql/settings.generated';
+import { useOptionalSelectedProject } from '@/contexts/ProjectContext';
 
 const Progress = styled.div<{ total: number; current: number }>`
   display: block;
@@ -193,11 +194,15 @@ interface Props {}
 
 export default function SidebarSection(_props: Props) {
   const router = useRouter();
+  const projectId = useOptionalSelectedProject();
   const [active, setActive] = useState(true);
   const $guide = useRef<ComponentRef<typeof LearningGuide>>(null);
   const $collapseBlock = useRef<HTMLDivElement>(null);
 
-  const { data: learningRecordResult } = useLearningRecordQuery();
+  const { data: learningRecordResult } = useLearningRecordQuery({
+    variables: { projectId: projectId! },
+    skip: !projectId,
+  });
 
   const [saveLearningRecord] = useSaveLearningRecordMutation({
     onError: (error) => console.error(error),
@@ -210,11 +215,13 @@ export default function SidebarSection(_props: Props) {
   });
 
   const saveRecord = async (path: LEARNING) => {
-    await saveLearningRecord({ variables: { data: { path } } });
+    if (!projectId) return;
+    await saveLearningRecord({ variables: { projectId, data: { path } } });
   };
 
   const saveLanguage = async (value: ProjectLanguage) => {
-    await updateCurrentProject({ variables: { data: { language: value } } });
+    if (!projectId) return;
+    await updateCurrentProject({ variables: { projectId, data: { language: value } } });
   };
 
   const stories = useMemo(() => {

@@ -1178,7 +1178,7 @@ export const typeDefs = gql`
     getMDL(hash: String!): GetMDLResult!
 
     # Learning
-    learningRecord: LearningRecord!
+    learningRecord(projectId: Int!): LearningRecord!
 
     # Recommendation questions
     getThreadRecommendationQuestions(projectId: Int!, threadId: Int!): RecommendedQuestionsTask!
@@ -1210,47 +1210,51 @@ export const typeDefs = gql`
     deploy(projectId: Int!, force: Boolean): JSON!
 
     # Modeling Page
-    createModel(data: CreateModelInput!): JSON!
-    updateModel(where: ModelWhereInput!, data: UpdateModelInput!): JSON!
-    deleteModel(where: ModelWhereInput!): Boolean!
-    previewModelData(where: WhereIdInput!): JSON!
+    createModel(projectId: Int!, data: CreateModelInput!): JSON!
+    updateModel(projectId: Int!, where: ModelWhereInput!, data: UpdateModelInput!): JSON!
+    deleteModel(projectId: Int!, where: ModelWhereInput!): Boolean!
+    previewModelData(projectId: Int!, where: WhereIdInput!): JSON!
     triggerDataSourceDetection(projectId: Int!): Boolean!
     resolveSchemaChange(projectId: Int!, where: ResolveSchemaChangeWhereInput!): Boolean!
 
     # Metadata
     updateModelMetadata(
+      projectId: Int!
       where: ModelWhereInput!
       data: UpdateModelMetadataInput!
     ): Boolean!
     updateViewMetadata(
+      projectId: Int!
       where: ViewWhereUniqueInput!
       data: UpdateViewMetadataInput!
     ): Boolean!
 
     # Relation
-    createRelation(data: RelationInput!): JSON!
-    updateRelation(data: UpdateRelationInput!, where: WhereIdInput!): JSON!
-    deleteRelation(where: WhereIdInput!): Boolean!
+    createRelation(projectId: Int!, data: RelationInput!): JSON!
+    updateRelation(projectId: Int!, data: UpdateRelationInput!, where: WhereIdInput!): JSON!
+    deleteRelation(projectId: Int!, where: WhereIdInput!): Boolean!
 
     # Calculated field
-    createCalculatedField(data: CreateCalculatedFieldInput!): JSON!
+    createCalculatedField(projectId: Int!, data: CreateCalculatedFieldInput!): JSON!
     updateCalculatedField(
+      projectId: Int!
       where: UpdateCalculatedFieldWhere!
       data: UpdateCalculatedFieldInput!
     ): JSON!
-    deleteCalculatedField(where: UpdateCalculatedFieldWhere): Boolean!
+    deleteCalculatedField(projectId: Int!, where: UpdateCalculatedFieldWhere): Boolean!
     validateCalculatedField(
+      projectId: Int!
       data: ValidateCalculatedFieldInput!
     ): CalculatedFieldValidationResponse!
 
     # View
-    createView(data: CreateViewInput!): ViewInfo!
-    deleteView(where: ViewWhereUniqueInput!): Boolean!
-    previewViewData(where: PreviewViewDataInput!): JSON!
-    validateView(data: ValidateViewInput!): ViewValidationResponse!
+    createView(projectId: Int!, data: CreateViewInput!): ViewInfo!
+    deleteView(projectId: Int!, where: ViewWhereUniqueInput!): Boolean!
+    previewViewData(projectId: Int!, where: PreviewViewDataInput!): JSON!
+    validateView(projectId: Int!, data: ValidateViewInput!): ViewValidationResponse!
 
     # Ask
-    createAskingTask(data: AskingTaskInput!): Task!
+    createAskingTask(projectId: Int!, data: AskingTaskInput!): Task!
     cancelAskingTask(taskId: String!): Boolean!
     rerunAskingTask(responseId: Int!): Task!
 

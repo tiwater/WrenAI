@@ -137,7 +137,7 @@ export class ProjectService implements IProjectService {
     if (!project) {
       throw new Error(`Project not found`);
     }
-    const { manifest } = await this.mdlService.makeCurrentModelMDL();
+    const { manifest } = await this.mdlService.makeCurrentModelMDL(projectId);
     const recommendQuestionResult =
       await this.wrenAIAdaptor.generateRecommendationQuestions({
         manifest,

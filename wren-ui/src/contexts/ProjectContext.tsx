@@ -48,11 +48,17 @@ export function useProject() {
 // Hook to ensure a project is selected
 export function useSelectedProject() {
   const { selectedProjectId } = useProject();
-  
-  if (!selectedProjectId) {
+
+  // Check if we are in a state where missing selectedProjectId is expected
+  const isSetupFlow = typeof window !== 'undefined' &&
+    (window.location.pathname.startsWith('/setup') ||
+      sessionStorage.getItem('creatingNewProject') === 'true' ||
+      window.location.pathname === '/projects');
+
+  if (!selectedProjectId && !isSetupFlow) {
     throw new Error('No project selected. Please select a project first.');
   }
-  
+
   return selectedProjectId;
 }
 

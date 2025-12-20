@@ -10,6 +10,7 @@ import {
 import { Dispatcher, DriverObj } from './utils';
 import { makeStoriesPlayer } from './stories';
 import { useGetSettingsQuery } from '@/apollo/client/graphql/settings.generated';
+import { useOptionalSelectedProject } from '@/contexts/ProjectContext';
 
 import 'driver.js/dist/driver.css';
 
@@ -23,7 +24,11 @@ export default forwardRef<Attributes, Props>(function Guide(_props, ref) {
   const router = useRouter();
   const $driver = useRef<DriverObj>(null);
 
-  const { data: settingsResult } = useGetSettingsQuery();
+  const projectId = useOptionalSelectedProject();
+  const { data: settingsResult } = useGetSettingsQuery({
+    variables: { projectId: projectId! },
+    skip: !projectId,
+  });
   const storyPayload = useMemo(() => {
     return {
       sampleDataset: settingsResult?.settings?.dataSource.sampleDataset,

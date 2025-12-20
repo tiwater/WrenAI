@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Select, Button, Space, Modal, Form, Input, message, Tag } from 'antd';
 import { PlusOutlined, DatabaseOutlined, CheckCircleOutlined } from '@ant-design/icons';
 import { useRouter } from 'next/router';
-import { 
+import {
   useListProjectsQuery,
-  useCreateProjectMutation 
+  useCreateProjectMutation
 } from '@/apollo/client/graphql/projects.generated';
 import { Path } from '@/utils/enum';
 import { DataSourceName } from '@/apollo/client/graphql/__types__';
@@ -21,11 +21,11 @@ export default function ProjectSelector({ className }: ProjectSelectorProps) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [form] = Form.useForm();
   const { selectedProjectId, setSelectedProjectId } = useProject();
-  
+
   const { data, loading, refetch } = useListProjectsQuery({
     fetchPolicy: 'cache-and-network',
   });
-  
+
   // Set initial selected project if not set
   useEffect(() => {
     if (!selectedProjectId && data?.listProjects?.projects?.length > 0) {
@@ -50,7 +50,7 @@ export default function ProjectSelector({ className }: ProjectSelectorProps) {
 
   const handleProjectChange = (projectId: number) => {
     if (projectId === selectedProjectId) return;
-    
+
     Modal.confirm({
       title: 'Switch Project',
       content: 'Are you sure you want to switch to this project? Any unsaved changes will be lost.',
@@ -67,17 +67,12 @@ export default function ProjectSelector({ className }: ProjectSelectorProps) {
 
   const handleCreateProject = () => {
     form.validateFields().then((values) => {
-      createProject({
-        variables: {
-          data: {
-            name: values.name,
-            type: DataSourceName.POSTGRES, // Default type, will be updated in connection setup
-            properties: {
-              displayName: values.name,
-            },
-          },
-        },
-      });
+      // Don't create project immediately, pass name to setup flow
+      sessionStorage.setItem('newProjectName', values.name);
+      sessionStorage.setItem('creatingNewProject', 'true');
+      setIsModalVisible(false);
+      form.resetFields();
+      router.push(Path.OnboardingConnection);
     });
   };
 

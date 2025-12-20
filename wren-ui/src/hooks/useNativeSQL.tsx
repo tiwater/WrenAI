@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useGetSettingsQuery } from '@/apollo/client/graphql/settings.generated';
 import { useGetNativeSqlLazyQuery } from '@/apollo/client/graphql/home.generated';
 import { DataSourceName } from '@/apollo/client/graphql/__types__';
-import { useSelectedProject } from '@/contexts/ProjectContext';
+import { useOptionalSelectedProject } from '@/contexts/ProjectContext';
 export interface NativeSQLResult {
   data: string;
   dataSourceType: DataSourceName;
@@ -13,8 +13,11 @@ export interface NativeSQLResult {
 }
 
 // we assume that not having a sample dataset means supporting native SQL
-function useNativeSQLInfo() {
-  const { data: settingsQueryResult } = useGetSettingsQuery();
+function useNativeSQLInfo(projectId: number | null) {
+  const { data: settingsQueryResult } = useGetSettingsQuery({
+    variables: { projectId: projectId! },
+    skip: !projectId,
+  });
   const settings = settingsQueryResult?.settings;
   const dataSourceType = settings?.dataSource.type;
   const sampleDataset = settings?.dataSource.sampleDataset;
@@ -26,7 +29,8 @@ function useNativeSQLInfo() {
 }
 
 export default function useNativeSQL() {
-  const projectId = useSelectedProject();  const nativeSQLInfo = useNativeSQLInfo();
+  const projectId = useOptionalSelectedProject();
+  const nativeSQLInfo = useNativeSQLInfo(projectId);
 
   const [nativeSQLMode, setNativeSQLMode] = useState<boolean>(false);
 

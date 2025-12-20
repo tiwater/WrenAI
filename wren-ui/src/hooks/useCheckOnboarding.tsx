@@ -15,14 +15,18 @@ const redirectRoute = {
 export const useWithOnboarding = () => {
   const router = useRouter();
   const { selectedProjectId } = useProject();
-  
+
+  // If no project selected, redirect to projects page
   // If no project selected, redirect to projects page
   useEffect(() => {
-    if (!selectedProjectId && router.pathname !== Path.Projects) {
+    const isCreatingNewProject = typeof window !== 'undefined' &&
+      (sessionStorage.getItem('newProjectName') || sessionStorage.getItem('creatingNewProject') === 'true');
+
+    if (!selectedProjectId && router.pathname !== Path.Projects && !isCreatingNewProject) {
       router.push(Path.Projects);
     }
   }, [selectedProjectId, router]);
-  
+
   const { data, loading } = useOnboardingStatusQuery({
     variables: { projectId: selectedProjectId || 0 },
     skip: !selectedProjectId,
@@ -34,13 +38,18 @@ export const useWithOnboarding = () => {
     if (selectedProjectId && onboardingStatus) {
       const newPath = redirectRoute[onboardingStatus];
       const pathname = router.pathname;
-      
+
       // Check if user is creating a new project (has project name in sessionStorage)
-      const isCreatingNewProject = typeof window !== 'undefined' && 
+      const isCreatingNewProject = typeof window !== 'undefined' &&
         (sessionStorage.getItem('newProjectName') || sessionStorage.getItem('creatingNewProject'));
 
       // redirect to new path if onboarding is not completed
       if (newPath && newPath !== Path.Modeling) {
+        // do not redirect if user is creating a new project
+        if (isCreatingNewProject) {
+          return;
+        }
+
         // do not redirect if the new path and router pathname are the same
         if (newPath === pathname) {
           return;
