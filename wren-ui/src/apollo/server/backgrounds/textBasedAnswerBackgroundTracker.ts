@@ -12,6 +12,7 @@ import {
   ThreadResponseAnswerStatus,
   PreviewDataResponse,
 } from '../services';
+import { IThreadRepository } from '../repositories/threadRepository';
 import { getLogger } from '@server/utils';
 
 const logger = getLogger('TextBasedAnswerBackgroundTracker');
@@ -23,6 +24,7 @@ export class TextBasedAnswerBackgroundTracker {
   private intervalTime: number;
   private wrenAIAdaptor: IWrenAIAdaptor;
   private threadResponseRepository: IThreadResponseRepository;
+  private threadRepository: IThreadRepository;
   private projectService: IProjectService;
   private deployService: IDeployService;
   private queryService: IQueryService;
@@ -31,18 +33,21 @@ export class TextBasedAnswerBackgroundTracker {
   constructor({
     wrenAIAdaptor,
     threadResponseRepository,
+    threadRepository,
     projectService,
     deployService,
     queryService,
   }: {
     wrenAIAdaptor: IWrenAIAdaptor;
     threadResponseRepository: IThreadResponseRepository;
+    threadRepository: IThreadRepository;
     projectService: IProjectService;
     deployService: IDeployService;
     queryService: IQueryService;
   }) {
     this.wrenAIAdaptor = wrenAIAdaptor;
     this.threadResponseRepository = threadResponseRepository;
+    this.threadRepository = threadRepository;
     this.projectService = projectService;
     this.deployService = deployService;
     this.queryService = queryService;
@@ -72,7 +77,15 @@ export class TextBasedAnswerBackgroundTracker {
             });
 
             // get sql data
-            const project = await this.projectService.getCurrentProject();
+            const thread = await this.threadRepository.findOneBy({
+              id: threadResponse.threadId,
+            });
+            if (!thread) {
+              throw new Error(`Thread ${threadResponse.threadId} not found`);
+            }
+            const project = await this.projectService.getProjectById(
+              thread.projectId,
+            );
             const deployment = await this.deployService.getLastDeployment(
               project.id,
             );

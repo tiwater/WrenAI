@@ -666,7 +666,7 @@ export class AskingResolver {
   ): Promise<any> {
     const { responseId, limit } = args.where;
     const askingService = ctx.askingService;
-    const data = await askingService.previewData(responseId, limit);
+    const data = await askingService.previewData(args.projectId, responseId, limit);
     return data;
   }
 
@@ -678,6 +678,7 @@ export class AskingResolver {
     const { responseId, stepIndex, limit } = args.where;
     const askingService = ctx.askingService;
     const data = await askingService.previewBreakdownData(
+      args.projectId,
       responseId,
       stepIndex,
       limit,

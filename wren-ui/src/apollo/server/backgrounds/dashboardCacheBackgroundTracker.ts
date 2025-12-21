@@ -102,7 +102,9 @@ export class DashboardCacheBackgroundTracker {
       });
 
       // Get project and deployment info
-      const project = await this.projectService.getCurrentProject();
+      const project = await this.projectService.getProjectById(
+        dashboard.projectId,
+      );
       const deployment = await this.deployService.getLastDeployment(project.id);
       const mdl = deployment.manifest;
       const hash = uuidv4();

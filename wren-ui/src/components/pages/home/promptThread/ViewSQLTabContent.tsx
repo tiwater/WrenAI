@@ -24,6 +24,7 @@ import { Props as AnswerResultProps } from '@/components/pages/home/promptThread
 import usePromptThreadStore from '@/components/pages/home/promptThread/store';
 import PreviewData from '@/components/dataPreview/PreviewData';
 import { usePreviewDataMutation } from '@/apollo/client/graphql/home.generated';
+import { useProject } from '@/contexts/ProjectContext';
 
 const SQLCodeBlock = dynamic(() => import('@/components/code/SQLCodeBlock'), {
   ssr: false,
@@ -49,6 +50,8 @@ const StyledToolBar = styled.div`
 export default function ViewSQLTabContent(props: AnswerResultProps) {
   const { isLastThreadResponse, onInitPreviewDone, threadResponse } = props;
 
+  const { selectedProjectId: projectId } = useProject();
+
   const { onOpenAdjustSQLModal } = usePromptThreadStore();
   const { fetchNativeSQL, nativeSQLResult } = useNativeSQL();
   const [previewData, previewDataResult] = usePreviewDataMutation({
@@ -56,7 +59,8 @@ export default function ViewSQLTabContent(props: AnswerResultProps) {
   });
 
   const onPreviewData = async () => {
-    await previewData({ variables: { where: { responseId: id } } });
+    if (!projectId) return;
+    await previewData({ variables: { projectId, where: { responseId: id } } });
   };
 
   const autoTriggerPreviewDataButton = async () => {
