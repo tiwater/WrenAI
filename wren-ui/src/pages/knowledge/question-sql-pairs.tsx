@@ -14,7 +14,9 @@ import { SQLPairDropdown } from '@/components/diagram/CustomDropdown';
 import QuestionSQLPairModal from '@/components/modals/QuestionSQLPairModal';
 import SQLPairDrawer from '@/components/pages/knowledge/SQLPairDrawer';
 import { SqlPair } from '@/apollo/client/graphql/__types__';
+import { useOptionalSelectedProject } from '@/contexts/ProjectContext';
 import {
+  SqlPairsDocument,
   useSqlPairsQuery,
   useCreateSqlPairMutation,
   useUpdateSqlPairMutation,
@@ -31,7 +33,11 @@ export default function ManageQuestionSQLPairs() {
   const questionSqlPairModal = useModalAction();
   const sqlPairDrawer = useDrawerAction();
 
+  const projectId = useOptionalSelectedProject();
+
   const { data, loading } = useSqlPairsQuery({
+    variables: { projectId: projectId! },
+    skip: !projectId,
     fetchPolicy: 'cache-and-network',
   });
   const sqlPairs = data?.sqlPairs || [];
@@ -39,7 +45,9 @@ export default function ManageQuestionSQLPairs() {
   const getBaseOptions = (options) => {
     return {
       onError: (error) => console.error(error),
-      refetchQueries: ['SqlPairs'],
+      refetchQueries: projectId
+        ? [{ query: SqlPairsDocument, variables: { projectId } }]
+        : [],
       awaitRefetchQueries: true,
       ...options,
     };
@@ -75,7 +83,7 @@ export default function ManageQuestionSQLPairs() {
     const { type, data } = payload;
     if (type === MORE_ACTION.DELETE) {
       await deleteSqlPairMutation({
-        variables: { where: { id: data.id } },
+        variables: { projectId: projectId!, where: { id: data.id } },
       });
     } else if (type === MORE_ACTION.EDIT) {
       questionSqlPairModal.openModal(data);
@@ -182,10 +190,12 @@ export default function ManageQuestionSQLPairs() {
           onSubmit={async ({ id, data }) => {
             if (id) {
               await editSqlPairMutation({
-                variables: { where: { id }, data },
+                variables: { projectId: projectId!, where: { id }, data },
               });
             } else {
-              await createSqlPairMutation({ variables: { data } });
+              await createSqlPairMutation({
+                variables: { projectId: projectId!, data },
+              });
             }
           }}
         />

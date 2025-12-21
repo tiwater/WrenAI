@@ -23,11 +23,13 @@ import InstructionModal from '@/components/modals/InstructionModal';
 import InstructionDrawer from '@/components/pages/knowledge/InstructionDrawer';
 import { Instruction } from '@/apollo/client/graphql/__types__';
 import {
+  InstructionsDocument,
   useInstructionsQuery,
   useCreateInstructionMutation,
   useUpdateInstructionMutation,
   useDeleteInstructionMutation,
 } from '@/apollo/client/graphql/instructions.generated';
+import { useOptionalSelectedProject } from '@/contexts/ProjectContext';
 
 const { Paragraph, Text } = Typography;
 
@@ -52,7 +54,11 @@ export default function ManageInstructions() {
   const instructionModal = useModalAction();
   const instructionDrawer = useDrawerAction();
 
+  const projectId = useOptionalSelectedProject();
+
   const { data, loading } = useInstructionsQuery({
+    variables: { projectId: projectId! },
+    skip: !projectId,
     fetchPolicy: 'cache-and-network',
   });
   const instructions = data?.instructions || [];
@@ -60,7 +66,9 @@ export default function ManageInstructions() {
   const getBaseOptions = (options) => {
     return {
       onError: (error) => console.error(error),
-      refetchQueries: ['Instructions'],
+      refetchQueries: projectId
+        ? [{ query: InstructionsDocument, variables: { projectId } }]
+        : [],
       awaitRefetchQueries: true,
       ...options,
     };
@@ -96,7 +104,7 @@ export default function ManageInstructions() {
     const { type, data } = payload;
     if (type === MORE_ACTION.DELETE) {
       await deleteInstructionMutation({
-        variables: { where: { id: data.id } },
+        variables: { projectId: projectId!, where: { id: data.id } },
       });
     } else if (type === MORE_ACTION.EDIT) {
       instructionModal.openModal(data);
@@ -220,10 +228,12 @@ export default function ManageInstructions() {
           onSubmit={async ({ id, data }) => {
             if (id) {
               await updateInstructionMutation({
-                variables: { where: { id }, data },
+                variables: { projectId: projectId!, where: { id }, data },
               });
             } else {
-              await createInstructionMutation({ variables: { data } });
+              await createInstructionMutation({
+                variables: { projectId: projectId!, data },
+              });
             }
           }}
         />
