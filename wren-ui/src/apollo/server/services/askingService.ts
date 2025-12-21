@@ -608,6 +608,8 @@ export class AskingService implements IAskingService {
       query: input.question,
       histories,
       deployId,
+      projectId,
+      threadId: threadId || undefined,
       configurations: { language },
       rerunFromCancelled,
       previousTaskId,

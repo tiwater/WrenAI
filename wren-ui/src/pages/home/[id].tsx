@@ -120,6 +120,8 @@ export default function HomeThread() {
           },
         };
       });
+
+      onGenerateThreadResponseAnswer(nextResponse.id);
     },
   });
   const [updateThreadResponse, { loading: threadResponseUpdating }] =

@@ -237,6 +237,8 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
       const res = await axios.post(`${this.wrenAIBaseEndpoint}/v1/asks`, {
         query: input.query,
         id: input.deployId,
+        project_id: input.projectId ? input.projectId.toString() : undefined,
+        thread_id: input.threadId ? input.threadId.toString() : undefined,
         histories: this.transformHistoryInput(input.histories),
         configurations: input.configurations,
       });

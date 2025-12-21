@@ -74,6 +74,8 @@ export interface ProjectConfigurations {
 export interface AskInput {
   query: string;
   deployId: string;
+  projectId?: number;
+  threadId?: number;
   histories?: ThreadResponse[];
   configurations?: ProjectConfigurations;
 }
