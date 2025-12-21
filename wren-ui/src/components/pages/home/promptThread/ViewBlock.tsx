@@ -32,8 +32,7 @@ export default function ViewBlock({ view, onClick }: Props) {
 
   return (
     <Button
-      className="gray-6"
-      type="text"
+      type="link"
       size="small"
       icon={<SaveOutlined />}
       onClick={onClick}

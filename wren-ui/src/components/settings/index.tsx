@@ -13,6 +13,7 @@ import {
   useGetSettingsLazyQuery,
   GetSettingsQuery,
 } from '@/apollo/client/graphql/settings.generated';
+import { useOptionalSelectedProject } from '@/contexts/ProjectContext';
 
 const { Sider, Content } = Layout;
 
@@ -93,6 +94,7 @@ const MenuIterator = makeIterable(MenuTemplate);
 
 export default function Settings(props: Props) {
   const { onClose, visible } = props;
+  const projectId = useOptionalSelectedProject();
   const [menu, setMenu] = useState<SETTINGS>(SETTINGS.DATA_SOURCE);
   const current = getSettingMenu(menu);
   const menuList = Object.keys(SETTINGS).map((key) => ({
@@ -103,12 +105,19 @@ export default function Settings(props: Props) {
     fetchPolicy: 'cache-and-network',
   });
 
+  const refetchSettings = () => {
+    if (!projectId) return;
+    refetch({ projectId });
+  };
+
   const productVersion = useMemo(() => {
     return data?.settings?.productVersion;
   }, [data?.settings]);
 
   useEffect(() => {
-    if (visible) fetchSettings();
+    if (!visible) return;
+    if (!projectId) return;
+    fetchSettings({ variables: { projectId } });
   }, [visible]);
 
   const onMenuClick = ({ value }) => setMenu(value);
@@ -152,7 +161,7 @@ export default function Settings(props: Props) {
             <DynamicComponent
               menu={menu}
               data={data?.settings}
-              refetch={refetch}
+              refetch={refetchSettings}
               closeModal={onClose}
             />
           </div>
