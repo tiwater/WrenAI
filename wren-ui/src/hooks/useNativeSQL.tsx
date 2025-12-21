@@ -38,6 +38,16 @@ export default function useNativeSQL() {
     fetchPolicy: 'cache-and-network',
   });
 
+  const fetchNativeSQLWithProject = (options: { variables: { responseId: number } }) => {
+    return fetchNativeSQL({
+      ...options,
+      variables: {
+        projectId: projectId!,
+        ...options.variables,
+      },
+    });
+  };
+
   const nativeSQL = data?.nativeSql || '';
   const nativeSQLResult: NativeSQLResult = {
     ...nativeSQLInfo,
@@ -48,7 +58,7 @@ export default function useNativeSQL() {
   };
 
   return {
-    fetchNativeSQL,
+    fetchNativeSQL: fetchNativeSQLWithProject,
     nativeSQLResult,
   };
 }

@@ -8,6 +8,7 @@ import { parseGraphQLError } from '@/utils/errorHandler';
 import ErrorCollapse from '@/components/ErrorCollapse';
 import PreviewData from '@/components/dataPreview/PreviewData';
 import { usePreviewSqlMutation } from '@/apollo/client/graphql/sql.generated';
+import { useOptionalSelectedProject } from '@/contexts/ProjectContext';
 
 interface AdjustSQLFormValues {
   responseId: number;
@@ -20,6 +21,8 @@ type Props = ModalAction<AdjustSQLFormValues, AdjustSQLFormValues> & {
 
 export default function AdjustSQLModal(props: Props) {
   const { defaultValue, loading, onClose, onSubmit, visible } = props;
+
+  const projectId = useOptionalSelectedProject();
 
   const [form] = Form.useForm();
   const [error, setError] =
@@ -51,6 +54,7 @@ export default function AdjustSQLModal(props: Props) {
   const onValidateSQL = async () => {
     await previewSqlMutation({
       variables: {
+        projectId: projectId!,
         data: {
           sql: sqlValue,
           limit: 1,
@@ -74,6 +78,7 @@ export default function AdjustSQLModal(props: Props) {
       setShowPreview(true);
       await previewSqlMutation({
         variables: {
+          projectId: projectId!,
           data: {
             sql: sqlValue,
             limit: 50,

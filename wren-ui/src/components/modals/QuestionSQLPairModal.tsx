@@ -117,6 +117,7 @@ export default function QuestionSQLPairModal(props: Props) {
   const onValidateSQL = async () => {
     await previewSqlMutation({
       variables: {
+        projectId: projectId!,
         data: {
           sql: sqlValue,
           limit: 1,
@@ -140,6 +141,7 @@ export default function QuestionSQLPairModal(props: Props) {
       setShowPreview(true);
       await previewSqlMutation({
         variables: {
+          projectId: projectId!,
           data: {
             sql: sqlValue,
             limit: 50,
@@ -180,6 +182,7 @@ export default function QuestionSQLPairModal(props: Props) {
     setGeneratingQuestion(true);
     const { data } = await generateQuestionMutation({
       variables: {
+        projectId: projectId!,
         data: {
           sql: sqlValue,
         },
