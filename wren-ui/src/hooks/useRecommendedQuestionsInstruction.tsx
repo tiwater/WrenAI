@@ -5,7 +5,7 @@ import Icon from '@/import/icon';
 import ReloadOutlined from '@ant-design/icons/ReloadOutlined';
 import { CopilotSVG } from '@/utils/svgs';
 import { isRecommendedFinished } from '@/hooks/useAskPrompt';
-import { useSelectedProject } from '@/contexts/ProjectContext';
+import { useProject } from '@/contexts/ProjectContext';
 import {
   ResultQuestion,
   RecommendedQuestionsTaskStatus,
@@ -33,7 +33,7 @@ const getGroupedQuestions = (
 };
 
 export default function useRecommendedQuestionsInstruction() {
-  const projectId = useSelectedProject();
+  const { selectedProjectId: projectId } = useProject();
   const [showRetry, setShowRetry] = useState<boolean>(false);
   const [generating, setGenerating] = useState<boolean>(false);
   const [isRegenerate, setIsRegenerate] = useState<boolean>(false);
@@ -135,6 +135,7 @@ export default function useRecommendedQuestionsInstruction() {
     const baseProps = {
       loading: generating,
       onClick: onGetRecommendationQuestions,
+      disabled: !projectId,
     };
 
     if (showRecommendedQuestionsPromptMode && isRegenerate) {
@@ -158,7 +159,7 @@ export default function useRecommendedQuestionsInstruction() {
           ? 'Retry'
           : 'What could I ask?',
     };
-  }, [generating, isRegenerate, showRetry, showRecommendedQuestionsPromptMode]);
+  }, [generating, isRegenerate, projectId, showRetry, showRecommendedQuestionsPromptMode]);
 
   return {
     recommendedQuestions,

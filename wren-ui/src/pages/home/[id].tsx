@@ -12,7 +12,7 @@ import { isEmpty } from 'lodash';
 import { message } from 'antd';
 import { Path } from '@/utils/enum';
 import useHomeSidebar from '@/hooks/useHomeSidebar';
-import { useSelectedProject } from '@/contexts/ProjectContext';
+import { useProject } from '@/contexts/ProjectContext';
 import SiderLayout from '@/components/layouts/SiderLayout';
 import Prompt from '@/components/pages/home/prompt';
 import useAskPrompt, {
@@ -48,7 +48,10 @@ import {
   ThreadResponse,
   CreateSqlPairInput,
 } from '@/apollo/client/graphql/__types__';
-import { useCreateSqlPairMutation } from '@/apollo/client/graphql/sqlPairs.generated';
+import {
+  SqlPairsDocument,
+  useCreateSqlPairMutation,
+} from '@/apollo/client/graphql/sqlPairs.generated';
 
 const getThreadResponseIsFinished = (threadResponse: ThreadResponse) => {
   const { answerDetail, breakdownDetail, chartDetail } = threadResponse || {};
@@ -75,7 +78,7 @@ export default function HomeThread() {
   const $prompt = useRef<ComponentRef<typeof Prompt>>(null);
   const router = useRouter();
   const params = useParams();
-  const projectId = useSelectedProject();
+  const { selectedProjectId: projectId, hydrated } = useProject();
   const homeSidebar = useHomeSidebar();
   const threadId = useMemo(() => Number(params?.id) || null, [params]);
   const askPrompt = useAskPrompt(threadId);
@@ -84,6 +87,11 @@ export default function HomeThread() {
   const questionSqlPairModal = useModalAction();
   const adjustReasoningStepsModal = useModalAction();
   const adjustSqlModal = useModalAction();
+
+  useEffect(() => {
+    if (!hydrated) return;
+    if (!projectId) router.replace(Path.Projects);
+  }, [hydrated, projectId, router]);
 
   const [showRecommendedQuestions, setShowRecommendedQuestions] =
     useState<boolean>(false);
@@ -166,7 +174,9 @@ export default function HomeThread() {
 
   const [createSqlPairMutation, { loading: createSqlPairLoading }] =
     useCreateSqlPairMutation({
-      refetchQueries: ['SqlPairs'],
+      refetchQueries: projectId
+        ? [{ query: SqlPairsDocument, variables: { projectId } }]
+        : [],
       awaitRefetchQueries: true,
       onError: (error) => console.error(error),
       onCompleted: () => {
@@ -362,7 +372,8 @@ export default function HomeThread() {
         onClose={questionSqlPairModal.closeModal}
         loading={createSqlPairLoading}
         onSubmit={async ({ data }: { data: CreateSqlPairInput }) => {
-          await createSqlPairMutation({ variables: { data } });
+          if (!projectId) return;
+          await createSqlPairMutation({ variables: { projectId, data } });
         }}
       />
 
