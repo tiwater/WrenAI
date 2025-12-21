@@ -372,8 +372,9 @@ export default function HomeThread() {
         loading={creating}
         onClose={saveAsViewModal.closeModal}
         onSubmit={async (values) => {
+          if (!projectId) return;
           await createViewMutation({
-            variables: { data: values },
+            variables: { projectId, data: values },
           });
         }}
       />

@@ -8,6 +8,7 @@ import { COLUMN } from '@/components/table/BaseTable';
 import { EditableContext } from '@/components/EditableWrapper';
 import EditBasicMetadata from './EditBasicMetadata';
 import { useValidateViewMutation } from '@/apollo/client/graphql/view.generated';
+import { useProject } from '@/contexts/ProjectContext';
 
 export interface Props {
   formNamespace: string;
@@ -36,6 +37,7 @@ export default function EditViewMetadata(props: Props) {
   } = props || {};
 
   const form = useContext(EditableContext);
+  const { selectedProjectId: projectId } = useProject();
 
   const [validateViewMutation] = useValidateViewMutation({
     fetchPolicy: 'no-cache',
@@ -74,7 +76,7 @@ export default function EditViewMetadata(props: Props) {
           displayName: [
             {
               required: true,
-              validator: createViewNameValidator(validateViewMutation),
+              validator: createViewNameValidator(validateViewMutation, projectId || undefined),
             },
           ],
         }}

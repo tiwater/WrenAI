@@ -4,6 +4,7 @@ import { ModalAction } from '@/hooks/useModalAction';
 import { createViewNameValidator } from '@/utils/validator';
 import SQLCodeBlock from '@/components/code/SQLCodeBlock';
 import { useValidateViewMutation } from '@/apollo/client/graphql/view.generated';
+import { useProject } from '@/contexts/ProjectContext';
 
 const { Text } = Typography;
 
@@ -15,6 +16,7 @@ type Props = ModalAction<{ sql: string }> & {
 
 export default function SaveAsViewModal(props: Props) {
   const { visible, loading, onSubmit, onClose, defaultValue, payload } = props;
+  const { selectedProjectId: projectId } = useProject();
   const [form] = Form.useForm();
   const [validateViewMutation] = useValidateViewMutation({
     fetchPolicy: 'no-cache',
@@ -76,7 +78,7 @@ export default function SaveAsViewModal(props: Props) {
           rules={[
             {
               required: true,
-              validator: createViewNameValidator(validateViewMutation),
+              validator: createViewNameValidator(validateViewMutation, projectId || undefined),
             },
           ]}
         >
