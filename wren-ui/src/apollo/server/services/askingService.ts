@@ -58,6 +58,7 @@ export interface Task {
 export interface AskingPayload {
   threadId?: number;
   language: string;
+  projectId: number;
 }
 
 export interface AskingTaskInput {
@@ -139,13 +140,13 @@ export interface IAskingService {
   /**
    * Asking detail task.
    */
-  createThread(input: AskingDetailTaskInput): Promise<Thread>;
+  createThread(input: AskingDetailTaskInput, projectId: number): Promise<Thread>;
   updateThread(
     threadId: number,
     input: Partial<AskingDetailTaskUpdateInput>,
   ): Promise<Thread>;
   deleteThread(threadId: number): Promise<void>;
-  listThreads(): Promise<Thread[]>;
+  listThreads(projectId: number): Promise<Thread[]>;
   createThreadResponse(
     input: AskingDetailTaskInput,
     threadId: number,
@@ -206,12 +207,13 @@ export interface IAskingService {
    * Recommendation questions
    */
   createInstantRecommendedQuestions(
+    projectId: number,
     input: InstantRecommendedQuestionsInput,
   ): Promise<Task>;
   getInstantRecommendedQuestions(
     queryId: string,
   ): Promise<RecommendationQuestionsResult>;
-  generateThreadRecommendationQuestions(threadId: number): Promise<void>;
+  generateThreadRecommendationQuestions(projectId: number, threadId: number): Promise<void>;
   getThreadRecommendationQuestions(
     threadId: number,
   ): Promise<ThreadRecommendQuestionResult>;
@@ -592,8 +594,8 @@ export class AskingService implements IAskingService {
     previousTaskId?: number,
     threadResponseId?: number,
   ): Promise<Task> {
-    const { threadId, language } = payload;
-    const deployId = await this.getDeployId();
+    const { threadId, language, projectId } = payload;
+    const deployId = await this.getDeployId(projectId);
 
     // if it's a follow-up question, then the input will have a threadId
     // then use the threadId to get the sql and get the steps of last thread response
@@ -678,11 +680,10 @@ export class AskingService implements IAskingService {
    * 2. create a task on AI service to generate the detail
    * 3. update the thread response with the task id
    */
-  public async createThread(input: AskingDetailTaskInput): Promise<Thread> {
+  public async createThread(input: AskingDetailTaskInput, projectId: number): Promise<Thread> {
     // 1. create a thread and the first thread response
-    const { id } = await this.projectService.getCurrentProject();
     const thread = await this.threadRepository.createOne({
-      projectId: id,
+      projectId,
       summary: input.question,
     });
 
@@ -707,9 +708,8 @@ export class AskingService implements IAskingService {
     return thread;
   }
 
-  public async listThreads(): Promise<Thread[]> {
-    const { id } = await this.projectService.getCurrentProject();
-    return await this.threadRepository.listAllTimeDescOrder(id);
+  public async listThreads(projectId: number): Promise<Thread[]> {
+    return await this.threadRepository.listAllTimeDescOrder(projectId);
   }
 
   public async updateThread(
@@ -1056,9 +1056,8 @@ export class AskingService implements IAskingService {
     return updatedResponse;
   }
 
-  private async getDeployId() {
-    const { id } = await this.projectService.getCurrentProject();
-    const lastDeploy = await this.deployService.getLastDeployment(id);
+  private async getDeployId(projectId: number) {
+    const lastDeploy = await this.deployService.getLastDeployment(projectId);
     return lastDeploy.hash;
   }
 

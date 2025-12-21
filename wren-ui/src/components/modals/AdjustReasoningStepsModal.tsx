@@ -8,6 +8,7 @@ import useAutoComplete, { convertMention } from '@/hooks/useAutoComplete';
 import { ModalAction } from '@/hooks/useModalAction';
 import MarkdownEditor from '@/components/editor/MarkdownEditor';
 import { useListModelsQuery } from '@/apollo/client/graphql/model.generated';
+import { useSelectedProject } from '@/contexts/ProjectContext';
 
 const MultiSelect = styled(Select)`
   .ant-select-selector {
@@ -35,13 +36,17 @@ type Props = ModalAction<{
 export default function AdjustReasoningStepsModal(props: Props) {
   const { visible, defaultValue, loading, onSubmit, onClose } = props;
   const [form] = Form.useForm();
+  const projectId = useSelectedProject();
 
   const mentions = useAutoComplete({
     convertor: convertMention,
     includeColumns: true,
     skip: !visible,
   });
-  const listModelsResult = useListModelsQuery({ skip: !visible });
+  const listModelsResult = useListModelsQuery({
+    variables: { projectId: projectId! },
+    skip: !visible || !projectId,
+  });
   const modelNameMap = keyBy(
     listModelsResult.data?.listModels,
     'referenceName',

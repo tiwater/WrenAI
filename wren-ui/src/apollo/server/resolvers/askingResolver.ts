@@ -141,9 +141,9 @@ export class AskingResolver {
     args: { projectId: number; threadId: number },
     ctx: IContext,
   ): Promise<boolean> {
-    const { threadId } = args;
+    const { threadId, projectId } = args;
     const askingService = ctx.askingService;
-    await askingService.generateThreadRecommendationQuestions(threadId);
+    await askingService.generateThreadRecommendationQuestions(projectId, threadId);
     return true;
   }
 
@@ -190,6 +190,7 @@ export class AskingResolver {
     const task = await askingService.createAskingTask(data, {
       threadId,
       language: WrenAILanguage[project.language] || WrenAILanguage.EN,
+      projectId: args.projectId,
     });
     ctx.telemetry.sendEvent(TelemetryEvent.HOME_ASK_CANDIDATE, {
       question,
@@ -284,7 +285,7 @@ export class AskingResolver {
 
     const eventName = TelemetryEvent.HOME_CREATE_THREAD;
     try {
-      const thread = await askingService.createThread(threadInput);
+      const thread = await askingService.createThread(threadInput, args.projectId);
       ctx.telemetry.sendEvent(eventName, {});
       return thread;
     } catch (err: any) {
@@ -386,7 +387,7 @@ export class AskingResolver {
     args: { projectId: number },
     ctx: IContext,
   ): Promise<Thread[]> {
-    const threads = await ctx.askingService.listThreads();
+    const threads = await ctx.askingService.listThreads(args.projectId);
     return threads;
   }
 
@@ -470,6 +471,7 @@ export class AskingResolver {
 
     const task = await askingService.rerunAskingTask(responseId, {
       language: WrenAILanguage[project.language] || WrenAILanguage.EN,
+      projectId: args.projectId,
     });
     ctx.telemetry.sendEvent(TelemetryEvent.HOME_RERUN_ASKING_TASK, {
       responseId,
@@ -688,9 +690,9 @@ export class AskingResolver {
     args: { projectId: number; data: { previousQuestions?: string[] } },
     ctx: IContext,
   ): Promise<Task> {
-    const { data } = args;
+    const { data, projectId } = args;
     const askingService = ctx.askingService;
-    return askingService.createInstantRecommendedQuestions(data);
+    return askingService.createInstantRecommendedQuestions(projectId, data);
   }
 
   public async getInstantRecommendedQuestions(
