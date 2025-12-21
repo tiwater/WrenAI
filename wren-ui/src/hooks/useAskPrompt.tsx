@@ -80,20 +80,21 @@ const isNeedPreparing = (askingTask: AskingTask) =>
 const handleUpdateThreadCache = (
   threadId: number,
   askingTask: AskingTask,
+  projectId: number,
   client: ApolloClient<NormalizedCacheObject>,
 ) => {
   if (!askingTask) return;
 
   const result = client.cache.readQuery<{ thread: DetailedThread }>({
     query: THREAD,
-    variables: { threadId },
+    variables: { projectId, threadId },
   });
 
   if (result?.thread) {
     client.cache.updateQuery(
       {
         query: THREAD,
-        variables: { threadId },
+        variables: { projectId, threadId },
       },
       (existingData) => {
         return {
@@ -119,13 +120,14 @@ const handleUpdateRerunAskingTaskCache = (
   threadId: number,
   threadResponseId: number,
   askingTask: AskingTask,
+  projectId: number,
   client: ApolloClient<NormalizedCacheObject>,
 ) => {
   if (!askingTask) return;
 
   const result = client.cache.readQuery<{ thread: DetailedThread }>({
     query: THREAD,
-    variables: { threadId },
+    variables: { projectId, threadId },
   });
 
   if (result?.thread) {
@@ -138,7 +140,7 @@ const handleUpdateRerunAskingTaskCache = (
     client.cache.updateQuery(
       {
         query: THREAD,
-        variables: { threadId },
+        variables: { projectId, threadId },
       },
       (existingData) => {
         return {
@@ -240,11 +242,18 @@ export default function useAskPrompt(threadId?: number) {
     // handle update cache for preparing component
     if (isNeedPreparing(askingTask)) {
       if (threadId) {
-        handleUpdateThreadCache(threadId, askingTask, askingTaskResult.client);
+        if (projectId) {
+          handleUpdateThreadCache(
+            threadId,
+            askingTask,
+            projectId,
+            askingTaskResult.client,
+          );
+        }
         checkFetchAskingStreamTask(askingTask);
       }
     }
-  }, [askingTask?.status, threadId, checkFetchAskingStreamTask]);
+  }, [askingTask?.status, threadId, checkFetchAskingStreamTask, projectId]);
 
   useEffect(() => {
     // handle instant recommended questions
@@ -293,6 +302,7 @@ export default function useAskPrompt(threadId?: number) {
         threadId,
         threadResponse.id,
         data.askingTask,
+        projectId,
         askingTaskResult.client,
       );
     } catch (error) {

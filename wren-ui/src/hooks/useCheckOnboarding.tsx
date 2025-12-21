@@ -14,11 +14,12 @@ const redirectRoute = {
 
 export const useWithOnboarding = () => {
   const router = useRouter();
-  const { selectedProjectId } = useProject();
+  const { selectedProjectId, hydrated } = useProject();
 
   // If no project selected, redirect to projects page
   // If no project selected, redirect to projects page
   useEffect(() => {
+    if (!hydrated) return;
     const isCreatingNewProject = typeof window !== 'undefined' &&
       (sessionStorage.getItem('newProjectName') || sessionStorage.getItem('creatingNewProject') === 'true');
 
@@ -29,7 +30,7 @@ export const useWithOnboarding = () => {
       }
       router.push(Path.Projects);
     }
-  }, [selectedProjectId, router]);
+  }, [selectedProjectId, hydrated, router]);
 
   const { data, loading } = useOnboardingStatusQuery({
     variables: { projectId: selectedProjectId || 0 },

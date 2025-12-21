@@ -12,6 +12,7 @@ import { isEmpty } from 'lodash';
 import { message } from 'antd';
 import { Path } from '@/utils/enum';
 import useHomeSidebar from '@/hooks/useHomeSidebar';
+import { useSelectedProject } from '@/contexts/ProjectContext';
 import SiderLayout from '@/components/layouts/SiderLayout';
 import Prompt from '@/components/pages/home/prompt';
 import useAskPrompt, {
@@ -74,6 +75,7 @@ export default function HomeThread() {
   const $prompt = useRef<ComponentRef<typeof Prompt>>(null);
   const router = useRouter();
   const params = useParams();
+  const projectId = useSelectedProject();
   const homeSidebar = useHomeSidebar();
   const threadId = useMemo(() => Number(params?.id) || null, [params]);
   const askPrompt = useAskPrompt(threadId);
@@ -92,9 +94,9 @@ export default function HomeThread() {
   });
 
   const { data, updateQuery: updateThreadQuery } = useThreadQuery({
-    variables: { threadId },
+    variables: { projectId, threadId },
     fetchPolicy: 'cache-and-network',
-    skip: threadId === null,
+    skip: threadId === null || !projectId,
     onError: () => router.push(Path.Home),
   });
   const [createThreadResponse] = useCreateThreadResponseMutation({
@@ -185,18 +187,18 @@ export default function HomeThread() {
 
   const onFixSQLStatement = async (responseId: number, sql: string) => {
     await updateThreadResponse({
-      variables: { where: { id: responseId }, data: { sql } },
+      variables: { projectId, where: { id: responseId }, data: { sql } },
     });
   };
 
   const onGenerateThreadResponseAnswer = async (responseId: number) => {
-    await generateThreadResponseAnswer({ variables: { responseId } });
-    fetchThreadResponse({ variables: { responseId } });
+    await generateThreadResponseAnswer({ variables: { projectId, responseId } });
+    fetchThreadResponse({ variables: { projectId, responseId } });
   };
 
   const onGenerateThreadResponseChart = async (responseId: number) => {
-    await generateThreadResponseChart({ variables: { responseId } });
-    fetchThreadResponse({ variables: { responseId } });
+    await generateThreadResponseChart({ variables: { projectId, responseId } });
+    fetchThreadResponse({ variables: { projectId, responseId } });
   };
 
   const onAdjustThreadResponseChart = async (
@@ -204,14 +206,16 @@ export default function HomeThread() {
     data: AdjustThreadResponseChartInput,
   ) => {
     await adjustThreadResponseChart({
-      variables: { responseId, data },
+      variables: { projectId, responseId, data },
     });
-    fetchThreadResponse({ variables: { responseId } });
+    fetchThreadResponse({ variables: { projectId, responseId } });
   };
 
   const onGenerateThreadRecommendedQuestions = async () => {
-    await generateThreadRecommendationQuestions({ variables: { threadId } });
-    fetchThreadRecommendationQuestions({ variables: { threadId } });
+    await generateThreadRecommendationQuestions({
+      variables: { projectId, threadId },
+    });
+    fetchThreadRecommendationQuestions({ variables: { projectId, threadId } });
   };
 
   const handleUnfinishedTasks = useCallback(
@@ -236,11 +240,11 @@ export default function HomeThread() {
         unfinishedThreadResponse
       ) {
         fetchThreadResponse({
-          variables: { responseId: unfinishedThreadResponse.id },
+          variables: { projectId, responseId: unfinishedThreadResponse.id },
         });
       }
     },
-    [askPrompt, fetchThreadResponse],
+    [askPrompt, fetchThreadResponse, projectId],
   );
 
   // store thread questions for instant recommended questions
@@ -255,7 +259,7 @@ export default function HomeThread() {
   // stop all requests when change thread
   useEffect(() => {
     if (threadId !== null) {
-      fetchThreadRecommendationQuestions({ variables: { threadId } });
+      fetchThreadRecommendationQuestions({ variables: { projectId, threadId } });
       setShowRecommendedQuestions(true);
     }
     return () => {
@@ -264,7 +268,7 @@ export default function HomeThread() {
       threadRecommendationQuestionsResult.stopPolling();
       $prompt.current?.close();
     };
-  }, [threadId]);
+  }, [threadId, projectId]);
 
   // initialize asking task
   useEffect(() => {
@@ -299,7 +303,7 @@ export default function HomeThread() {
 
       const threadId = thread.id;
       await createThreadResponse({
-        variables: { threadId, data: payload },
+        variables: { projectId, threadId, data: payload },
       });
       setShowRecommendedQuestions(false);
     } catch (error) {

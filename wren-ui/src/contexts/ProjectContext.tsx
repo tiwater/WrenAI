@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 interface ProjectContextType {
   selectedProjectId: number | null;
   setSelectedProjectId: (projectId: number | null) => void;
+  hydrated: boolean;
 }
 
 const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
@@ -11,6 +12,7 @@ const PROJECT_STORAGE_KEY = 'wrenai_selected_project';
 
 export function ProjectProvider({ children }: { children: ReactNode }) {
   const [selectedProjectId, setSelectedProjectIdState] = useState<number | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
   // Load selected project from localStorage on mount
   useEffect(() => {
@@ -18,6 +20,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     if (storedProjectId) {
       setSelectedProjectIdState(parseInt(storedProjectId, 10));
     }
+    setHydrated(true);
   }, []);
 
   // Save selected project to localStorage when it changes
@@ -31,7 +34,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <ProjectContext.Provider value={{ selectedProjectId, setSelectedProjectId }}>
+    <ProjectContext.Provider value={{ selectedProjectId, setSelectedProjectId, hydrated }}>
       {children}
     </ProjectContext.Provider>
   );
@@ -47,7 +50,18 @@ export function useProject() {
 
 // Hook to ensure a project is selected
 export function useSelectedProject() {
-  const { selectedProjectId } = useProject();
+  const { selectedProjectId, hydrated } = useProject();
+
+  // Avoid throwing during SSR. On the server, localStorage/sessionStorage is not
+  // available and selectedProjectId will be null until hydration.
+  if (typeof window === 'undefined') {
+    return selectedProjectId || 0;
+  }
+
+  // Avoid throwing during initial client render before hydration completes.
+  if (!hydrated) {
+    return selectedProjectId || 0;
+  }
 
   // Check if we are in a state where missing selectedProjectId is expected
   const isSetupFlow = typeof window !== 'undefined' &&

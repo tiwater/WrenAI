@@ -547,6 +547,7 @@ export class AskingService implements IAskingService {
     const questions = slicedThreadResponses.map(({ question }) => question);
     const recommendQuestionData: RecommendationQuestionsInput = {
       manifest,
+      projectId: projectId.toString(),
       previousQuestions: questions,
       ...this.getThreadRecommendationQuestionsConfig(project),
     };
@@ -1007,6 +1008,7 @@ export class AskingService implements IAskingService {
 
     const response = await this.wrenAIAdaptor.generateRecommendationQuestions({
       manifest,
+      projectId: projectId.toString(),
       previousQuestions: input.previousQuestions,
       ...this.getThreadRecommendationQuestionsConfig(project),
     });
