@@ -166,10 +166,12 @@ export interface IAskingService {
     configurations: { language: string },
   ): Promise<ThreadResponse>;
   generateThreadResponseChart(
+    projectId: number,
     threadResponseId: number,
     configurations: { language: string },
   ): Promise<ThreadResponse>;
   adjustThreadResponseChart(
+    projectId: number,
     threadResponseId: number,
     input: ChartAdjustmentOption,
     configurations: { language: string },
@@ -196,8 +198,13 @@ export interface IAskingService {
     status: ThreadResponseAnswerStatus,
     content?: string,
   ): Promise<ThreadResponse>;
-  previewData(responseId: number, limit?: number): Promise<PreviewDataResponse>;
+  previewData(
+    projectId: number,
+    responseId: number,
+    limit?: number,
+  ): Promise<PreviewDataResponse>;
   previewBreakdownData(
+    projectId: number,
     responseId: number,
     stepIndex?: number,
     limit?: number,
@@ -848,6 +855,7 @@ export class AskingService implements IAskingService {
   }
 
   public async generateThreadResponseChart(
+    projectId: number,
     threadResponseId: number,
     configurations: { language: string },
   ): Promise<ThreadResponse> {
@@ -863,6 +871,7 @@ export class AskingService implements IAskingService {
     const response = await this.wrenAIAdaptor.generateChart({
       query: threadResponse.question,
       sql: threadResponse.sql,
+      projectId: projectId.toString(),
       configurations,
     });
 
@@ -884,6 +893,7 @@ export class AskingService implements IAskingService {
   }
 
   public async adjustThreadResponseChart(
+    projectId: number,
     threadResponseId: number,
     input: ChartAdjustmentOption,
     configurations: { language: string },
@@ -902,6 +912,7 @@ export class AskingService implements IAskingService {
       sql: threadResponse.sql,
       adjustmentOption: input,
       chartSchema: threadResponse.chartDetail?.chartSchema,
+      projectId: projectId.toString(),
       configurations,
     });
 

@@ -476,9 +476,14 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
 
   public async generateChart(input: ChartInput): Promise<AsyncQueryResponse> {
     try {
+      const body: any = { ...input };
+      if (input.projectId) {
+        body.project_id = input.projectId;
+        delete body.projectId;
+      }
       const res = await axios.post(
         `${this.wrenAIBaseEndpoint}/v1/charts`,
-        input,
+        body,
       );
       return { queryId: res.data.query_id };
     } catch (err: any) {
@@ -734,10 +739,12 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
   }
 
   private transformChartAdjustmentInput(input: ChartAdjustmentInput) {
-    const { query, sql, adjustmentOption, chartSchema, configurations } = input;
+    const { query, sql, adjustmentOption, chartSchema, configurations, projectId } =
+      input;
     return {
       query,
       sql,
+      project_id: projectId,
       adjustment_option: {
         chart_type: adjustmentOption.chartType.toLowerCase(),
         x_axis: adjustmentOption.xAxis,

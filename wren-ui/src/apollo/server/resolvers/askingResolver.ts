@@ -626,7 +626,7 @@ export class AskingResolver {
     }
     const { responseId } = args;
     const askingService = ctx.askingService;
-    return askingService.generateThreadResponseChart(responseId, {
+    return askingService.generateThreadResponseChart(args.projectId, responseId, {
       language: WrenAILanguage[project.language] || WrenAILanguage.EN,
     });
   }
@@ -642,7 +642,7 @@ export class AskingResolver {
     }
     const { responseId, data } = args;
     const askingService = ctx.askingService;
-    return askingService.adjustThreadResponseChart(responseId, data, {
+    return askingService.adjustThreadResponseChart(args.projectId, responseId, data, {
       language: WrenAILanguage[project.language] || WrenAILanguage.EN,
     });
   }
