@@ -21,6 +21,7 @@ import {
 import { useCreateDashboardItemMutation } from '@/apollo/client/graphql/dashboard.generated';
 import { DashboardItemType } from '@/apollo/server/repositories';
 import usePromptThreadStore from './store';
+import { useProject } from '@/contexts/ProjectContext';
 
 const Chart = dynamic(() => import('@/components/chart'), {
   ssr: false,
@@ -78,6 +79,7 @@ const getDynamicProperties = (chartType: ChartType) => {
 };
 
 export default function ChartAnswer(props: AnswerResultProps) {
+  const { selectedProjectId: projectId } = useProject();
   const { onGenerateChartAnswer, onAdjustChartAnswer } = usePromptThreadStore();
   const { threadResponse } = props;
   const [regenerating, setRegenerating] = useState(false);
@@ -102,10 +104,11 @@ export default function ChartAnswer(props: AnswerResultProps) {
 
   // initial trigger when render
   useEffect(() => {
+    if (!projectId) return;
     previewData({
-      variables: { where: { responseId: threadResponse.id } },
+      variables: { projectId, where: { responseId: threadResponse.id } },
     });
-  }, []);
+  }, [projectId, threadResponse.id]);
 
   const chartSpec = useMemo(() => {
     if (

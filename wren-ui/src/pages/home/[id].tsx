@@ -198,17 +198,20 @@ export default function HomeThread() {
   );
 
   const onFixSQLStatement = async (responseId: number, sql: string) => {
+    if (!projectId) return;
     await updateThreadResponse({
       variables: { projectId, where: { id: responseId }, data: { sql } },
     });
   };
 
   const onGenerateThreadResponseAnswer = async (responseId: number) => {
+    if (!projectId) return;
     await generateThreadResponseAnswer({ variables: { projectId, responseId } });
     fetchThreadResponse({ variables: { projectId, responseId } });
   };
 
   const onGenerateThreadResponseChart = async (responseId: number) => {
+    if (!projectId) return;
     await generateThreadResponseChart({ variables: { projectId, responseId } });
     fetchThreadResponse({ variables: { projectId, responseId } });
   };
@@ -217,6 +220,7 @@ export default function HomeThread() {
     responseId: number,
     data: AdjustThreadResponseChartInput,
   ) => {
+    if (!projectId) return;
     await adjustThreadResponseChart({
       variables: { projectId, responseId, data },
     });
@@ -224,6 +228,7 @@ export default function HomeThread() {
   };
 
   const onGenerateThreadRecommendedQuestions = async () => {
+    if (!projectId || threadId === null) return;
     await generateThreadRecommendationQuestions({
       variables: { projectId, threadId },
     });
@@ -251,6 +256,7 @@ export default function HomeThread() {
         canFetchThreadResponse(unfinishedThreadResponse?.askingTask) &&
         unfinishedThreadResponse
       ) {
+        if (!projectId) return;
         fetchThreadResponse({
           variables: { projectId, responseId: unfinishedThreadResponse.id },
         });
@@ -270,7 +276,7 @@ export default function HomeThread() {
 
   // stop all requests when change thread
   useEffect(() => {
-    if (threadId !== null) {
+    if (threadId !== null && projectId) {
       fetchThreadRecommendationQuestions({ variables: { projectId, threadId } });
       setShowRecommendedQuestions(true);
     }
@@ -312,6 +318,8 @@ export default function HomeThread() {
   const onCreateResponse = async (payload: CreateThreadResponseInput) => {
     try {
       askPrompt.onStopPolling();
+
+      if (!projectId) return;
 
       const threadId = thread.id;
       await createThreadResponse({

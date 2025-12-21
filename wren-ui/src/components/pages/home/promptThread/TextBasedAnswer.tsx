@@ -17,6 +17,7 @@ import PreviewData from '@/components/dataPreview/PreviewData';
 import { AdjustAnswerDropdown } from '@/components/diagram/CustomDropdown';
 import { usePreviewDataMutation } from '@/apollo/client/graphql/home.generated';
 import { ThreadResponseAnswerStatus } from '@/apollo/client/graphql/__types__';
+import { useProject } from '@/contexts/ProjectContext';
 
 const { Text } = Typography;
 
@@ -39,6 +40,7 @@ const getIsLoadingFinished = (status: ThreadResponseAnswerStatus) =>
   status === ThreadResponseAnswerStatus.STREAMING;
 
 export default function TextBasedAnswer(props: AnswerResultProps) {
+  const { selectedProjectId: projectId } = useProject();
   const {
     onGenerateTextBasedAnswer,
     onOpenAdjustReasoningStepsModal,
@@ -119,7 +121,8 @@ export default function TextBasedAnswer(props: AnswerResultProps) {
   const hasPreviewData = !!previewDataResult.data?.previewData;
 
   const onPreviewData = async () => {
-    await previewData({ variables: { where: { responseId: id } } });
+    if (!projectId) return;
+    await previewData({ variables: { projectId, where: { responseId: id } } });
   };
 
   const autoTriggerPreviewDataButton = async () => {
