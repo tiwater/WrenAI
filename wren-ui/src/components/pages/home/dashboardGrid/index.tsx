@@ -25,6 +25,7 @@ import {
   usePreviewItemSqlMutation,
   useUpdateDashboardItemMutation,
 } from '@/apollo/client/graphql/dashboard.generated';
+import { useOptionalSelectedProject } from '@/contexts/ProjectContext';
 
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
@@ -243,6 +244,7 @@ export default DashboardGrid;
 const PinnedItemTitle = (props: { id: number; title: string }) => {
   const { title } = props;
   const [form] = Form.useForm();
+  const projectId = useOptionalSelectedProject();
 
   const [updateDashboardItem] = useUpdateDashboardItemMutation({
     onError: (error) => console.error(error),
@@ -250,8 +252,10 @@ const PinnedItemTitle = (props: { id: number; title: string }) => {
 
   const handleSave = (dashboardItemId: number, values: { title: string }) => {
     if (values.title === title) return;
+    if (!projectId) return;
     updateDashboardItem({
       variables: {
+        projectId,
         where: { id: dashboardItemId },
         data: {
           displayName: values.title.trim(),
@@ -286,6 +290,7 @@ const PinnedItem = forwardRef(
   ) => {
     const { item, isSupportCached, onDelete } = props;
     const { detail } = item;
+    const projectId = useOptionalSelectedProject();
     const [isHideLegend, setIsHideLegend] = useState(true);
     const [forceLoading, setForceLoading] = useState(false);
     const [forceUpdate, setForceUpdate] = useState(0);
@@ -294,12 +299,16 @@ const PinnedItem = forwardRef(
       ref,
       () => ({
         onRefresh: () => {
+          if (!projectId) return;
           previewItemSQL({
-            variables: { data: { itemId: item.id, refresh: isSupportCached } },
+            variables: {
+              projectId,
+              data: { itemId: item.id, refresh: isSupportCached },
+            },
           });
         },
       }),
-      [item.id],
+      [item.id, isSupportCached, projectId],
     );
 
     const [previewItemSQL, previewItemSQLResult] = usePreviewItemSqlMutation({
@@ -310,8 +319,9 @@ const PinnedItem = forwardRef(
       previewItem?.cacheOverrodeAt || previewItem?.cacheCreatedAt;
 
     useEffect(() => {
-      previewItemSQL({ variables: { data: { itemId: item.id } } });
-    }, [item.id]);
+      if (!projectId) return;
+      previewItemSQL({ variables: { projectId, data: { itemId: item.id } } });
+    }, [item.id, projectId]);
 
     useEffect(() => {
       setForceLoading(true);
@@ -334,8 +344,12 @@ const PinnedItem = forwardRef(
       if (action === MORE_ACTION.DELETE) {
         await onDelete(item.id);
       } else if (action === MORE_ACTION.REFRESH) {
+        if (!projectId) return;
         previewItemSQL({
-          variables: { data: { itemId: item.id, refresh: isSupportCached } },
+          variables: {
+            projectId,
+            data: { itemId: item.id, refresh: isSupportCached },
+          },
         });
       } else if (action === MORE_ACTION.HIDE_CATEGORY) {
         onHideLegend();

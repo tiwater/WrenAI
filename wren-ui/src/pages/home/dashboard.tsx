@@ -102,12 +102,16 @@ export default function Dashboard() {
 
   const onUpdateChange = async (layouts: ItemLayoutInput[]) => {
     if (layouts && layouts.length > 0) {
-      await updateDashboardItemLayouts({ variables: { data: { layouts } } });
+      if (!projectId) return;
+      await updateDashboardItemLayouts({
+        variables: { projectId, data: { layouts } },
+      });
     }
   };
 
   const onDelete = async (id: number) => {
-    await deleteDashboardItem({ variables: { where: { id } } });
+    if (!projectId) return;
+    await deleteDashboardItem({ variables: { projectId, where: { id } } });
   };
 
   return (
@@ -142,7 +146,8 @@ export default function Dashboard() {
               {...cacheSettingsDrawer.state}
               onClose={cacheSettingsDrawer.closeDrawer}
               onSubmit={async (values) => {
-                await setDashboardSchedule({ variables: { data: values } });
+                if (!projectId) return;
+                await setDashboardSchedule({ variables: { projectId, data: values } });
               }}
             />
           )}

@@ -182,12 +182,17 @@ export default function ChartAnswer(props: AnswerResultProps) {
   };
 
   const onPin = () => {
+    if (!projectId) {
+      message.error('No project selected. Please select a project first.');
+      return;
+    }
     Modal.confirm({
       title: 'Are you sure you want to pin this chart to the dashboard?',
       okText: 'Save',
       onOk: async () =>
         await createDashboardItem({
           variables: {
+            projectId,
             data: {
               // DashboardItemType is compatible with ChartType
               itemType: chartType as unknown as DashboardItemType,
