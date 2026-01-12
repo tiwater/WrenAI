@@ -611,13 +611,16 @@ export class IbisAdaptor implements IIbisAdaptor {
     defaultMessage: string,
     errorMessageBuilder?: CallableFunction,
   ) {
-    const customMessage =
+    let customMessage =
       e.response?.data?.message ||
       e.response?.data ||
       e.message ||
       defaultMessage;
 
-    const errorData = e.response?.data;
+    if (typeof customMessage === 'object') {
+      customMessage = JSON.stringify(customMessage);
+    }
+
     throw Errors.create(Errors.GeneralErrorCodes.IBIS_SERVER_ERROR, {
       customMessage: errorMessageBuilder
         ? errorMessageBuilder(customMessage)
@@ -626,7 +629,6 @@ export class IbisAdaptor implements IIbisAdaptor {
       other: {
         correlationId: e.response?.headers['x-correlation-id'],
         processTime: e.response?.headers['x-process-time'],
-        ...errorData,
       },
     });
   }
