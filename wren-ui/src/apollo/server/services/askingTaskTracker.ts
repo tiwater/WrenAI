@@ -370,6 +370,7 @@ export class AskingTaskTracker implements IAskingTaskTracker {
     }
     // if the generated response of asking task is not null, update the thread response
     if (response.viewId) {
+      logger.info(`[DEBUG] updateThreadResponseWhenTaskFinalized: Updating with viewId ${response.viewId}`);
       // get sql from the view
       const view = await this.viewRepository.findOneBy({
         id: response.viewId,
@@ -378,10 +379,13 @@ export class AskingTaskTracker implements IAskingTaskTracker {
         sql: view.statement,
         viewId: response.viewId,
       });
-    } else {
+    } else if (response.sql) {
+      logger.info(`[DEBUG] updateThreadResponseWhenTaskFinalized: Updating with SQL: ${response.sql}`);
       await this.threadResponseRepository.updateOne(task.threadResponseId, {
-        sql: response?.sql,
+        sql: response.sql,
       });
+    } else {
+      logger.info(`[DEBUG] updateThreadResponseWhenTaskFinalized: No SQL or ViewID in response. Skipping update. Response keys: ${Object.keys(response)}`);
     }
   }
 

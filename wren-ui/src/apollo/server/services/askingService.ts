@@ -698,21 +698,26 @@ export class AskingService implements IAskingService {
       summary: input.question,
     });
 
-    const threadResponse = await this.threadResponseRepository.createOne({
-      threadId: thread.id,
-      question: input.question,
-      sql: input.sql,
-      askingTaskId: input.trackedAskingResult?.taskId,
-    });
+    // Only create the first thread response when we have a tracked asking task
+    // (so SQL will be filled later) or when SQL is explicitly provided.
+    // This avoids creating a response with sql=null for question-only thread creation.
+    if (input.trackedAskingResult?.taskId || input.sql) {
+      const threadResponse = await this.threadResponseRepository.createOne({
+        threadId: thread.id,
+        question: input.question,
+        sql: input.sql,
+        askingTaskId: input.trackedAskingResult?.taskId,
+      });
 
-    // if queryId is provided, update asking task
-    if (input.trackedAskingResult?.taskId) {
-      await this.askingTaskTracker.bindThreadResponse(
-        input.trackedAskingResult.taskId,
-        input.trackedAskingResult.queryId,
-        thread.id,
-        threadResponse.id,
-      );
+      // if queryId is provided, update asking task
+      if (input.trackedAskingResult?.taskId) {
+        await this.askingTaskTracker.bindThreadResponse(
+          input.trackedAskingResult.taskId,
+          input.trackedAskingResult.queryId,
+          thread.id,
+          threadResponse.id,
+        );
+      }
     }
 
     // return the task id
@@ -836,6 +841,31 @@ export class AskingService implements IAskingService {
 
     if (!threadResponse) {
       throw new Error(`Thread response ${threadResponseId} not found`);
+    }
+
+    logger.info(`[DEBUG] generateThreadResponseAnswer: Fetched response ${threadResponse.id} with SQL: ${threadResponse.sql}`);
+
+    // Self-healing: If SQL is missing but askingTaskId exists, try to recover it from the task
+    if (!threadResponse.sql && threadResponse.askingTaskId) {
+      logger.info(`[DEBUG] generateThreadResponseAnswer: SQL missing for response ${threadResponse.id}, attempting to recover from task ${threadResponse.askingTaskId}`);
+      const task = await this.askingTaskTracker.getAskingResultById(threadResponse.askingTaskId);
+      const recoveredSql = task?.response?.[0]?.sql;
+      
+      if (recoveredSql) {
+        logger.info(`[DEBUG] generateThreadResponseAnswer: Recovered SQL: ${recoveredSql}`);
+        await this.threadResponseRepository.updateOne(threadResponse.id, { sql: recoveredSql });
+        threadResponse.sql = recoveredSql;
+      } else {
+        logger.warn(`[DEBUG] generateThreadResponseAnswer: Failed to recover SQL for response ${threadResponse.id}`);
+      }
+    }
+
+    // Guard: don't enqueue a text-based answer job if SQL is still missing.
+    // This prevents ibis adaptor errors like "Input should be a valid string".
+    if (!threadResponse.sql) {
+      throw new Error(
+        `Thread response ${threadResponse.id} SQL is not ready. Refusing to generate answer.`,
+      );
     }
 
     // update with initial status

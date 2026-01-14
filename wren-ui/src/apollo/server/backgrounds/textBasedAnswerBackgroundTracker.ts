@@ -68,10 +68,27 @@ export class TextBasedAnswerBackgroundTracker {
           this.runningJobs.add(threadResponse.id);
 
           try {
+            const latestThreadResponse = await this.threadResponseRepository.findOneBy({
+              id: threadResponse.id,
+            });
+            if (!latestThreadResponse) {
+              delete this.tasks[threadResponse.id];
+              return;
+            }
+
+            // Refresh cached task payload to avoid using stale sql/answerDetail.
+            this.tasks[threadResponse.id] = latestThreadResponse;
+
+            // SQL might be backfilled asynchronously by AskingTaskTracker.
+            // If SQL is not ready yet, keep the task and retry in next interval.
+            if (!latestThreadResponse.sql) {
+              return;
+            }
+
             // update the status to fetching data
             await this.threadResponseRepository.updateOne(threadResponse.id, {
               answerDetail: {
-                ...threadResponse.answerDetail,
+                ...latestThreadResponse.answerDetail,
                 status: ThreadResponseAnswerStatus.FETCHING_DATA,
               },
             });
@@ -92,7 +109,7 @@ export class TextBasedAnswerBackgroundTracker {
             const mdl = deployment.manifest;
             let data: PreviewDataResponse;
             try {
-              data = (await this.queryService.preview(threadResponse.sql, {
+              data = (await this.queryService.preview(latestThreadResponse.sql, {
                 project,
                 manifest: mdl,
                 modelingOnly: false,
@@ -102,7 +119,7 @@ export class TextBasedAnswerBackgroundTracker {
               logger.error(`Error when query sql data: ${error}`);
               await this.threadResponseRepository.updateOne(threadResponse.id, {
                 answerDetail: {
-                  ...threadResponse.answerDetail,
+                  ...latestThreadResponse.answerDetail,
                   status: ThreadResponseAnswerStatus.FAILED,
                   error: error?.extensions || error,
                 },
@@ -111,11 +128,12 @@ export class TextBasedAnswerBackgroundTracker {
             }
 
             // request AI service
+            logger.info(`[DEBUG] TextBasedAnswerBackgroundTracker: processing responseId ${latestThreadResponse.id} with SQL: ${latestThreadResponse.sql}`);
             const response = await this.wrenAIAdaptor.createTextBasedAnswer({
-              query: threadResponse.question,
-              sql: threadResponse.sql,
+              query: latestThreadResponse.question,
+              sql: latestThreadResponse.sql,
               sqlData: data,
-              threadId: threadResponse.threadId.toString(),
+              threadId: latestThreadResponse.threadId.toString(),
               configurations: {
                 language: WrenAILanguage[project.language] || WrenAILanguage.EN,
               },
@@ -124,7 +142,7 @@ export class TextBasedAnswerBackgroundTracker {
             // update the status to preprocessing
             await this.threadResponseRepository.updateOne(threadResponse.id, {
               answerDetail: {
-                ...threadResponse.answerDetail,
+                ...latestThreadResponse.answerDetail,
                 status: ThreadResponseAnswerStatus.PREPROCESSING,
               },
             });

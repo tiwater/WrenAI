@@ -422,7 +422,9 @@ export class AskingResolver {
       threadResponseInput = {
         question: askingTask.question,
         trackedAskingResult: askingTask,
+        sql: data.sql,
       };
+      logger.info(`[DEBUG] createThreadResponse: Using SQL from data: ${data.sql}`);
     } else {
       // when we use recommendation questions, there's no task to track
       threadResponseInput = data;
