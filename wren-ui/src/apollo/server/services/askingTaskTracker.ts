@@ -117,6 +117,26 @@ export class AskingTaskTracker implements IAskingTaskTracker {
       } as TrackedTask;
       this.trackedTasks.set(queryId, task);
 
+
+      // Persist a DB record immediately so follow-up requests (e.g. createThreadResponse)
+      // can resolve the asking task by queryId even before the first poll updates the DB.
+      // This avoids a race where createThreadResponse throws "Asking task ... not found".
+      const existingTaskRecord = await this.askingTaskRepository.findByQueryId(queryId);
+      if (!existingTaskRecord) {
+        const createdTask = await this.askingTaskRepository.createOne({
+          queryId,
+          question: input.query,
+          detail: {
+            status: AskResultStatus.UNDERSTANDING,
+          } as any,
+        });
+        task.taskId = createdTask.id;
+        this.trackedTasksById.set(createdTask.id, task);
+      } else {
+        task.taskId = existingTaskRecord.id;
+        this.trackedTasksById.set(existingTaskRecord.id, task);
+      }
+
       // if rerun from cancelled, we update the query id to the previous task
       if (
         input.rerunFromCancelled &&

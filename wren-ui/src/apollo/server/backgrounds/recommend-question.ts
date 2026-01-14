@@ -83,6 +83,15 @@ export class ProjectRecommendQuestionBackgroundTracker {
           const nextQuestions = result.response?.questions || [];
           const prevQuestions = latestProject.questions || [];
 
+          // If task is finalized, always remove it even if there is no further change.
+          // Otherwise we can get stuck logging "status not changed" forever.
+          if (isFinalized(result.status)) {
+            this.logger.debug(
+              `${loggerPrefix}job ${this.taskKey(project)} is finalized, removing`,
+            );
+            delete this.tasks[this.taskKey(project)];
+          }
+
           // check if status change
           if (
             latestProject.questionsStatus === result.status &&
@@ -241,6 +250,15 @@ export class ThreadRecommendQuestionBackgroundTracker {
 
           const nextQuestions = result.response?.questions || [];
           const prevQuestions = latestThread.questions || [];
+
+          // If task is finalized, always remove it even if there is no further change.
+          // Otherwise we can get stuck logging "status not changed" forever.
+          if (isFinalized(result.status)) {
+            this.logger.debug(
+              `${loggerPrefix}job ${this.taskKey(thread)} is finalized, removing`,
+            );
+            delete this.tasks[this.taskKey(thread)];
+          }
 
           // check if status change
           if (
