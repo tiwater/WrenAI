@@ -860,8 +860,25 @@ export class AskingService implements IAskingService {
       }
     }
 
-    // Guard: don't enqueue a text-based answer job if SQL is still missing.
-    // This prevents ibis adaptor errors like "Input should be a valid string".
+    // If SQL is still missing and this response is backed by an asking task,
+    // enqueue the job and let the background tracker wait for SQL backfill.
+    // This avoids transient GraphQL errors when the UI triggers answer generation
+    // immediately after creating the response.
+    if (!threadResponse.sql && threadResponse.askingTaskId) {
+      const updatedThreadResponse = await this.threadResponseRepository.updateOne(
+        threadResponse.id,
+        {
+          answerDetail: {
+            status: ThreadResponseAnswerStatus.NOT_STARTED,
+          },
+        },
+      );
+      this.textBasedAnswerBackgroundTracker.addTask(updatedThreadResponse);
+      return updatedThreadResponse;
+    }
+
+    // Guard: don't enqueue a text-based answer job if SQL is still missing and
+    // there is no asking task to backfill it.
     if (!threadResponse.sql) {
       throw new Error(
         `Thread response ${threadResponse.id} SQL is not ready. Refusing to generate answer.`,

@@ -24,6 +24,7 @@ export class ProjectRecommendQuestionBackgroundTracker {
   // tasks is a kv pair of task id and thread response
   private tasks: Record<number, Project> = {};
   private intervalTime: number;
+  private interval?: ReturnType<typeof setInterval>;
   private wrenAIAdaptor: IWrenAIAdaptor;
   private projectRepository: IProjectRepository;
   private runningJobs = new Set();
@@ -49,8 +50,11 @@ export class ProjectRecommendQuestionBackgroundTracker {
   }
 
   public start() {
+    if (this.interval) {
+      return;
+    }
     this.logger.info('Recommend question background tracker started');
-    setInterval(() => {
+    this.interval = setInterval(() => {
       const jobs = Object.values(this.tasks).map((project) => async () => {
         // check if same job is running
         if (this.runningJobs.has(this.taskKey(project))) {
@@ -179,6 +183,7 @@ export class ThreadRecommendQuestionBackgroundTracker {
   // tasks is a kv pair of task id and thread response
   private tasks: Record<number, Thread> = {};
   private intervalTime: number;
+  private interval?: ReturnType<typeof setInterval>;
   private wrenAIAdaptor: IWrenAIAdaptor;
   private threadRepository: IThreadRepository;
   private runningJobs = new Set();
@@ -204,8 +209,11 @@ export class ThreadRecommendQuestionBackgroundTracker {
   }
 
   public start() {
+    if (this.interval) {
+      return;
+    }
     this.logger.info('Recommend question background tracker started');
-    setInterval(() => {
+    this.interval = setInterval(() => {
       const jobs = Object.values(this.tasks).map((thread) => async () => {
         // check if same job is running
         if (this.runningJobs.has(this.taskKey(thread))) {
