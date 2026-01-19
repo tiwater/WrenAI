@@ -220,8 +220,18 @@ export default function useAskPrompt(threadId?: number) {
       const response = await createInstantRecommendedQuestions({
         variables: { projectId, data: { previousQuestions } },
       });
+
+      const taskId = response.data?.createInstantRecommendedQuestions?.id;
+      if (!taskId) {
+        console.warn(
+          '[useAskPrompt] createInstantRecommendedQuestions returned empty data; skip polling instantRecommendedQuestions',
+          { errors: response.errors },
+        );
+        return;
+      }
+
       fetchInstantRecommendedQuestions({
-        variables: { taskId: response.data.createInstantRecommendedQuestions.id },
+        variables: { taskId },
       });
     }
   }, [originalQuestion, projectId]);

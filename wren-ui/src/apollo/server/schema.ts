@@ -1328,6 +1328,7 @@ export const typeDefs = gql`
     generateThreadRecommendationQuestions(projectId: Int!, threadId: Int!): Boolean!
     generateProjectRecommendationQuestions(projectId: Int!): Boolean!
     createInstantRecommendedQuestions(
+      projectId: Int!
       data: InstantRecommendedQuestionsInput!
     ): Task!
 
