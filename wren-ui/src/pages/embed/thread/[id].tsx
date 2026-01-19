@@ -113,7 +113,7 @@ export default function EmbedThread() {
 
   const [createViewMutation, { loading: creating }] = useCreateViewMutation({
     onError: (error) => console.error(error),
-    onCompleted: () => message.success('Successfully created view.'),
+    onCompleted: () => message.success('已成功创建视图。'),
   });
 
   const { data, updateQuery: updateThreadQuery } = useThreadQuery({
@@ -144,7 +144,7 @@ export default function EmbedThread() {
     useUpdateThreadResponseMutation({
       onError: (error) => console.error(error),
       onCompleted: (d) => {
-        message.success('Successfully updated the SQL statement');
+        message.success('已成功更新 SQL 语句。');
         onGenerateThreadResponseAnswer(d.updateThreadResponse.id);
       },
     });
@@ -198,7 +198,7 @@ export default function EmbedThread() {
       awaitRefetchQueries: true,
       onError: (error) => console.error(error),
       onCompleted: () => {
-        message.success('Successfully created question-sql pair.');
+        message.success('已成功创建问题-SQL 对。');
       },
     });
 

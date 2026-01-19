@@ -66,7 +66,7 @@ export default function AdjustSQLModal(props: Props) {
 
   const handleError = (error) => {
     const graphQLError = parseGraphQLError(error);
-    setError({ ...graphQLError, shortMessage: 'Invalid SQL syntax' });
+    setError({ ...graphQLError, shortMessage: 'SQL 语法无效' });
     console.error(graphQLError);
   };
 
@@ -124,7 +124,7 @@ export default function AdjustSQLModal(props: Props) {
 
   return (
     <Modal
-      title="Adjust SQL"
+      title="调整 SQL"
       centered
       closable
       confirmLoading={confirmLoading}
@@ -147,26 +147,25 @@ export default function AdjustSQLModal(props: Props) {
               type="secondary"
               className="text-sm gray-7 text-left"
             >
-              The SQL statement used here follows <b>Wren SQL</b>, which is
-              based on ANSI SQL and optimized for Wren AI.{` `}
+              此处使用的 SQL 遵循 <b>Wren SQL</b>，它基于 ANSI SQL 并针对 Wren AI 进行了优化。{` `}
               <Typography.Link
                 type="secondary"
                 href="https://docs.getwren.ai/oss/guide/home/wren_sql"
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                Learn more about the syntax.
+                了解更多语法说明。
               </Typography.Link>
             </Typography.Text>
           </div>
           <div>
-            <Button onClick={onClose}>Cancel</Button>
+            <Button onClick={onClose}>取消</Button>
             <Button
               type="primary"
               onClick={onSubmitButton}
               loading={confirmLoading}
             >
-              Submit
+              提交
             </Button>
           </div>
         </div>
@@ -174,7 +173,7 @@ export default function AdjustSQLModal(props: Props) {
     >
       <Form form={form} preserve={false} layout="vertical">
         <Form.Item
-          label="SQL statement"
+          label="SQL 语句"
           name="sql"
           required
           rules={[
@@ -189,14 +188,14 @@ export default function AdjustSQLModal(props: Props) {
       </Form>
       <div className="my-3">
         <Typography.Text className="d-block gray-7 mb-2">
-          Data preview (50 rows)
+          数据预览（50 行）
         </Typography.Text>
         <Button
           onClick={onPreviewData}
           loading={previewing}
           disabled={disabled}
         >
-          Preview data
+          预览数据
         </Button>
         {showPreview && (
           <div className="my-3">

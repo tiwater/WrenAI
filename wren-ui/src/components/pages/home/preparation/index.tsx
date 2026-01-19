@@ -88,12 +88,12 @@ export default function Preparation(props: Props) {
               <Typography.Title level={5} className="gray-8 text-medium mb-0">
                 <Image
                   src="/images/icon/message-ai.svg"
-                  alt="Answer Preparation Steps"
+                  alt="准备步骤"
                   width={24}
                   height={24}
                   className="mr-1"
                 />
-                Answer preparation steps
+                准备步骤
               </Typography.Title>
               <PreparationStatus {...props} preparedTask={preparedTask} />
             </div>

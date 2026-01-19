@@ -40,7 +40,7 @@ export default function SaveAsViewModal(props: Props) {
 
   return (
     <Modal
-      title="Save as View"
+      title="保存为视图"
       centered
       closable
       destroyOnClose
@@ -57,14 +57,13 @@ export default function SaveAsViewModal(props: Props) {
           >
             <InfoCircleOutlined className="mr-2 text-sm gray-6" />
             <Text type="secondary" className="text-sm gray-6 text-left">
-              After saving, make sure you go to "Modeling Page" to deploy all
-              saved views.
+              保存后，请前往「建模页面」部署所有已保存的视图。
             </Text>
           </div>
           <div>
-            <Button onClick={onClose}>Cancel</Button>
+            <Button onClick={onClose}>取消</Button>
             <Button type="primary" onClick={submit} loading={loading}>
-              Save
+              保存
             </Button>
           </div>
         </div>
@@ -72,7 +71,7 @@ export default function SaveAsViewModal(props: Props) {
     >
       <Form form={form} preserve={false} layout="vertical">
         <Form.Item
-          label="Name"
+          label="名称"
           name="name"
           required
           rules={[
@@ -84,7 +83,7 @@ export default function SaveAsViewModal(props: Props) {
         >
           <Input />
         </Form.Item>
-        <Form.Item label="SQL Statement">
+        <Form.Item label="SQL 语句">
           <SQLCodeBlock code={sql} showLineNumbers maxHeight="300" />
         </Form.Item>
       </Form>
