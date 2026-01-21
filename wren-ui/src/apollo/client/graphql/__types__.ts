@@ -756,12 +756,14 @@ export type Mutation = {
 
 export type MutationAdjustThreadResponseArgs = {
   data: AdjustThreadResponseInput;
+  projectId: Scalars['Int'];
   responseId: Scalars['Int'];
 };
 
 
 export type MutationAdjustThreadResponseChartArgs = {
   data: AdjustThreadResponseChartInput;
+  projectId: Scalars['Int'];
   responseId: Scalars['Int'];
 };
 
@@ -778,31 +780,37 @@ export type MutationCancelAskingTaskArgs = {
 
 export type MutationCreateAskingTaskArgs = {
   data: AskingTaskInput;
+  projectId: Scalars['Int'];
 };
 
 
 export type MutationCreateCalculatedFieldArgs = {
   data: CreateCalculatedFieldInput;
+  projectId: Scalars['Int'];
 };
 
 
 export type MutationCreateDashboardItemArgs = {
   data: CreateDashboardItemInput;
+  projectId: Scalars['Int'];
 };
 
 
 export type MutationCreateInstantRecommendedQuestionsArgs = {
   data: InstantRecommendedQuestionsInput;
+  projectId: Scalars['Int'];
 };
 
 
 export type MutationCreateInstructionArgs = {
   data: CreateInstructionInput;
+  projectId: Scalars['Int'];
 };
 
 
 export type MutationCreateModelArgs = {
   data: CreateModelInput;
+  projectId: Scalars['Int'];
 };
 
 
@@ -813,46 +821,55 @@ export type MutationCreateProjectArgs = {
 
 export type MutationCreateRelationArgs = {
   data: RelationInput;
+  projectId: Scalars['Int'];
 };
 
 
 export type MutationCreateSqlPairArgs = {
   data: CreateSqlPairInput;
+  projectId: Scalars['Int'];
 };
 
 
 export type MutationCreateThreadArgs = {
   data: CreateThreadInput;
+  projectId: Scalars['Int'];
 };
 
 
 export type MutationCreateThreadResponseArgs = {
   data: CreateThreadResponseInput;
+  projectId: Scalars['Int'];
   threadId: Scalars['Int'];
 };
 
 
 export type MutationCreateViewArgs = {
   data: CreateViewInput;
+  projectId: Scalars['Int'];
 };
 
 
 export type MutationDeleteCalculatedFieldArgs = {
+  projectId: Scalars['Int'];
   where?: InputMaybe<UpdateCalculatedFieldWhere>;
 };
 
 
 export type MutationDeleteDashboardItemArgs = {
+  projectId: Scalars['Int'];
   where: DashboardItemWhereInput;
 };
 
 
 export type MutationDeleteInstructionArgs = {
+  projectId: Scalars['Int'];
   where: InstructionWhereInput;
 };
 
 
 export type MutationDeleteModelArgs = {
+  projectId: Scalars['Int'];
   where: ModelWhereInput;
 };
 
@@ -863,21 +880,25 @@ export type MutationDeleteProjectArgs = {
 
 
 export type MutationDeleteRelationArgs = {
+  projectId: Scalars['Int'];
   where: WhereIdInput;
 };
 
 
 export type MutationDeleteSqlPairArgs = {
+  projectId: Scalars['Int'];
   where: SqlPairWhereUniqueInput;
 };
 
 
 export type MutationDeleteThreadArgs = {
+  projectId: Scalars['Int'];
   where: ThreadUniqueWhereInput;
 };
 
 
 export type MutationDeleteViewArgs = {
+  projectId: Scalars['Int'];
   where: ViewWhereUniqueInput;
 };
 
@@ -901,6 +922,7 @@ export type MutationGenerateProjectRecommendationQuestionsArgs = {
 
 export type MutationGenerateQuestionArgs = {
   data: GenerateQuestionInput;
+  projectId: Scalars['Int'];
 };
 
 
@@ -911,41 +933,49 @@ export type MutationGenerateThreadRecommendationQuestionsArgs = {
 
 
 export type MutationGenerateThreadResponseAnswerArgs = {
+  projectId: Scalars['Int'];
   responseId: Scalars['Int'];
 };
 
 
 export type MutationGenerateThreadResponseBreakdownArgs = {
+  projectId: Scalars['Int'];
   responseId: Scalars['Int'];
 };
 
 
 export type MutationGenerateThreadResponseChartArgs = {
+  projectId: Scalars['Int'];
   responseId: Scalars['Int'];
 };
 
 
 export type MutationModelSubstituteArgs = {
   data: ModelSubstituteInput;
+  projectId: Scalars['Int'];
 };
 
 
 export type MutationPreviewBreakdownDataArgs = {
+  projectId: Scalars['Int'];
   where: PreviewDataInput;
 };
 
 
 export type MutationPreviewDataArgs = {
+  projectId: Scalars['Int'];
   where: PreviewDataInput;
 };
 
 
 export type MutationPreviewItemSqlArgs = {
   data: PreviewItemSqlInput;
+  projectId: Scalars['Int'];
 };
 
 
 export type MutationPreviewModelDataArgs = {
+  projectId: Scalars['Int'];
   where: WhereIdInput;
 };
 
@@ -957,16 +987,19 @@ export type MutationPreviewSqlArgs = {
 
 
 export type MutationPreviewViewDataArgs = {
+  projectId: Scalars['Int'];
   where: PreviewViewDataInput;
 };
 
 
 export type MutationRerunAdjustmentTaskArgs = {
+  projectId: Scalars['Int'];
   responseId: Scalars['Int'];
 };
 
 
 export type MutationRerunAskingTaskArgs = {
+  projectId: Scalars['Int'];
   responseId: Scalars['Int'];
 };
 
@@ -1008,6 +1041,7 @@ export type MutationSaveTablesArgs = {
 
 export type MutationSetDashboardScheduleArgs = {
   data: SetDashboardScheduleInput;
+  projectId: Scalars['Int'];
 };
 
 
@@ -1024,6 +1058,7 @@ export type MutationTriggerDataSourceDetectionArgs = {
 
 export type MutationUpdateCalculatedFieldArgs = {
   data: UpdateCalculatedFieldInput;
+  projectId: Scalars['Int'];
   where: UpdateCalculatedFieldWhere;
 };
 
@@ -1036,12 +1071,14 @@ export type MutationUpdateCurrentProjectArgs = {
 
 export type MutationUpdateDashboardItemArgs = {
   data: UpdateDashboardItemInput;
+  projectId: Scalars['Int'];
   where: DashboardItemWhereInput;
 };
 
 
 export type MutationUpdateDashboardItemLayoutsArgs = {
   data: UpdateDashboardItemLayoutsInput;
+  projectId: Scalars['Int'];
 };
 
 
@@ -1053,18 +1090,21 @@ export type MutationUpdateDataSourceArgs = {
 
 export type MutationUpdateInstructionArgs = {
   data: UpdateInstructionInput;
+  projectId: Scalars['Int'];
   where: InstructionWhereInput;
 };
 
 
 export type MutationUpdateModelArgs = {
   data: UpdateModelInput;
+  projectId: Scalars['Int'];
   where: ModelWhereInput;
 };
 
 
 export type MutationUpdateModelMetadataArgs = {
   data: UpdateModelMetadataInput;
+  projectId: Scalars['Int'];
   where: ModelWhereInput;
 };
 
@@ -1077,41 +1117,48 @@ export type MutationUpdateProjectArgs = {
 
 export type MutationUpdateRelationArgs = {
   data: UpdateRelationInput;
+  projectId: Scalars['Int'];
   where: WhereIdInput;
 };
 
 
 export type MutationUpdateSqlPairArgs = {
   data: UpdateSqlPairInput;
+  projectId: Scalars['Int'];
   where: SqlPairWhereUniqueInput;
 };
 
 
 export type MutationUpdateThreadArgs = {
   data: UpdateThreadInput;
+  projectId: Scalars['Int'];
   where: ThreadUniqueWhereInput;
 };
 
 
 export type MutationUpdateThreadResponseArgs = {
   data: UpdateThreadResponseInput;
+  projectId: Scalars['Int'];
   where: ThreadResponseUniqueWhereInput;
 };
 
 
 export type MutationUpdateViewMetadataArgs = {
   data: UpdateViewMetadataInput;
+  projectId: Scalars['Int'];
   where: ViewWhereUniqueInput;
 };
 
 
 export type MutationValidateCalculatedFieldArgs = {
   data: ValidateCalculatedFieldInput;
+  projectId: Scalars['Int'];
 };
 
 
 export type MutationValidateViewArgs = {
   data: ValidateViewInput;
+  projectId: Scalars['Int'];
 };
 
 export type NestedFieldInfo = {
@@ -1258,6 +1305,7 @@ export type QueryAdjustmentTaskArgs = {
 export type QueryApiHistoryArgs = {
   filter?: InputMaybe<ApiHistoryFilterInput>;
   pagination: ApiHistoryPaginationInput;
+  projectId: Scalars['Int'];
 };
 
 
@@ -1313,6 +1361,11 @@ export type QueryInstantRecommendedQuestionsArgs = {
 
 
 export type QueryInstructionsArgs = {
+  projectId: Scalars['Int'];
+};
+
+
+export type QueryLearningRecordArgs = {
   projectId: Scalars['Int'];
 };
 

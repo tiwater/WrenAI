@@ -13,6 +13,7 @@ import {
 } from '@server/repositories';
 import { IWrenAIAdaptor } from '../adaptors';
 import * as Errors from '@server/utils/error';
+import { ThreadResponseAnswerStatus } from './askingService';
 
 const logger = getLogger('AskingTaskTracker');
 logger.level = 'debug';
@@ -272,6 +273,30 @@ export class AskingTaskTracker implements IAskingTaskTracker {
             // Mark the job as running
             this.runningJobs.add(queryId);
 
+            // Check for timeout
+            if (now - task.createdAt > this.timeout) {
+              logger.warn(`AskingTaskTracker: Task ${queryId} timed out.`);
+              const error = {
+                code: 'TIMEOUT',
+                message: 'Asking task timed out',
+                shortMessage: 'Asking task timed out',
+              };
+              task.isFinalized = true;
+              task.result = {
+                ...task.result,
+                status: AskResultStatus.FAILED,
+                error,
+              } as AskResult;
+
+              await this.updateTaskInDatabase({ queryId }, task);
+              
+              if (task.threadResponseId) {
+                await this.updateThreadResponseWhenTaskFinalized(task);
+              }
+              this.runningJobs.delete(queryId);
+              return;
+            }
+
             // Poll for updates
             logger.info(`Polling for updates for task ${queryId}`);
             const result = await this.wrenAIAdaptor.getAskResult(queryId);
@@ -385,9 +410,34 @@ export class AskingTaskTracker implements IAskingTaskTracker {
     task: TrackedTask,
   ): Promise<void> {
     const response = task?.result?.response?.[0];
+    
+    // Helper to fail the thread response
+    const failThreadResponse = async (error: any) => {
+      logger.info(`[DEBUG] updateThreadResponseWhenTaskFinalized: Marking response ${task.threadResponseId} as FAILED due to: ${JSON.stringify(error)}`);
+      // We need to fetch current answerDetail first to preserve other fields if needed, 
+      // but here we just want to set status to FAILED.
+      // Ideally we should use a transaction or atomic update, but simple update is fine for now.
+      const threadResponse = await this.threadResponseRepository.findOneBy({ id: task.threadResponseId });
+      if (threadResponse) {
+        await this.threadResponseRepository.updateOne(task.threadResponseId, {
+          answerDetail: {
+            ...threadResponse.answerDetail,
+            status: ThreadResponseAnswerStatus.FAILED,
+            error: error,
+          },
+        });
+      }
+    };
+
     if (!response) {
+      if (task.result?.status === AskResultStatus.FAILED) {
+        await failThreadResponse(task.result.error || { message: 'Asking task failed' });
+      } else if (task.result?.status === AskResultStatus.FINISHED) {
+        await failThreadResponse({ message: 'Asking task finished but returned no response data' });
+      }
       return;
     }
+
     // if the generated response of asking task is not null, update the thread response
     if (response.viewId) {
       logger.info(`[DEBUG] updateThreadResponseWhenTaskFinalized: Updating with viewId ${response.viewId}`);
@@ -395,10 +445,14 @@ export class AskingTaskTracker implements IAskingTaskTracker {
       const view = await this.viewRepository.findOneBy({
         id: response.viewId,
       });
-      await this.threadResponseRepository.updateOne(task.threadResponseId, {
-        sql: view.statement,
-        viewId: response.viewId,
-      });
+      if (view) {
+        await this.threadResponseRepository.updateOne(task.threadResponseId, {
+          sql: view.statement,
+          viewId: response.viewId,
+        });
+      } else {
+        await failThreadResponse({ message: `View ${response.viewId} not found` });
+      }
     } else if (response.sql) {
       logger.info(`[DEBUG] updateThreadResponseWhenTaskFinalized: Updating with SQL: ${response.sql}`);
       await this.threadResponseRepository.updateOne(task.threadResponseId, {
@@ -406,6 +460,7 @@ export class AskingTaskTracker implements IAskingTaskTracker {
       });
     } else {
       logger.info(`[DEBUG] updateThreadResponseWhenTaskFinalized: No SQL or ViewID in response. Skipping update. Response keys: ${Object.keys(response)}`);
+      await failThreadResponse({ message: 'Asking task finished but returned no SQL or ViewID' });
     }
   }
 
