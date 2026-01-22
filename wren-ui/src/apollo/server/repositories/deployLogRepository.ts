@@ -43,6 +43,9 @@ export class DeployLogRepository
   }
 
   public async findInProgressProjectDeployLog(projectId: number) {
+    // a timeout to avoid stuck in progress status
+    // if the deployment is still in progress after 10 minutes, we consider it as failed
+    const timeout = new Date(Date.now() - 10 * 60 * 1000);
     const res = await this.knex
       .select('*')
       .from(this.tableName)
@@ -52,6 +55,7 @@ export class DeployLogRepository
           status: DeployStatusEnum.IN_PROGRESS,
         }),
       )
+      .andWhere('created_at', '>', timeout)
       .orderBy('created_at', 'desc')
       .first();
     return (res && this.transformFromDBData(res)) || null;
