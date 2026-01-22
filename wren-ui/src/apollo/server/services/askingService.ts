@@ -469,6 +469,7 @@ export class AskingService implements IAskingService {
         wrenAIAdaptor,
         threadResponseRepository,
         threadRepository,
+        askingTaskRepository,
         projectService,
         deployService,
         queryService,

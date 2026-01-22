@@ -218,10 +218,20 @@ export class AskingTaskTracker implements IAskingTaskTracker {
     threadId: number,
     threadResponseId: number,
   ): Promise<void> {
+    logger.info(
+      `[DEBUG] bindThreadResponse called: taskId=${id}, queryId=${queryId}, ` +
+      `threadId=${threadId}, threadResponseId=${threadResponseId}`,
+    );
     const task = this.trackedTasks.get(queryId);
     if (!task) {
+      logger.error(`[DEBUG] bindThreadResponse: Task ${queryId} not found in trackedTasks`);
       throw new Error(`Task ${queryId} not found`);
     }
+
+    logger.info(
+      `[DEBUG] bindThreadResponse: Task ${queryId} found. isFinalized=${task.isFinalized}, ` +
+      `hasResult=${!!task.result}, resultStatus=${task.result?.status}`,
+    );
 
     task.threadResponseId = threadResponseId;
     this.trackedTasksById.set(id, task);
@@ -232,7 +242,16 @@ export class AskingTaskTracker implements IAskingTaskTracker {
 
     // check if the task is finalized and has a sql
     if (task.isFinalized) {
+      logger.info(
+        `[DEBUG] bindThreadResponse: Task ${queryId} is already finalized. ` +
+        `Calling updateThreadResponseWhenTaskFinalized immediately.`,
+      );
       await this.updateThreadResponseWhenTaskFinalized(task);
+    } else {
+      logger.info(
+        `[DEBUG] bindThreadResponse: Task ${queryId} not yet finalized. ` +
+        `Will update threadResponse when task completes.`,
+      );
     }
   }
 
@@ -302,8 +321,18 @@ export class AskingTaskTracker implements IAskingTaskTracker {
             const result = await this.wrenAIAdaptor.getAskResult(queryId);
             task.lastPolled = now;
 
+            logger.info(
+              `[DEBUG] Polled task ${queryId}: ` +
+              `oldStatus=${task.result?.status}, newStatus=${result.status}, ` +
+              `oldType=${task.result?.type}, newType=${result.type}`,
+            );
+
             // if result is not changed, we don't need to update the database
-            if (!this.isResultChanged(task.result, result)) {
+            const resultChanged = this.isResultChanged(task.result, result);
+            logger.info(
+              `[DEBUG] isResultChanged for task ${queryId}: ${resultChanged}`,
+            );
+            if (!resultChanged) {
               this.runningJobs.delete(queryId);
               return;
             }
@@ -317,38 +346,51 @@ export class AskingTaskTracker implements IAskingTaskTracker {
               return;
             }
 
-            // if it's identified as GENERAL or MISLEADING_QUER
-            // we don't need to update the database and finalize the task
+            // if it's identified as GENERAL or MISLEADING_QUERY
+            // we need to finalize the task and notify the frontend
             if (
               result.type === AskResultType.GENERAL ||
               result.type === AskResultType.MISLEADING_QUERY
             ) {
               task.isFinalized = true;
-              // if it's rerun from cancelled, we need to update the task result to failed in db
-              if (task.rerunFromCancelled) {
-                const errorCode =
-                  result.type === AskResultType.GENERAL
-                    ? Errors.GeneralErrorCodes.IDENTIED_AS_GENERAL
-                    : Errors.GeneralErrorCodes.IDENTIED_AS_MISLEADING_QUERY;
-                const error = {
-                  code: errorCode,
-                  message: Errors.errorMessages[errorCode],
-                  shortMessage: Errors.shortMessages[errorCode],
-                };
-                await this.updateTaskInDatabase(
-                  { queryId },
-                  {
-                    ...task,
-                    // update the status to failed
-                    // and the error message should be "IDENTIED_AS_GENERAL" or "IDENTIED_AS_MISLEADING_QUERY"
-                    result: {
-                      ...task.result,
-                      status: AskResultStatus.FAILED,
-                      error,
-                    },
-                  },
+              logger.info(
+                `[DEBUG] Task ${queryId} identified as ${result.type}. ` +
+                `threadResponseId=${task.threadResponseId}`,
+              );
+              
+              const errorCode =
+                result.type === AskResultType.GENERAL
+                  ? Errors.GeneralErrorCodes.IDENTIED_AS_GENERAL
+                  : Errors.GeneralErrorCodes.IDENTIED_AS_MISLEADING_QUERY;
+              const error = {
+                code: errorCode,
+                message: Errors.errorMessages[errorCode],
+                shortMessage: Errors.shortMessages[errorCode],
+              };
+              
+              // Update task result to FAILED
+              task.result = {
+                ...task.result,
+                status: AskResultStatus.FAILED,
+                error,
+              };
+              
+              // Update database
+              await this.updateTaskInDatabase({ queryId }, task);
+              
+              // Notify frontend by updating threadResponse
+              if (task.threadResponseId) {
+                logger.info(
+                  `[DEBUG] Calling updateThreadResponseWhenTaskFinalized for GENERAL/MISLEADING task ${queryId}`,
+                );
+                await this.updateThreadResponseWhenTaskFinalized(task);
+              } else {
+                logger.warn(
+                  `[DEBUG] Task ${queryId} identified as ${result.type} but threadResponseId not set. ` +
+                  `Frontend will not be notified.`,
                 );
               }
+              
               this.runningJobs.delete(queryId);
               return;
             }
@@ -363,9 +405,21 @@ export class AskingTaskTracker implements IAskingTaskTracker {
             // Check if task is now finalized
             if (this.isTaskFinalized(result.status)) {
               task.isFinalized = true;
+              logger.info(
+                `[DEBUG] Task ${queryId} is finalized with status: ${result.status}. ` +
+                `threadResponseId=${task.threadResponseId}`,
+              );
               // update thread response if threadResponseId is provided
               if (task.threadResponseId) {
+                logger.info(
+                  `[DEBUG] Calling updateThreadResponseWhenTaskFinalized for task ${queryId}`,
+                );
                 await this.updateThreadResponseWhenTaskFinalized(task);
+              } else {
+                logger.warn(
+                  `[DEBUG] Task ${queryId} finalized but threadResponseId not set. ` +
+                  `SQL will not be written to threadResponse. This may cause the UI to hang.`,
+                );
               }
 
               logger.info(
@@ -409,7 +463,15 @@ export class AskingTaskTracker implements IAskingTaskTracker {
   private async updateThreadResponseWhenTaskFinalized(
     task: TrackedTask,
   ): Promise<void> {
+    logger.info(
+      `[DEBUG] updateThreadResponseWhenTaskFinalized called for task ${task.queryId}, ` +
+      `threadResponseId=${task.threadResponseId}`,
+    );
     const response = task?.result?.response?.[0];
+    logger.info(
+      `[DEBUG] updateThreadResponseWhenTaskFinalized: response exists=${!!response}, ` +
+      `hasViewId=${!!response?.viewId}, hasSql=${!!response?.sql}`,
+    );
     
     // Helper to fail the thread response
     const failThreadResponse = async (error: any) => {
