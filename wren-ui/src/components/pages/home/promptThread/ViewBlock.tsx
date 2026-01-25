@@ -11,33 +11,36 @@ interface Props {
 }
 
 export default function ViewBlock({ view, onClick }: Props) {
-  const isViewSaved = !!view;
+  // Disable save as view feature for Jinjie
+  
+  // const isViewSaved = !!view;
 
-  if (isViewSaved) {
-    return (
-      <div className="gray-6 text-medium">
-        <FileDoneOutlined className="mr-2" />
-        Generated from saved view{' '}
-        <Link
-          className="gray-7"
-          href={`${Path.Modeling}?viewId=${view.id}&openMetadata=true`}
-          target="_blank"
-          rel="noreferrer noopener"
-        >
-          {view.displayName}
-        </Link>
-      </div>
-    );
-  }
+  // if (isViewSaved) {
+  //   return (
+  //     <div className="gray-6 text-medium">
+  //       <FileDoneOutlined className="mr-2" />
+  //       Generated from saved view{' '}
+  //       <Link
+  //         className="gray-7"
+  //         href={`${Path.Modeling}?viewId=${view.id}&openMetadata=true`}
+  //         target="_blank"
+  //         rel="noreferrer noopener"
+  //       >
+  //         {view.displayName}
+  //       </Link>
+  //     </div>
+  //   );
+  // }
 
-  return (
-    <Button
-      type="link"
-      size="small"
-      icon={<SaveOutlined />}
-      onClick={onClick}
-    >
-      Save as View
-    </Button>
-  );
+  // return (
+  //   <Button
+  //     type="link"
+  //     size="small"
+  //     icon={<SaveOutlined />}
+  //     onClick={onClick}
+  //   >
+  //     Save as View
+  //   </Button>
+  // );
+  return ("");
 }

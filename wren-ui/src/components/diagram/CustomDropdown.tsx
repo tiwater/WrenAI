@@ -330,7 +330,7 @@ export const AdjustAnswerDropdown = makeDropdown(
     const { onMoreClick, data } = props;
     const items: ItemType[] = [
       {
-        label: 'Adjust steps',
+        label: '调整推理步骤',
         icon: <EditSVG />,
         disabled: !data.sqlGenerationReasoning,
         key: 'adjust-steps',
@@ -341,7 +341,7 @@ export const AdjustAnswerDropdown = makeDropdown(
           }),
       },
       {
-        label: 'Adjust SQL',
+        label: '调整 SQL',
         icon: <CodeFilled className="text-base" />,
         disabled: !data.sql,
         key: 'adjust-sql',

@@ -301,7 +301,7 @@ export default function AnswerResult(props: Props) {
                 tab={
                   <div className="select-none">
                     <CheckCircleFilled className="mr-2" />
-                    <Text>Answer</Text>
+                    <Text>回答</Text>
                   </div>
                 }
               >
@@ -313,7 +313,7 @@ export default function AnswerResult(props: Props) {
               tab={
                 <div className="select-none">
                   <CodeFilled className="mr-2" />
-                  <Text>View SQL</Text>
+                  <Text>查看 SQL</Text>
                 </div>
               }
             >
@@ -325,7 +325,7 @@ export default function AnswerResult(props: Props) {
                 <div className="select-none">
                   <PieChartFilled className="mr-2" />
                   <Text>
-                    Chart<Tag className="adm-beta-tag">Beta</Tag>
+                    图表<Tag className="adm-beta-tag">Beta</Tag>
                   </Text>
                 </div>
               }
@@ -356,7 +356,7 @@ export default function AnswerResult(props: Props) {
               >
                 <div className="d-flex align-center">
                   <RobotSVG className="mr-2" />
-                  Save to knowledge
+                  保存 SQL 信息
                 </div>
               </Button>
             </Tooltip>

@@ -176,7 +176,7 @@ export default function TextBasedAnswer(props: AnswerResultProps) {
         icon={<EditOutlined />}
         onClick={(event) => event.stopPropagation()}
       >
-        Adjust the answer
+        调整问答
         <CaretDownOutlined
           className="ml-1"
           rotate={adjustResultsDropdown.visible ? 180 : 0}
@@ -222,7 +222,7 @@ export default function TextBasedAnswer(props: AnswerResultProps) {
               title="Regenerate answer"
               onClick={onRegenerateAnswer}
             >
-              Regenerate
+              重新生成
             </Button>
           </div>
         )}
@@ -243,7 +243,7 @@ export default function TextBasedAnswer(props: AnswerResultProps) {
               data-ph-capture="true"
               data-ph-capture-attribute-name="cta_text-answer_preview_data"
             >
-              View results
+              查看查询结果
             </Button>
 
             <div className="mt-2 mb-3" data-guideid="text-answer-preview-data">

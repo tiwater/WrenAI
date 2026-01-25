@@ -122,6 +122,7 @@ export default function AdjustReasoningStepsModal(props: Props) {
       width={640}
       visible={visible}
       okText="重新生成答案"
+      cancelText="取消"
       onOk={submit}
       onCancel={onClose}
       confirmLoading={loading}
