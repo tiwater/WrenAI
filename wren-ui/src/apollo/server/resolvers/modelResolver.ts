@@ -82,11 +82,11 @@ export class ModelResolver {
     args: { projectId: number; data: RelationData },
     ctx: IContext,
   ) {
-    const { data } = args;
+    const { projectId, data } = args;
 
     const eventName = TelemetryEvent.MODELING_CREATE_RELATION;
     try {
-      const relation = await ctx.modelService.createRelation(data);
+      const relation = await ctx.modelService.createRelation(projectId, data);
       ctx.telemetry.sendEvent(eventName, { data });
       return relation;
     } catch (err: any) {
@@ -805,18 +805,6 @@ export class ModelResolver {
       ? JSON.parse(view.properties)?.displayName
       : view.name;
     return { ...view, displayName };
-  }
-
-  // list views
-  public async listViews(_root: any, args: { projectId: number }, ctx: IContext) {
-    const projectId = args.projectId;
-    const views = await ctx.viewRepository.findAllBy({ projectId });
-    return views.map((view) => ({
-      ...view,
-      displayName: view.properties
-        ? JSON.parse(view.properties)?.displayName
-        : view.name,
-    }));
   }
 
   // validate a view name

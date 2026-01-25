@@ -40,12 +40,18 @@ export interface ValidateCalculatedFieldResponse {
 }
 
 export interface IModelService {
-  updatePrimaryKeys(tables: SampleDatasetTable[]): Promise<void>;
-  batchUpdateModelProperties(tables: SampleDatasetTable[]): Promise<void>;
-  batchUpdateColumnProperties(tables: SampleDatasetTable[]): Promise<void>;
+  updatePrimaryKeys(projectId: number, tables: SampleDatasetTable[]): Promise<void>;
+  batchUpdateModelProperties(
+    projectId: number,
+    tables: SampleDatasetTable[],
+  ): Promise<void>;
+  batchUpdateColumnProperties(
+    projectId: number,
+    tables: SampleDatasetTable[],
+  ): Promise<void>;
   // saveRelations was used in the onboarding process, we assume there is not existing relation in the project
-  saveRelations(relations: RelationData[]): Promise<Relation[]>;
-  createRelation(relation: RelationData): Promise<Relation>;
+  saveRelations(projectId: number, relations: RelationData[]): Promise<Relation[]>;
+  createRelation(projectId: number, relation: RelationData): Promise<Relation>;
   updateRelation(relation: UpdateRelationData, id: number): Promise<Relation>;
   deleteRelation(id: number): Promise<void>;
   createCalculatedField(data: CreateCalculatedFieldData): Promise<ModelColumn>;
@@ -137,7 +143,7 @@ export class ModelService implements IModelService {
 
     // check this calculated field is valid for engine to query
     const { valid: canQuery, message: errorMessage } =
-      await this.checkCalculatedFieldCanQuery(modelId, model.referenceName, {
+      await this.checkCalculatedFieldCanQuery(model.projectId, modelId, model.referenceName, {
         referenceName,
         expression,
         lineage,
@@ -204,7 +210,7 @@ export class ModelService implements IModelService {
 
     // check this calculated field is valid for engine to query
     const { valid: canQuery, message: errorMessage } =
-      await this.checkCalculatedFieldCanQuery(model.id, model.referenceName, {
+      await this.checkCalculatedFieldCanQuery(model.projectId, model.id, model.referenceName, {
         referenceName,
         expression,
         lineage,
@@ -382,6 +388,10 @@ export class ModelService implements IModelService {
   }
 
   public async createRelation(projectId: number, relation: RelationData): Promise<Relation> {
+    if (!relation) {
+      throw new Error('Invalid relation input');
+    }
+
     const modelIds = [relation.fromModelId, relation.toModelId];
     const models = await this.modelRepository.findAllByIds(modelIds);
     const columnIds = [relation.fromColumnId, relation.toColumnId];

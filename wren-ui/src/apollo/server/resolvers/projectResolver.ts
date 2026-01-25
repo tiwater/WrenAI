@@ -249,9 +249,9 @@ export class ProjectResolver {
       // save tables as model and modelColumns
       await this.overwriteModelsAndColumns(tableNames, ctx, project);
 
-      await ctx.modelService.updatePrimaryKeys(dataset.tables);
-      await ctx.modelService.batchUpdateModelProperties(dataset.tables);
-      await ctx.modelService.batchUpdateColumnProperties(dataset.tables);
+      await ctx.modelService.updatePrimaryKeys(project.id, dataset.tables);
+      await ctx.modelService.batchUpdateModelProperties(project.id, dataset.tables);
+      await ctx.modelService.batchUpdateColumnProperties(project.id, dataset.tables);
 
       // save relations
       const relations = getRelations(name as SampleDatasetName);
@@ -262,7 +262,7 @@ export class ProjectResolver {
         models,
         columns,
       );
-      await ctx.modelService.saveRelations(mappedRelations);
+      await ctx.modelService.saveRelations(project.id, mappedRelations);
 
       // mark current project as using sample dataset
       await ctx.projectRepository.updateOne(project.id, {
@@ -322,10 +322,10 @@ export class ProjectResolver {
     // Don't reset project in multi-project mode
     // await this.resetCurrentProject(_root, args, ctx);
 
-    const { displayName, name, ...connectionInfo } = properties;
+    const { displayName, ...connectionInfo } = properties as any;
     const project = await ctx.projectService.createProject({
-      name: (properties as any).name || (properties as any).displayName,
-      displayName: (properties as any).displayName,
+      name: (properties as any).name || displayName,
+      displayName,
       type,
       connectionInfo,
     } as ProjectData);
@@ -568,6 +568,7 @@ export class ProjectResolver {
     const eventName = TelemetryEvent.CONNECTION_SAVE_RELATION;
     try {
       const savedRelations = await ctx.modelService.saveRelations(
+        arg.projectId,
         arg.data.relations,
       );
       // async deploy
