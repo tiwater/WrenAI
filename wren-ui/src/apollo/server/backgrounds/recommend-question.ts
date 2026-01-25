@@ -22,8 +22,9 @@ const isFinalized = (status: RecommendationQuestionStatus) => {
 
 export class ProjectRecommendQuestionBackgroundTracker {
   // tasks is a kv pair of task id and thread response
-  private tasks: Record<number, Project> = {};
+  private tasks: Record<number, { project: Project; addedAt: number }> = {};
   private intervalTime: number;
+  private timeout: number = 10 * 60 * 1000; // 10 minutes
   private interval?: ReturnType<typeof setInterval>;
   private wrenAIAdaptor: IWrenAIAdaptor;
   private projectRepository: IProjectRepository;
@@ -55,7 +56,7 @@ export class ProjectRecommendQuestionBackgroundTracker {
     }
     this.logger.info('Recommend question background tracker started');
     this.interval = setInterval(() => {
-      const jobs = Object.values(this.tasks).map((project) => async () => {
+      const jobs = Object.values(this.tasks).map(({ project, addedAt }) => async () => {
         // check if same job is running
         if (this.runningJobs.has(this.taskKey(project))) {
           return;
@@ -65,6 +66,23 @@ export class ProjectRecommendQuestionBackgroundTracker {
         this.runningJobs.add(this.taskKey(project));
 
         try {
+          // Check timeout
+          if (Date.now() - addedAt > this.timeout) {
+            this.logger.warn(
+              `${loggerPrefix}job ${this.taskKey(project)} timed out.`,
+            );
+            await this.projectRepository.updateOne(project.id, {
+              questionsStatus: RecommendationQuestionStatus.FAILED,
+              questionsError: {
+                code: 'TIMEOUT',
+                message: 'Timeout waiting for recommendation questions',
+                shortMessage: 'Timeout',
+              },
+            });
+            delete this.tasks[this.taskKey(project)];
+            return;
+          }
+
           const latestProject = await this.projectRepository.findOneBy({
             id: project.id,
           });
@@ -73,7 +91,7 @@ export class ProjectRecommendQuestionBackgroundTracker {
             return;
           }
           // Refresh cached payload to avoid using stale status/questions.
-          this.tasks[this.taskKey(project)] = latestProject;
+          this.tasks[this.taskKey(project)].project = latestProject;
 
           const result =
             await this.wrenAIAdaptor.getRecommendationQuestionsResult(
@@ -160,7 +178,10 @@ export class ProjectRecommendQuestionBackgroundTracker {
   }
 
   public addTask(project: Project) {
-    this.tasks[this.taskKey(project)] = project;
+    this.tasks[this.taskKey(project)] = {
+      project,
+      addedAt: Date.now(),
+    };
   }
 
   public getTasks() {
@@ -190,8 +211,9 @@ export class ProjectRecommendQuestionBackgroundTracker {
 
 export class ThreadRecommendQuestionBackgroundTracker {
   // tasks is a kv pair of task id and thread response
-  private tasks: Record<number, Thread> = {};
+  private tasks: Record<number, { thread: Thread; addedAt: number }> = {};
   private intervalTime: number;
+  private timeout: number = 10 * 60 * 1000; // 10 minutes
   private interval?: ReturnType<typeof setInterval>;
   private wrenAIAdaptor: IWrenAIAdaptor;
   private threadRepository: IThreadRepository;
@@ -223,7 +245,7 @@ export class ThreadRecommendQuestionBackgroundTracker {
     }
     this.logger.info('Recommend question background tracker started');
     this.interval = setInterval(() => {
-      const jobs = Object.values(this.tasks).map((thread) => async () => {
+      const jobs = Object.values(this.tasks).map(({ thread, addedAt }) => async () => {
         // check if same job is running
         if (this.runningJobs.has(this.taskKey(thread))) {
           return;
@@ -233,6 +255,23 @@ export class ThreadRecommendQuestionBackgroundTracker {
         this.runningJobs.add(this.taskKey(thread));
 
         try {
+          // Check timeout
+          if (Date.now() - addedAt > this.timeout) {
+            this.logger.warn(
+              `${loggerPrefix}job ${this.taskKey(thread)} timed out.`,
+            );
+            await this.threadRepository.updateOne(thread.id, {
+              questionsStatus: RecommendationQuestionStatus.FAILED,
+              questionsError: {
+                code: 'TIMEOUT',
+                message: 'Timeout waiting for recommendation questions',
+                shortMessage: 'Timeout',
+              },
+            });
+            delete this.tasks[this.taskKey(thread)];
+            return;
+          }
+
           const latestThread = await this.threadRepository.findOneBy({
             id: thread.id,
           });
@@ -241,7 +280,7 @@ export class ThreadRecommendQuestionBackgroundTracker {
             return;
           }
           // Refresh cached payload to avoid using stale status/questions.
-          this.tasks[this.taskKey(thread)] = latestThread;
+          this.tasks[this.taskKey(thread)].thread = latestThread;
 
           const result =
             await this.wrenAIAdaptor.getRecommendationQuestionsResult(
@@ -327,7 +366,10 @@ export class ThreadRecommendQuestionBackgroundTracker {
   }
 
   public addTask(thread: Thread) {
-    this.tasks[this.taskKey(thread)] = thread;
+    this.tasks[this.taskKey(thread)] = {
+      thread,
+      addedAt: Date.now(),
+    };
   }
 
   public getTasks() {
