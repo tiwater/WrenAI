@@ -861,26 +861,48 @@ export class AskingService implements IAskingService {
       return threadResponse;
     }
 
-    // Self-healing: If SQL is missing but askingTaskId exists, try to recover it from the task
-    if (!threadResponse.sql && threadResponse.askingTaskId) {
-      logger.info(`[DEBUG] generateThreadResponseAnswer: SQL missing for response ${threadResponse.id}, attempting to recover from task ${threadResponse.askingTaskId}`);
-      const task = await this.askingTaskTracker.getAskingResultById(threadResponse.askingTaskId);
-      const recoveredSql = task?.response?.[0]?.sql;
-      
-      if (recoveredSql) {
-        logger.info(`[DEBUG] generateThreadResponseAnswer: Recovered SQL: ${recoveredSql}`);
-        await this.threadResponseRepository.updateOne(threadResponse.id, { sql: recoveredSql });
-        threadResponse.sql = recoveredSql;
-      } else {
-        logger.warn(`[DEBUG] generateThreadResponseAnswer: Failed to recover SQL for response ${threadResponse.id}`);
+    try {
+      // Self-healing: If SQL is missing but askingTaskId exists, try to recover it from the task
+      if (!threadResponse.sql && threadResponse.askingTaskId) {
+        logger.info(`[DEBUG] generateThreadResponseAnswer: SQL missing for response ${threadResponse.id}, attempting to recover from task ${threadResponse.askingTaskId}`);
+        const task = await this.askingTaskTracker.getAskingResultById(threadResponse.askingTaskId);
+        const recoveredSql = task?.response?.[0]?.sql;
+        
+        if (recoveredSql) {
+          logger.info(`[DEBUG] generateThreadResponseAnswer: Recovered SQL: ${recoveredSql}`);
+          await this.threadResponseRepository.updateOne(threadResponse.id, { sql: recoveredSql });
+          threadResponse.sql = recoveredSql;
+        } else {
+          logger.warn(`[DEBUG] generateThreadResponseAnswer: Failed to recover SQL for response ${threadResponse.id}`);
+        }
       }
-    }
 
-    // If SQL is still missing and this response is backed by an asking task,
-    // enqueue the job and let the background tracker wait for SQL backfill.
-    // This avoids transient GraphQL errors when the UI triggers answer generation
-    // immediately after creating the response.
-    if (!threadResponse.sql && threadResponse.askingTaskId) {
+      // If SQL is still missing and this response is backed by an asking task,
+      // enqueue the job and let the background tracker wait for SQL backfill.
+      // This avoids transient GraphQL errors when the UI triggers answer generation
+      // immediately after creating the response.
+      if (!threadResponse.sql && threadResponse.askingTaskId) {
+        const updatedThreadResponse = await this.threadResponseRepository.updateOne(
+          threadResponse.id,
+          {
+            answerDetail: {
+              status: ThreadResponseAnswerStatus.NOT_STARTED,
+            },
+          },
+        );
+        this.textBasedAnswerBackgroundTracker.addTask(updatedThreadResponse);
+        return updatedThreadResponse;
+      }
+
+      // Guard: don't enqueue a text-based answer job if SQL is still missing and
+      // there is no asking task to backfill it.
+      if (!threadResponse.sql) {
+        throw new Error(
+          `Thread response ${threadResponse.id} SQL is not ready. Refusing to generate answer.`,
+        );
+      }
+
+      // update with initial status
       const updatedThreadResponse = await this.threadResponseRepository.updateOne(
         threadResponse.id,
         {
@@ -889,32 +911,31 @@ export class AskingService implements IAskingService {
           },
         },
       );
+
+      // put the task into background tracker
       this.textBasedAnswerBackgroundTracker.addTask(updatedThreadResponse);
+
       return updatedThreadResponse;
-    }
-
-    // Guard: don't enqueue a text-based answer job if SQL is still missing and
-    // there is no asking task to backfill it.
-    if (!threadResponse.sql) {
-      throw new Error(
-        `Thread response ${threadResponse.id} SQL is not ready. Refusing to generate answer.`,
-      );
-    }
-
-    // update with initial status
-    const updatedThreadResponse = await this.threadResponseRepository.updateOne(
-      threadResponse.id,
-      {
-        answerDetail: {
-          status: ThreadResponseAnswerStatus.NOT_STARTED,
+    } catch (error: any) {
+      logger.error(`[ERROR] generateThreadResponseAnswer failed for response ${threadResponse.id}: ${error.message}`);
+      
+      // Update answerDetail.status to FAILED to stop frontend polling
+      const failedThreadResponse = await this.threadResponseRepository.updateOne(
+        threadResponse.id,
+        {
+          answerDetail: {
+            status: ThreadResponseAnswerStatus.FAILED,
+            error: {
+              code: 'GENERATION_FAILED',
+              message: error.message || 'Failed to generate answer',
+              shortMessage: 'Answer generation failed',
+            },
+          },
         },
-      },
-    );
-
-    // put the task into background tracker
-    this.textBasedAnswerBackgroundTracker.addTask(updatedThreadResponse);
-
-    return updatedThreadResponse;
+      );
+      
+      return failedThreadResponse;
+    }
   }
 
   public async generateThreadResponseChart(

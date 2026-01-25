@@ -54,9 +54,7 @@ export default function ViewSQLTabContent(props: AnswerResultProps) {
 
   const { onOpenAdjustSQLModal } = usePromptThreadStore();
   const { fetchNativeSQL, nativeSQLResult } = useNativeSQL();
-  const [previewData, previewDataResult] = usePreviewDataMutation({
-    onError: (error) => console.error(error),
-  });
+  const [previewData, previewDataResult] = usePreviewDataMutation();
 
   const onPreviewData = async () => {
     if (!projectId) return;

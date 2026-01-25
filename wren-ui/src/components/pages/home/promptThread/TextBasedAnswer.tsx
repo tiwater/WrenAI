@@ -115,9 +115,7 @@ export default function TextBasedAnswer(props: AnswerResultProps) {
 
   const allowPreviewData = useMemo(() => Boolean(rowsUsed > 0), [rowsUsed]);
 
-  const [previewData, previewDataResult] = usePreviewDataMutation({
-    onError: (error) => console.error(error),
-  });
+  const [previewData, previewDataResult] = usePreviewDataMutation();
   const hasPreviewData = !!previewDataResult.data?.previewData;
 
   const onPreviewData = async () => {

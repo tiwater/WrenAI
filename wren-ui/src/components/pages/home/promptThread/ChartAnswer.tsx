@@ -91,9 +91,7 @@ export default function ChartAnswer(props: AnswerResultProps) {
   const { chartDetail } = threadResponse;
   const { error, status, adjustment } = chartDetail || {};
 
-  const [previewData, previewDataResult] = usePreviewDataMutation({
-    onError: (error) => console.error(error),
-  });
+  const [previewData, previewDataResult] = usePreviewDataMutation();
 
   const [createDashboardItem] = useCreateDashboardItemMutation({
     onError: (error) => console.error(error),
