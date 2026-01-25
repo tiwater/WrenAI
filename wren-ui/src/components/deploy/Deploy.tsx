@@ -72,7 +72,9 @@ export default function Deploy() {
       message.error('No project selected');
       return;
     }
-    deployMutation({ variables: { projectId } });
+    // If already synced, force redeploy
+    const force = syncStatus === SyncStatus.SYNCRONIZED;
+    deployMutation({ variables: { projectId, force } });
     startPolling(1000);
   };
 
@@ -83,7 +85,7 @@ export default function Deploy() {
   const disabled =
     deploying ||
     loading ||
-    [SyncStatus.SYNCRONIZED, SyncStatus.IN_PROGRESS].includes(syncStatus);
+    syncStatus === SyncStatus.IN_PROGRESS;
 
   return (
     <Space size={[8, 0]}>

@@ -105,13 +105,15 @@ export class TextBasedAnswerBackgroundTracker {
                 return;
               }
 
-              // Check if the task has already failed (e.g. by AskingTaskTracker)
+              // Check if the task has already failed or been interrupted (e.g. by AskingTaskTracker)
               if (
                 latestThreadResponse.answerDetail?.status ===
-                ThreadResponseAnswerStatus.FAILED
+                ThreadResponseAnswerStatus.FAILED ||
+                latestThreadResponse.answerDetail?.status ===
+                ThreadResponseAnswerStatus.INTERRUPTED
               ) {
                 logger.info(
-                  `TextBasedAnswerBackgroundTracker: Task ${threadResponse.id} is marked as FAILED. Stop tracking.`,
+                  `TextBasedAnswerBackgroundTracker: Task ${threadResponse.id} is marked as ${latestThreadResponse.answerDetail?.status}. Stop tracking.`,
                 );
                 delete this.tasks[threadResponse.id];
                 return;

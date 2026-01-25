@@ -5,6 +5,7 @@ import * as Apollo from '@apollo/client';
 const defaultOptions = {} as const;
 export type DeployMutationVariables = Types.Exact<{
   projectId: Types.Scalars['Int'];
+  force?: Types.InputMaybe<Types.Scalars['Boolean']>;
 }>;
 
 
@@ -19,8 +20,8 @@ export type DeployStatusQuery = { __typename?: 'Query', modelSync: { __typename?
 
 
 export const DeployDocument = gql`
-    mutation Deploy($projectId: Int!) {
-  deploy(projectId: $projectId)
+    mutation Deploy($projectId: Int!, $force: Boolean) {
+  deploy(projectId: $projectId, force: $force)
 }
     `;
 export type DeployMutationFn = Apollo.MutationFunction<DeployMutation, DeployMutationVariables>;
@@ -39,6 +40,7 @@ export type DeployMutationFn = Apollo.MutationFunction<DeployMutation, DeployMut
  * const [deployMutation, { data, loading, error }] = useDeployMutation({
  *   variables: {
  *      projectId: // value for 'projectId'
+ *      force: // value for 'force'
  *   },
  * });
  */

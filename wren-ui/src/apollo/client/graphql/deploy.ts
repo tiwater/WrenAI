@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client';
 
 export const DEPLOY = gql`
-  mutation Deploy($projectId: Int!) {
-    deploy(projectId: $projectId)
+  mutation Deploy($projectId: Int!, $force: Boolean) {
+    deploy(projectId: $projectId, force: $force)
   }
 `;
 

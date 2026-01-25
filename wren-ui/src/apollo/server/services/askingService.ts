@@ -846,6 +846,21 @@ export class AskingService implements IAskingService {
 
     logger.info(`[DEBUG] generateThreadResponseAnswer: Fetched response ${threadResponse.id} with SQL: ${threadResponse.sql}`);
 
+    // CRITICAL: If the task has already been finalized (FAILED, INTERRUPTED, or FINISHED),
+    // do NOT reset its status or add it to the background tracker again.
+    const currentStatus = threadResponse.answerDetail?.status;
+    if (
+      currentStatus === ThreadResponseAnswerStatus.FAILED ||
+      currentStatus === ThreadResponseAnswerStatus.INTERRUPTED ||
+      currentStatus === ThreadResponseAnswerStatus.FINISHED
+    ) {
+      logger.info(
+        `[DEBUG] generateThreadResponseAnswer: Response ${threadResponse.id} is already ${currentStatus}. ` +
+        `Not resetting status. ${currentStatus === ThreadResponseAnswerStatus.FAILED ? `Error: ${JSON.stringify(threadResponse.answerDetail?.error)}` : ''}`
+      );
+      return threadResponse;
+    }
+
     // Self-healing: If SQL is missing but askingTaskId exists, try to recover it from the task
     if (!threadResponse.sql && threadResponse.askingTaskId) {
       logger.info(`[DEBUG] generateThreadResponseAnswer: SQL missing for response ${threadResponse.id}, attempting to recover from task ${threadResponse.askingTaskId}`);
@@ -1122,6 +1137,38 @@ export class AskingService implements IAskingService {
 
   private async getDeployId(projectId: number) {
     const lastDeploy = await this.deployService.getLastDeployment(projectId);
+    if (!lastDeploy) {
+      logger.error(`[DEBUG] getDeployId: No deployment found for project ${projectId}`);
+      throw new Error(`No deployment found for project ${projectId}. Please deploy your model first.`);
+    }
+    const manifest = lastDeploy.manifest as any;
+    const modelCount = manifest?.models?.length || 0;
+    const manifestSize = JSON.stringify(lastDeploy.manifest).length;
+    logger.info(
+      `[DEBUG] getDeployId: projectId=${projectId}, deployId=${lastDeploy.hash}, ` +
+      `modelCount=${modelCount}, manifestSize=${manifestSize}`,
+    );
+    
+    // CRITICAL: Prevent asking tasks when manifest is empty or corrupted
+    if (modelCount === 0) {
+      const errorMsg = 
+        `Deployment ${lastDeploy.hash} has empty models array (manifestSize=${manifestSize}). ` +
+        `The AI cannot generate correct SQL without schema information. ` +
+        `Please redeploy your model to fix this issue.`;
+      logger.error(`[CRITICAL] getDeployId: ${errorMsg}`);
+      throw new Error(errorMsg);
+    }
+    
+    // Additional validation: check if manifest structure is valid
+    if (!manifest.models || !Array.isArray(manifest.models)) {
+      const errorMsg = 
+        `Deployment ${lastDeploy.hash} has invalid manifest structure. ` +
+        `Expected 'models' to be an array, got ${typeof manifest.models}. ` +
+        `Please redeploy your model.`;
+      logger.error(`[CRITICAL] getDeployId: ${errorMsg}`);
+      throw new Error(errorMsg);
+    }
+    
     return lastDeploy.hash;
   }
 

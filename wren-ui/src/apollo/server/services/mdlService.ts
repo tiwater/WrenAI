@@ -8,6 +8,9 @@ import {
   IViewRepository,
 } from '../repositories';
 import { Manifest } from '../mdl/type';
+import { getLogger } from '@server/utils/logger';
+
+const logger = getLogger('MDLService');
 
 export interface MakeCurrentModelMDLResult {
   manifest: Manifest;
@@ -68,6 +71,21 @@ export class MDLService implements IMDLService {
     const relatedModels = models;
     const relatedColumns = columns;
     const relatedRelations = relations;
+    
+    // CRITICAL: Log when models array is empty to diagnose manifest corruption
+    if (models.length === 0) {
+      logger.error(
+        `[CRITICAL] makeCurrentModelMDL: No models found for project ${projectId}! ` +
+        `This will create an empty manifest and cause AI to fail. ` +
+        `Project exists: ${!!project}, Project name: ${project?.name}`
+      );
+    } else {
+      logger.info(
+        `[DEBUG] makeCurrentModelMDL: Building manifest for project ${projectId} ` +
+        `with ${models.length} models, ${columns.length} columns, ${relations.length} relations, ${views.length} views`
+      );
+    }
+    
     const mdlBuilder = new MDLBuilder({
       project,
       models,

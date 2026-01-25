@@ -204,6 +204,42 @@ export class AskingTaskTracker implements IAskingTaskTracker {
 
   public async cancelAskingTask(queryId: string): Promise<void> {
     await this.wrenAIAdaptor.cancelAsk(queryId);
+    
+    // Update the threadResponse status to INTERRUPTED if it exists
+    const task = this.trackedTasks.get(queryId);
+    if (task?.threadResponseId) {
+      logger.info(
+        `[DEBUG] cancelAskingTask: Marking threadResponse ${task.threadResponseId} as INTERRUPTED for task ${queryId}`
+      );
+      
+      const threadResponse = await this.threadResponseRepository.findOneBy({
+        id: task.threadResponseId,
+      });
+      
+      if (threadResponse) {
+        await this.threadResponseRepository.updateOne(task.threadResponseId, {
+          answerDetail: {
+            ...threadResponse.answerDetail,
+            status: ThreadResponseAnswerStatus.INTERRUPTED,
+            error: {
+              code: 'USER_CANCELLED',
+              message: 'The task was cancelled by the user.',
+              shortMessage: 'Task cancelled',
+            },
+          },
+        });
+        logger.info(
+          `[DEBUG] cancelAskingTask: Successfully marked threadResponse ${task.threadResponseId} as INTERRUPTED`
+        );
+      } else {
+        logger.warn(
+          `[DEBUG] cancelAskingTask: ThreadResponse ${task.threadResponseId} not found`
+        );
+      }
+    }
+    
+    // Remove the task from tracked tasks
+    this.trackedTasks.delete(queryId);
   }
 
   public stopPolling(): void {
@@ -476,18 +512,27 @@ export class AskingTaskTracker implements IAskingTaskTracker {
     // Helper to fail the thread response
     const failThreadResponse = async (error: any) => {
       logger.info(`[DEBUG] updateThreadResponseWhenTaskFinalized: Marking response ${task.threadResponseId} as FAILED due to: ${JSON.stringify(error)}`);
-      // We need to fetch current answerDetail first to preserve other fields if needed, 
-      // but here we just want to set status to FAILED.
-      // Ideally we should use a transaction or atomic update, but simple update is fine for now.
       const threadResponse = await this.threadResponseRepository.findOneBy({ id: task.threadResponseId });
       if (threadResponse) {
+        const updatedAnswerDetail = {
+          ...threadResponse.answerDetail,
+          status: ThreadResponseAnswerStatus.FAILED,
+          error: error,
+        };
+        logger.info(
+          `[DEBUG] updateThreadResponseWhenTaskFinalized: Updating answerDetail for response ${task.threadResponseId}: ` +
+          `oldStatus=${threadResponse.answerDetail?.status}, newStatus=${updatedAnswerDetail.status}`,
+        );
         await this.threadResponseRepository.updateOne(task.threadResponseId, {
-          answerDetail: {
-            ...threadResponse.answerDetail,
-            status: ThreadResponseAnswerStatus.FAILED,
-            error: error,
-          },
+          answerDetail: updatedAnswerDetail,
         });
+        logger.info(
+          `[DEBUG] updateThreadResponseWhenTaskFinalized: Successfully updated response ${task.threadResponseId} to FAILED`,
+        );
+      } else {
+        logger.error(
+          `[DEBUG] updateThreadResponseWhenTaskFinalized: ThreadResponse ${task.threadResponseId} not found!`,
+        );
       }
     };
 
