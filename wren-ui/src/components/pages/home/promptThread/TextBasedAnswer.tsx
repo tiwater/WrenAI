@@ -8,6 +8,7 @@ import styled from 'styled-components';
 import { BinocularsIcon } from '@/utils/icons';
 import { nextTick } from '@/utils/time';
 import { MORE_ACTION } from '@/utils/enum';
+import { message } from 'antd';
 import usePromptThreadStore from './store';
 import useDropdown from '@/hooks/useDropdown';
 import useTextBasedAnswerStreamTask from '@/hooks/useTextBasedAnswerStreamTask';
@@ -120,7 +121,11 @@ export default function TextBasedAnswer(props: AnswerResultProps) {
 
   const onPreviewData = async () => {
     if (!projectId) return;
-    await previewData({ variables: { projectId, where: { responseId: id } } });
+    try {
+      await previewData({ variables: { projectId, where: { responseId: id } } });
+    } catch (e: any) {
+      message.error(e?.message || '查询失败');
+    }
   };
 
   const autoTriggerPreviewDataButton = async () => {

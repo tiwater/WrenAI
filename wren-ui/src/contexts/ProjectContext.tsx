@@ -16,6 +16,25 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
 
   // Load selected project from localStorage on mount
   useEffect(() => {
+    const queryProjectId = (() => {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const raw = params.get('projectId');
+        if (!raw) return null;
+        const pid = Number(raw);
+        return Number.isFinite(pid) ? pid : null;
+      } catch {
+        return null;
+      }
+    })();
+
+    if (queryProjectId) {
+      setSelectedProjectIdState(queryProjectId);
+      localStorage.setItem(PROJECT_STORAGE_KEY, queryProjectId.toString());
+      setHydrated(true);
+      return;
+    }
+
     const storedProjectId = localStorage.getItem(PROJECT_STORAGE_KEY);
     if (storedProjectId) {
       setSelectedProjectIdState(parseInt(storedProjectId, 10));
@@ -66,6 +85,7 @@ export function useSelectedProject() {
   // Check if we are in a state where missing selectedProjectId is expected
   const isSetupFlow = typeof window !== 'undefined' &&
     (window.location.pathname.startsWith('/setup') ||
+      window.location.pathname.startsWith('/embed') ||
       sessionStorage.getItem('creatingNewProject') === 'true' ||
       window.location.pathname === '/projects');
 

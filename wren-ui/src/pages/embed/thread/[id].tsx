@@ -42,6 +42,7 @@ import {
   CreateThreadResponseInput,
   ThreadResponse,
   CreateSqlPairInput,
+  AskingTaskStatus,
 } from '@/apollo/client/graphql/__types__';
 import {
   SqlPairsDocument,
@@ -256,6 +257,20 @@ export default function EmbedThread() {
           response?.askingTask && !getIsFinished(response?.askingTask?.status),
       );
       if (unfinishedAskingResponse) {
+        if (!projectId) return;
+
+        // If asking task has already failed/stopped, make sure we still fetch
+        // the latest threadResponse once so UI can show FAILED status/error.
+        if (
+          unfinishedAskingResponse.askingTask?.status === AskingTaskStatus.FAILED ||
+          unfinishedAskingResponse.askingTask?.status === AskingTaskStatus.STOPPED
+        ) {
+          fetchThreadResponse({
+            variables: { projectId, responseId: unfinishedAskingResponse.id },
+          });
+          return;
+        }
+
         askPrompt.onFetching(unfinishedAskingResponse?.askingTask?.queryId);
         return;
       }

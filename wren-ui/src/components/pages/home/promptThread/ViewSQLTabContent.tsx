@@ -56,9 +56,15 @@ export default function ViewSQLTabContent(props: AnswerResultProps) {
   const { fetchNativeSQL, nativeSQLResult } = useNativeSQL();
   const [previewData, previewDataResult] = usePreviewDataMutation();
 
+  const { id, sql } = threadResponse;
+
   const onPreviewData = async () => {
     if (!projectId) return;
-    await previewData({ variables: { projectId, where: { responseId: id } } });
+    try {
+      await previewData({ variables: { projectId, where: { responseId: id } } });
+    } catch (e: any) {
+      message.error(e?.message || '查询失败');
+    }
   };
 
   const autoTriggerPreviewDataButton = async () => {
@@ -74,8 +80,6 @@ export default function ViewSQLTabContent(props: AnswerResultProps) {
       autoTriggerPreviewDataButton();
     }
   }, [isLastThreadResponse]);
-
-  const { id, sql } = threadResponse;
 
   const { hasNativeSQL, dataSourceType } = nativeSQLResult;
   const showNativeSQL = hasNativeSQL;
@@ -204,7 +208,9 @@ export default function ViewSQLTabContent(props: AnswerResultProps) {
         >
           查看查询结果
         </Button>
-        {previewDataResult?.data?.previewData && (
+        {(previewDataResult.loading ||
+          previewDataResult.error ||
+          previewDataResult?.data?.previewData) && (
           <div className="mt-2 mb-3">
             <PreviewData
               error={previewDataResult.error}
