@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { capitalize } from 'lodash';
 import { useDiagramQuery } from '@/apollo/client/graphql/diagram.generated';
+import { useSelectedProject } from '@/contexts/ProjectContext';
 import { getNodeTypeIcon } from '@/utils/nodeType';
 import {
   DiagramModel,
@@ -74,7 +75,11 @@ export type Completer = ReturnType<typeof convertCompleter>;
 
 export default function useAutoComplete<T = Completer>(props: Props<T>) {
   const { includeColumns, skip } = props;
-  const { data } = useDiagramQuery({ skip });
+  const projectId = useSelectedProject();
+  const { data } = useDiagramQuery({
+    variables: { projectId: projectId! },
+    skip: !!skip || !projectId,
+  });
 
   // Defined convertor
   const convertor = (props.convertor || convertCompleter) as Convertor<T>;

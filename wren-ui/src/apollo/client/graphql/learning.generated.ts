@@ -3,12 +3,15 @@ import * as Types from './__types__';
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
 const defaultOptions = {} as const;
-export type LearningRecordQueryVariables = Types.Exact<{ [key: string]: never; }>;
+export type LearningRecordQueryVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
+}>;
 
 
 export type LearningRecordQuery = { __typename?: 'Query', learningRecord: { __typename?: 'LearningRecord', paths: Array<string> } };
 
 export type SaveLearningRecordMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   data: Types.SaveLearningRecordInput;
 }>;
 
@@ -17,8 +20,8 @@ export type SaveLearningRecordMutation = { __typename?: 'Mutation', saveLearning
 
 
 export const LearningRecordDocument = gql`
-    query LearningRecord {
-  learningRecord {
+    query LearningRecord($projectId: Int!) {
+  learningRecord(projectId: $projectId) {
     paths
   }
 }
@@ -36,10 +39,11 @@ export const LearningRecordDocument = gql`
  * @example
  * const { data, loading, error } = useLearningRecordQuery({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *   },
  * });
  */
-export function useLearningRecordQuery(baseOptions?: Apollo.QueryHookOptions<LearningRecordQuery, LearningRecordQueryVariables>) {
+export function useLearningRecordQuery(baseOptions: Apollo.QueryHookOptions<LearningRecordQuery, LearningRecordQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<LearningRecordQuery, LearningRecordQueryVariables>(LearningRecordDocument, options);
       }
@@ -51,8 +55,8 @@ export type LearningRecordQueryHookResult = ReturnType<typeof useLearningRecordQ
 export type LearningRecordLazyQueryHookResult = ReturnType<typeof useLearningRecordLazyQuery>;
 export type LearningRecordQueryResult = Apollo.QueryResult<LearningRecordQuery, LearningRecordQueryVariables>;
 export const SaveLearningRecordDocument = gql`
-    mutation SaveLearningRecord($data: SaveLearningRecordInput!) {
-  saveLearningRecord(data: $data) {
+    mutation SaveLearningRecord($projectId: Int!, $data: SaveLearningRecordInput!) {
+  saveLearningRecord(projectId: $projectId, data: $data) {
     paths
   }
 }
@@ -72,6 +76,7 @@ export type SaveLearningRecordMutationFn = Apollo.MutationFunction<SaveLearningR
  * @example
  * const [saveLearningRecordMutation, { data, loading, error }] = useSaveLearningRecordMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      data: // value for 'data'
  *   },
  * });

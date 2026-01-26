@@ -17,7 +17,9 @@ export type CommonResponseFragment = { __typename?: 'ThreadResponse', id: number
 
 export type CommonRecommendedQuestionsTaskFragment = { __typename?: 'RecommendedQuestionsTask', status: Types.RecommendedQuestionsTaskStatus, questions: Array<{ __typename?: 'ResultQuestion', question: string, category: string, sql: string }>, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null };
 
-export type SuggestedQuestionsQueryVariables = Types.Exact<{ [key: string]: never; }>;
+export type SuggestedQuestionsQueryVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
+}>;
 
 
 export type SuggestedQuestionsQuery = { __typename?: 'Query', suggestedQuestions: { __typename?: 'SuggestedQuestionResponse', questions: Array<{ __typename?: 'SuggestedQuestion', label: string, question: string } | null> } };
@@ -29,12 +31,15 @@ export type AskingTaskQueryVariables = Types.Exact<{
 
 export type AskingTaskQuery = { __typename?: 'Query', askingTask?: { __typename?: 'AskingTask', status: Types.AskingTaskStatus, type?: Types.AskingTaskType | null, rephrasedQuestion?: string | null, intentReasoning?: string | null, sqlGenerationReasoning?: string | null, retrievedTables?: Array<string> | null, invalidSql?: string | null, traceId?: string | null, queryId?: string | null, candidates: Array<{ __typename?: 'ResultCandidate', sql: string, type: Types.ResultCandidateType, view?: { __typename?: 'ViewInfo', id: number, name: string, statement: string, displayName: string } | null, sqlPair?: { __typename?: 'SqlPair', id: number, question: string, sql: string, projectId: number } | null }>, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null };
 
-export type ThreadsQueryVariables = Types.Exact<{ [key: string]: never; }>;
+export type ThreadsQueryVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
+}>;
 
 
 export type ThreadsQuery = { __typename?: 'Query', threads: Array<{ __typename?: 'Thread', id: number, summary: string }> };
 
 export type ThreadQueryVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   threadId: Types.Scalars['Int'];
 }>;
 
@@ -42,6 +47,7 @@ export type ThreadQueryVariables = Types.Exact<{
 export type ThreadQuery = { __typename?: 'Query', thread: { __typename?: 'DetailedThread', id: number, responses: Array<{ __typename?: 'ThreadResponse', id: number, threadId: number, question: string, sql?: string | null, view?: { __typename?: 'ViewInfo', id: number, name: string, statement: string, displayName: string } | null, breakdownDetail?: { __typename?: 'ThreadResponseBreakdownDetail', queryId?: string | null, status: Types.AskingTaskStatus, description?: string | null, steps?: Array<{ __typename?: 'DetailStep', summary: string, sql: string, cteName?: string | null }> | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, answerDetail?: { __typename?: 'ThreadResponseAnswerDetail', queryId?: string | null, status?: Types.ThreadResponseAnswerStatus | null, content?: string | null, numRowsUsedInLLM?: number | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, chartDetail?: { __typename?: 'ThreadResponseChartDetail', queryId?: string | null, status: Types.ChartTaskStatus, description?: string | null, chartType?: Types.ChartType | null, chartSchema?: any | null, adjustment?: boolean | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, askingTask?: { __typename?: 'AskingTask', status: Types.AskingTaskStatus, type?: Types.AskingTaskType | null, rephrasedQuestion?: string | null, intentReasoning?: string | null, sqlGenerationReasoning?: string | null, retrievedTables?: Array<string> | null, invalidSql?: string | null, traceId?: string | null, queryId?: string | null, candidates: Array<{ __typename?: 'ResultCandidate', sql: string, type: Types.ResultCandidateType, view?: { __typename?: 'ViewInfo', id: number, name: string, statement: string, displayName: string } | null, sqlPair?: { __typename?: 'SqlPair', id: number, question: string, sql: string, projectId: number } | null }>, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, adjustment?: { __typename?: 'ThreadResponseAdjustment', type: Types.ThreadResponseAdjustmentType, payload?: any | null } | null, adjustmentTask?: { __typename?: 'AdjustmentTask', queryId?: string | null, status?: Types.AskingTaskStatus | null, sql?: string | null, traceId?: string | null, invalidSql?: string | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null }> } };
 
 export type ThreadResponseQueryVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   responseId: Types.Scalars['Int'];
 }>;
 
@@ -49,6 +55,7 @@ export type ThreadResponseQueryVariables = Types.Exact<{
 export type ThreadResponseQuery = { __typename?: 'Query', threadResponse: { __typename?: 'ThreadResponse', id: number, threadId: number, question: string, sql?: string | null, view?: { __typename?: 'ViewInfo', id: number, name: string, statement: string, displayName: string } | null, breakdownDetail?: { __typename?: 'ThreadResponseBreakdownDetail', queryId?: string | null, status: Types.AskingTaskStatus, description?: string | null, steps?: Array<{ __typename?: 'DetailStep', summary: string, sql: string, cteName?: string | null }> | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, answerDetail?: { __typename?: 'ThreadResponseAnswerDetail', queryId?: string | null, status?: Types.ThreadResponseAnswerStatus | null, content?: string | null, numRowsUsedInLLM?: number | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, chartDetail?: { __typename?: 'ThreadResponseChartDetail', queryId?: string | null, status: Types.ChartTaskStatus, description?: string | null, chartType?: Types.ChartType | null, chartSchema?: any | null, adjustment?: boolean | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, askingTask?: { __typename?: 'AskingTask', status: Types.AskingTaskStatus, type?: Types.AskingTaskType | null, rephrasedQuestion?: string | null, intentReasoning?: string | null, sqlGenerationReasoning?: string | null, retrievedTables?: Array<string> | null, invalidSql?: string | null, traceId?: string | null, queryId?: string | null, candidates: Array<{ __typename?: 'ResultCandidate', sql: string, type: Types.ResultCandidateType, view?: { __typename?: 'ViewInfo', id: number, name: string, statement: string, displayName: string } | null, sqlPair?: { __typename?: 'SqlPair', id: number, question: string, sql: string, projectId: number } | null }>, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, adjustment?: { __typename?: 'ThreadResponseAdjustment', type: Types.ThreadResponseAdjustmentType, payload?: any | null } | null, adjustmentTask?: { __typename?: 'AdjustmentTask', queryId?: string | null, status?: Types.AskingTaskStatus | null, sql?: string | null, traceId?: string | null, invalidSql?: string | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null } };
 
 export type CreateAskingTaskMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   data: Types.AskingTaskInput;
 }>;
 
@@ -63,6 +70,7 @@ export type CancelAskingTaskMutationVariables = Types.Exact<{
 export type CancelAskingTaskMutation = { __typename?: 'Mutation', cancelAskingTask: boolean };
 
 export type RerunAskingTaskMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   responseId: Types.Scalars['Int'];
 }>;
 
@@ -70,6 +78,7 @@ export type RerunAskingTaskMutationVariables = Types.Exact<{
 export type RerunAskingTaskMutation = { __typename?: 'Mutation', rerunAskingTask: { __typename?: 'Task', id: string } };
 
 export type CreateThreadMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   data: Types.CreateThreadInput;
 }>;
 
@@ -77,6 +86,7 @@ export type CreateThreadMutationVariables = Types.Exact<{
 export type CreateThreadMutation = { __typename?: 'Mutation', createThread: { __typename?: 'Thread', id: number } };
 
 export type CreateThreadResponseMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   threadId: Types.Scalars['Int'];
   data: Types.CreateThreadResponseInput;
 }>;
@@ -85,6 +95,7 @@ export type CreateThreadResponseMutationVariables = Types.Exact<{
 export type CreateThreadResponseMutation = { __typename?: 'Mutation', createThreadResponse: { __typename?: 'ThreadResponse', id: number, threadId: number, question: string, sql?: string | null, view?: { __typename?: 'ViewInfo', id: number, name: string, statement: string, displayName: string } | null, breakdownDetail?: { __typename?: 'ThreadResponseBreakdownDetail', queryId?: string | null, status: Types.AskingTaskStatus, description?: string | null, steps?: Array<{ __typename?: 'DetailStep', summary: string, sql: string, cteName?: string | null }> | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, answerDetail?: { __typename?: 'ThreadResponseAnswerDetail', queryId?: string | null, status?: Types.ThreadResponseAnswerStatus | null, content?: string | null, numRowsUsedInLLM?: number | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, chartDetail?: { __typename?: 'ThreadResponseChartDetail', queryId?: string | null, status: Types.ChartTaskStatus, description?: string | null, chartType?: Types.ChartType | null, chartSchema?: any | null, adjustment?: boolean | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, askingTask?: { __typename?: 'AskingTask', status: Types.AskingTaskStatus, type?: Types.AskingTaskType | null, rephrasedQuestion?: string | null, intentReasoning?: string | null, sqlGenerationReasoning?: string | null, retrievedTables?: Array<string> | null, invalidSql?: string | null, traceId?: string | null, queryId?: string | null, candidates: Array<{ __typename?: 'ResultCandidate', sql: string, type: Types.ResultCandidateType, view?: { __typename?: 'ViewInfo', id: number, name: string, statement: string, displayName: string } | null, sqlPair?: { __typename?: 'SqlPair', id: number, question: string, sql: string, projectId: number } | null }>, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, adjustment?: { __typename?: 'ThreadResponseAdjustment', type: Types.ThreadResponseAdjustmentType, payload?: any | null } | null, adjustmentTask?: { __typename?: 'AdjustmentTask', queryId?: string | null, status?: Types.AskingTaskStatus | null, sql?: string | null, traceId?: string | null, invalidSql?: string | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null } };
 
 export type UpdateThreadMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   where: Types.ThreadUniqueWhereInput;
   data: Types.UpdateThreadInput;
 }>;
@@ -93,6 +104,7 @@ export type UpdateThreadMutationVariables = Types.Exact<{
 export type UpdateThreadMutation = { __typename?: 'Mutation', updateThread: { __typename?: 'Thread', id: number, summary: string } };
 
 export type UpdateThreadResponseMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   where: Types.ThreadResponseUniqueWhereInput;
   data: Types.UpdateThreadResponseInput;
 }>;
@@ -101,6 +113,7 @@ export type UpdateThreadResponseMutationVariables = Types.Exact<{
 export type UpdateThreadResponseMutation = { __typename?: 'Mutation', updateThreadResponse: { __typename?: 'ThreadResponse', id: number, threadId: number, question: string, sql?: string | null, view?: { __typename?: 'ViewInfo', id: number, name: string, statement: string, displayName: string } | null, breakdownDetail?: { __typename?: 'ThreadResponseBreakdownDetail', queryId?: string | null, status: Types.AskingTaskStatus, description?: string | null, steps?: Array<{ __typename?: 'DetailStep', summary: string, sql: string, cteName?: string | null }> | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, answerDetail?: { __typename?: 'ThreadResponseAnswerDetail', queryId?: string | null, status?: Types.ThreadResponseAnswerStatus | null, content?: string | null, numRowsUsedInLLM?: number | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, chartDetail?: { __typename?: 'ThreadResponseChartDetail', queryId?: string | null, status: Types.ChartTaskStatus, description?: string | null, chartType?: Types.ChartType | null, chartSchema?: any | null, adjustment?: boolean | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, askingTask?: { __typename?: 'AskingTask', status: Types.AskingTaskStatus, type?: Types.AskingTaskType | null, rephrasedQuestion?: string | null, intentReasoning?: string | null, sqlGenerationReasoning?: string | null, retrievedTables?: Array<string> | null, invalidSql?: string | null, traceId?: string | null, queryId?: string | null, candidates: Array<{ __typename?: 'ResultCandidate', sql: string, type: Types.ResultCandidateType, view?: { __typename?: 'ViewInfo', id: number, name: string, statement: string, displayName: string } | null, sqlPair?: { __typename?: 'SqlPair', id: number, question: string, sql: string, projectId: number } | null }>, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, adjustment?: { __typename?: 'ThreadResponseAdjustment', type: Types.ThreadResponseAdjustmentType, payload?: any | null } | null, adjustmentTask?: { __typename?: 'AdjustmentTask', queryId?: string | null, status?: Types.AskingTaskStatus | null, sql?: string | null, traceId?: string | null, invalidSql?: string | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null } };
 
 export type AdjustThreadResponseMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   responseId: Types.Scalars['Int'];
   data: Types.AdjustThreadResponseInput;
 }>;
@@ -109,6 +122,7 @@ export type AdjustThreadResponseMutationVariables = Types.Exact<{
 export type AdjustThreadResponseMutation = { __typename?: 'Mutation', adjustThreadResponse: { __typename?: 'ThreadResponse', id: number, threadId: number, question: string, sql?: string | null, view?: { __typename?: 'ViewInfo', id: number, name: string, statement: string, displayName: string } | null, breakdownDetail?: { __typename?: 'ThreadResponseBreakdownDetail', queryId?: string | null, status: Types.AskingTaskStatus, description?: string | null, steps?: Array<{ __typename?: 'DetailStep', summary: string, sql: string, cteName?: string | null }> | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, answerDetail?: { __typename?: 'ThreadResponseAnswerDetail', queryId?: string | null, status?: Types.ThreadResponseAnswerStatus | null, content?: string | null, numRowsUsedInLLM?: number | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, chartDetail?: { __typename?: 'ThreadResponseChartDetail', queryId?: string | null, status: Types.ChartTaskStatus, description?: string | null, chartType?: Types.ChartType | null, chartSchema?: any | null, adjustment?: boolean | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, askingTask?: { __typename?: 'AskingTask', status: Types.AskingTaskStatus, type?: Types.AskingTaskType | null, rephrasedQuestion?: string | null, intentReasoning?: string | null, sqlGenerationReasoning?: string | null, retrievedTables?: Array<string> | null, invalidSql?: string | null, traceId?: string | null, queryId?: string | null, candidates: Array<{ __typename?: 'ResultCandidate', sql: string, type: Types.ResultCandidateType, view?: { __typename?: 'ViewInfo', id: number, name: string, statement: string, displayName: string } | null, sqlPair?: { __typename?: 'SqlPair', id: number, question: string, sql: string, projectId: number } | null }>, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, adjustment?: { __typename?: 'ThreadResponseAdjustment', type: Types.ThreadResponseAdjustmentType, payload?: any | null } | null, adjustmentTask?: { __typename?: 'AdjustmentTask', queryId?: string | null, status?: Types.AskingTaskStatus | null, sql?: string | null, traceId?: string | null, invalidSql?: string | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null } };
 
 export type DeleteThreadMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   where: Types.ThreadUniqueWhereInput;
 }>;
 
@@ -116,6 +130,7 @@ export type DeleteThreadMutationVariables = Types.Exact<{
 export type DeleteThreadMutation = { __typename?: 'Mutation', deleteThread: boolean };
 
 export type PreviewDataMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   where: Types.PreviewDataInput;
 }>;
 
@@ -123,6 +138,7 @@ export type PreviewDataMutationVariables = Types.Exact<{
 export type PreviewDataMutation = { __typename?: 'Mutation', previewData: any };
 
 export type PreviewBreakdownDataMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   where: Types.PreviewDataInput;
 }>;
 
@@ -130,6 +146,7 @@ export type PreviewBreakdownDataMutationVariables = Types.Exact<{
 export type PreviewBreakdownDataMutation = { __typename?: 'Mutation', previewBreakdownData: any };
 
 export type GetNativeSqlQueryVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   responseId: Types.Scalars['Int'];
 }>;
 
@@ -137,6 +154,7 @@ export type GetNativeSqlQueryVariables = Types.Exact<{
 export type GetNativeSqlQuery = { __typename?: 'Query', nativeSql: string };
 
 export type CreateInstantRecommendedQuestionsMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   data: Types.InstantRecommendedQuestionsInput;
 }>;
 
@@ -151,23 +169,29 @@ export type InstantRecommendedQuestionsQueryVariables = Types.Exact<{
 export type InstantRecommendedQuestionsQuery = { __typename?: 'Query', instantRecommendedQuestions: { __typename?: 'RecommendedQuestionsTask', status: Types.RecommendedQuestionsTaskStatus, questions: Array<{ __typename?: 'ResultQuestion', question: string, category: string, sql: string }>, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } };
 
 export type GetThreadRecommendationQuestionsQueryVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   threadId: Types.Scalars['Int'];
 }>;
 
 
 export type GetThreadRecommendationQuestionsQuery = { __typename?: 'Query', getThreadRecommendationQuestions: { __typename?: 'RecommendedQuestionsTask', status: Types.RecommendedQuestionsTaskStatus, questions: Array<{ __typename?: 'ResultQuestion', question: string, category: string, sql: string }>, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } };
 
-export type GetProjectRecommendationQuestionsQueryVariables = Types.Exact<{ [key: string]: never; }>;
+export type GetProjectRecommendationQuestionsQueryVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
+}>;
 
 
 export type GetProjectRecommendationQuestionsQuery = { __typename?: 'Query', getProjectRecommendationQuestions: { __typename?: 'RecommendedQuestionsTask', status: Types.RecommendedQuestionsTaskStatus, questions: Array<{ __typename?: 'ResultQuestion', question: string, category: string, sql: string }>, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } };
 
-export type GenerateProjectRecommendationQuestionsMutationVariables = Types.Exact<{ [key: string]: never; }>;
+export type GenerateProjectRecommendationQuestionsMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
+}>;
 
 
 export type GenerateProjectRecommendationQuestionsMutation = { __typename?: 'Mutation', generateProjectRecommendationQuestions: boolean };
 
 export type GenerateThreadRecommendationQuestionsMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   threadId: Types.Scalars['Int'];
 }>;
 
@@ -175,6 +199,7 @@ export type GenerateThreadRecommendationQuestionsMutationVariables = Types.Exact
 export type GenerateThreadRecommendationQuestionsMutation = { __typename?: 'Mutation', generateThreadRecommendationQuestions: boolean };
 
 export type GenerateThreadResponseAnswerMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   responseId: Types.Scalars['Int'];
 }>;
 
@@ -182,6 +207,7 @@ export type GenerateThreadResponseAnswerMutationVariables = Types.Exact<{
 export type GenerateThreadResponseAnswerMutation = { __typename?: 'Mutation', generateThreadResponseAnswer: { __typename?: 'ThreadResponse', id: number, threadId: number, question: string, sql?: string | null, view?: { __typename?: 'ViewInfo', id: number, name: string, statement: string, displayName: string } | null, breakdownDetail?: { __typename?: 'ThreadResponseBreakdownDetail', queryId?: string | null, status: Types.AskingTaskStatus, description?: string | null, steps?: Array<{ __typename?: 'DetailStep', summary: string, sql: string, cteName?: string | null }> | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, answerDetail?: { __typename?: 'ThreadResponseAnswerDetail', queryId?: string | null, status?: Types.ThreadResponseAnswerStatus | null, content?: string | null, numRowsUsedInLLM?: number | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, chartDetail?: { __typename?: 'ThreadResponseChartDetail', queryId?: string | null, status: Types.ChartTaskStatus, description?: string | null, chartType?: Types.ChartType | null, chartSchema?: any | null, adjustment?: boolean | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, askingTask?: { __typename?: 'AskingTask', status: Types.AskingTaskStatus, type?: Types.AskingTaskType | null, rephrasedQuestion?: string | null, intentReasoning?: string | null, sqlGenerationReasoning?: string | null, retrievedTables?: Array<string> | null, invalidSql?: string | null, traceId?: string | null, queryId?: string | null, candidates: Array<{ __typename?: 'ResultCandidate', sql: string, type: Types.ResultCandidateType, view?: { __typename?: 'ViewInfo', id: number, name: string, statement: string, displayName: string } | null, sqlPair?: { __typename?: 'SqlPair', id: number, question: string, sql: string, projectId: number } | null }>, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, adjustment?: { __typename?: 'ThreadResponseAdjustment', type: Types.ThreadResponseAdjustmentType, payload?: any | null } | null, adjustmentTask?: { __typename?: 'AdjustmentTask', queryId?: string | null, status?: Types.AskingTaskStatus | null, sql?: string | null, traceId?: string | null, invalidSql?: string | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null } };
 
 export type GenerateThreadResponseChartMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   responseId: Types.Scalars['Int'];
 }>;
 
@@ -189,6 +215,7 @@ export type GenerateThreadResponseChartMutationVariables = Types.Exact<{
 export type GenerateThreadResponseChartMutation = { __typename?: 'Mutation', generateThreadResponseChart: { __typename?: 'ThreadResponse', id: number, threadId: number, question: string, sql?: string | null, view?: { __typename?: 'ViewInfo', id: number, name: string, statement: string, displayName: string } | null, breakdownDetail?: { __typename?: 'ThreadResponseBreakdownDetail', queryId?: string | null, status: Types.AskingTaskStatus, description?: string | null, steps?: Array<{ __typename?: 'DetailStep', summary: string, sql: string, cteName?: string | null }> | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, answerDetail?: { __typename?: 'ThreadResponseAnswerDetail', queryId?: string | null, status?: Types.ThreadResponseAnswerStatus | null, content?: string | null, numRowsUsedInLLM?: number | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, chartDetail?: { __typename?: 'ThreadResponseChartDetail', queryId?: string | null, status: Types.ChartTaskStatus, description?: string | null, chartType?: Types.ChartType | null, chartSchema?: any | null, adjustment?: boolean | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, askingTask?: { __typename?: 'AskingTask', status: Types.AskingTaskStatus, type?: Types.AskingTaskType | null, rephrasedQuestion?: string | null, intentReasoning?: string | null, sqlGenerationReasoning?: string | null, retrievedTables?: Array<string> | null, invalidSql?: string | null, traceId?: string | null, queryId?: string | null, candidates: Array<{ __typename?: 'ResultCandidate', sql: string, type: Types.ResultCandidateType, view?: { __typename?: 'ViewInfo', id: number, name: string, statement: string, displayName: string } | null, sqlPair?: { __typename?: 'SqlPair', id: number, question: string, sql: string, projectId: number } | null }>, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null, adjustment?: { __typename?: 'ThreadResponseAdjustment', type: Types.ThreadResponseAdjustmentType, payload?: any | null } | null, adjustmentTask?: { __typename?: 'AdjustmentTask', queryId?: string | null, status?: Types.AskingTaskStatus | null, sql?: string | null, traceId?: string | null, invalidSql?: string | null, error?: { __typename?: 'Error', code?: string | null, shortMessage?: string | null, message?: string | null, stacktrace?: Array<string | null> | null } | null } | null } };
 
 export type AdjustThreadResponseChartMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   responseId: Types.Scalars['Int'];
   data: Types.AdjustThreadResponseChartInput;
 }>;
@@ -211,6 +238,7 @@ export type CancelAdjustmentTaskMutationVariables = Types.Exact<{
 export type CancelAdjustmentTaskMutation = { __typename?: 'Mutation', cancelAdjustmentTask: boolean };
 
 export type RerunAdjustmentTaskMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   responseId: Types.Scalars['Int'];
 }>;
 
@@ -354,8 +382,8 @@ export const CommonRecommendedQuestionsTaskFragmentDoc = gql`
 }
     ${CommonErrorFragmentDoc}`;
 export const SuggestedQuestionsDocument = gql`
-    query SuggestedQuestions {
-  suggestedQuestions {
+    query SuggestedQuestions($projectId: Int!) {
+  suggestedQuestions(projectId: $projectId) {
     questions {
       label
       question
@@ -376,10 +404,11 @@ export const SuggestedQuestionsDocument = gql`
  * @example
  * const { data, loading, error } = useSuggestedQuestionsQuery({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *   },
  * });
  */
-export function useSuggestedQuestionsQuery(baseOptions?: Apollo.QueryHookOptions<SuggestedQuestionsQuery, SuggestedQuestionsQueryVariables>) {
+export function useSuggestedQuestionsQuery(baseOptions: Apollo.QueryHookOptions<SuggestedQuestionsQuery, SuggestedQuestionsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<SuggestedQuestionsQuery, SuggestedQuestionsQueryVariables>(SuggestedQuestionsDocument, options);
       }
@@ -426,8 +455,8 @@ export type AskingTaskQueryHookResult = ReturnType<typeof useAskingTaskQuery>;
 export type AskingTaskLazyQueryHookResult = ReturnType<typeof useAskingTaskLazyQuery>;
 export type AskingTaskQueryResult = Apollo.QueryResult<AskingTaskQuery, AskingTaskQueryVariables>;
 export const ThreadsDocument = gql`
-    query Threads {
-  threads {
+    query Threads($projectId: Int!) {
+  threads(projectId: $projectId) {
     id
     summary
   }
@@ -446,10 +475,11 @@ export const ThreadsDocument = gql`
  * @example
  * const { data, loading, error } = useThreadsQuery({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *   },
  * });
  */
-export function useThreadsQuery(baseOptions?: Apollo.QueryHookOptions<ThreadsQuery, ThreadsQueryVariables>) {
+export function useThreadsQuery(baseOptions: Apollo.QueryHookOptions<ThreadsQuery, ThreadsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<ThreadsQuery, ThreadsQueryVariables>(ThreadsDocument, options);
       }
@@ -461,8 +491,8 @@ export type ThreadsQueryHookResult = ReturnType<typeof useThreadsQuery>;
 export type ThreadsLazyQueryHookResult = ReturnType<typeof useThreadsLazyQuery>;
 export type ThreadsQueryResult = Apollo.QueryResult<ThreadsQuery, ThreadsQueryVariables>;
 export const ThreadDocument = gql`
-    query Thread($threadId: Int!) {
-  thread(threadId: $threadId) {
+    query Thread($projectId: Int!, $threadId: Int!) {
+  thread(projectId: $projectId, threadId: $threadId) {
     id
     responses {
       ...CommonResponse
@@ -483,6 +513,7 @@ export const ThreadDocument = gql`
  * @example
  * const { data, loading, error } = useThreadQuery({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      threadId: // value for 'threadId'
  *   },
  * });
@@ -499,8 +530,8 @@ export type ThreadQueryHookResult = ReturnType<typeof useThreadQuery>;
 export type ThreadLazyQueryHookResult = ReturnType<typeof useThreadLazyQuery>;
 export type ThreadQueryResult = Apollo.QueryResult<ThreadQuery, ThreadQueryVariables>;
 export const ThreadResponseDocument = gql`
-    query ThreadResponse($responseId: Int!) {
-  threadResponse(responseId: $responseId) {
+    query ThreadResponse($projectId: Int!, $responseId: Int!) {
+  threadResponse(projectId: $projectId, responseId: $responseId) {
     ...CommonResponse
   }
 }
@@ -518,6 +549,7 @@ export const ThreadResponseDocument = gql`
  * @example
  * const { data, loading, error } = useThreadResponseQuery({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      responseId: // value for 'responseId'
  *   },
  * });
@@ -534,8 +566,8 @@ export type ThreadResponseQueryHookResult = ReturnType<typeof useThreadResponseQ
 export type ThreadResponseLazyQueryHookResult = ReturnType<typeof useThreadResponseLazyQuery>;
 export type ThreadResponseQueryResult = Apollo.QueryResult<ThreadResponseQuery, ThreadResponseQueryVariables>;
 export const CreateAskingTaskDocument = gql`
-    mutation CreateAskingTask($data: AskingTaskInput!) {
-  createAskingTask(data: $data) {
+    mutation CreateAskingTask($projectId: Int!, $data: AskingTaskInput!) {
+  createAskingTask(projectId: $projectId, data: $data) {
     id
   }
 }
@@ -555,6 +587,7 @@ export type CreateAskingTaskMutationFn = Apollo.MutationFunction<CreateAskingTas
  * @example
  * const [createAskingTaskMutation, { data, loading, error }] = useCreateAskingTaskMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      data: // value for 'data'
  *   },
  * });
@@ -598,8 +631,8 @@ export type CancelAskingTaskMutationHookResult = ReturnType<typeof useCancelAski
 export type CancelAskingTaskMutationResult = Apollo.MutationResult<CancelAskingTaskMutation>;
 export type CancelAskingTaskMutationOptions = Apollo.BaseMutationOptions<CancelAskingTaskMutation, CancelAskingTaskMutationVariables>;
 export const RerunAskingTaskDocument = gql`
-    mutation RerunAskingTask($responseId: Int!) {
-  rerunAskingTask(responseId: $responseId) {
+    mutation RerunAskingTask($projectId: Int!, $responseId: Int!) {
+  rerunAskingTask(projectId: $projectId, responseId: $responseId) {
     id
   }
 }
@@ -619,6 +652,7 @@ export type RerunAskingTaskMutationFn = Apollo.MutationFunction<RerunAskingTaskM
  * @example
  * const [rerunAskingTaskMutation, { data, loading, error }] = useRerunAskingTaskMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      responseId: // value for 'responseId'
  *   },
  * });
@@ -631,8 +665,8 @@ export type RerunAskingTaskMutationHookResult = ReturnType<typeof useRerunAsking
 export type RerunAskingTaskMutationResult = Apollo.MutationResult<RerunAskingTaskMutation>;
 export type RerunAskingTaskMutationOptions = Apollo.BaseMutationOptions<RerunAskingTaskMutation, RerunAskingTaskMutationVariables>;
 export const CreateThreadDocument = gql`
-    mutation CreateThread($data: CreateThreadInput!) {
-  createThread(data: $data) {
+    mutation CreateThread($projectId: Int!, $data: CreateThreadInput!) {
+  createThread(projectId: $projectId, data: $data) {
     id
   }
 }
@@ -652,6 +686,7 @@ export type CreateThreadMutationFn = Apollo.MutationFunction<CreateThreadMutatio
  * @example
  * const [createThreadMutation, { data, loading, error }] = useCreateThreadMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      data: // value for 'data'
  *   },
  * });
@@ -664,8 +699,8 @@ export type CreateThreadMutationHookResult = ReturnType<typeof useCreateThreadMu
 export type CreateThreadMutationResult = Apollo.MutationResult<CreateThreadMutation>;
 export type CreateThreadMutationOptions = Apollo.BaseMutationOptions<CreateThreadMutation, CreateThreadMutationVariables>;
 export const CreateThreadResponseDocument = gql`
-    mutation CreateThreadResponse($threadId: Int!, $data: CreateThreadResponseInput!) {
-  createThreadResponse(threadId: $threadId, data: $data) {
+    mutation CreateThreadResponse($projectId: Int!, $threadId: Int!, $data: CreateThreadResponseInput!) {
+  createThreadResponse(projectId: $projectId, threadId: $threadId, data: $data) {
     ...CommonResponse
   }
 }
@@ -685,6 +720,7 @@ export type CreateThreadResponseMutationFn = Apollo.MutationFunction<CreateThrea
  * @example
  * const [createThreadResponseMutation, { data, loading, error }] = useCreateThreadResponseMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      threadId: // value for 'threadId'
  *      data: // value for 'data'
  *   },
@@ -698,8 +734,8 @@ export type CreateThreadResponseMutationHookResult = ReturnType<typeof useCreate
 export type CreateThreadResponseMutationResult = Apollo.MutationResult<CreateThreadResponseMutation>;
 export type CreateThreadResponseMutationOptions = Apollo.BaseMutationOptions<CreateThreadResponseMutation, CreateThreadResponseMutationVariables>;
 export const UpdateThreadDocument = gql`
-    mutation UpdateThread($where: ThreadUniqueWhereInput!, $data: UpdateThreadInput!) {
-  updateThread(where: $where, data: $data) {
+    mutation UpdateThread($projectId: Int!, $where: ThreadUniqueWhereInput!, $data: UpdateThreadInput!) {
+  updateThread(projectId: $projectId, where: $where, data: $data) {
     id
     summary
   }
@@ -720,6 +756,7 @@ export type UpdateThreadMutationFn = Apollo.MutationFunction<UpdateThreadMutatio
  * @example
  * const [updateThreadMutation, { data, loading, error }] = useUpdateThreadMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      where: // value for 'where'
  *      data: // value for 'data'
  *   },
@@ -733,8 +770,8 @@ export type UpdateThreadMutationHookResult = ReturnType<typeof useUpdateThreadMu
 export type UpdateThreadMutationResult = Apollo.MutationResult<UpdateThreadMutation>;
 export type UpdateThreadMutationOptions = Apollo.BaseMutationOptions<UpdateThreadMutation, UpdateThreadMutationVariables>;
 export const UpdateThreadResponseDocument = gql`
-    mutation UpdateThreadResponse($where: ThreadResponseUniqueWhereInput!, $data: UpdateThreadResponseInput!) {
-  updateThreadResponse(where: $where, data: $data) {
+    mutation UpdateThreadResponse($projectId: Int!, $where: ThreadResponseUniqueWhereInput!, $data: UpdateThreadResponseInput!) {
+  updateThreadResponse(projectId: $projectId, where: $where, data: $data) {
     ...CommonResponse
   }
 }
@@ -754,6 +791,7 @@ export type UpdateThreadResponseMutationFn = Apollo.MutationFunction<UpdateThrea
  * @example
  * const [updateThreadResponseMutation, { data, loading, error }] = useUpdateThreadResponseMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      where: // value for 'where'
  *      data: // value for 'data'
  *   },
@@ -767,8 +805,12 @@ export type UpdateThreadResponseMutationHookResult = ReturnType<typeof useUpdate
 export type UpdateThreadResponseMutationResult = Apollo.MutationResult<UpdateThreadResponseMutation>;
 export type UpdateThreadResponseMutationOptions = Apollo.BaseMutationOptions<UpdateThreadResponseMutation, UpdateThreadResponseMutationVariables>;
 export const AdjustThreadResponseDocument = gql`
-    mutation AdjustThreadResponse($responseId: Int!, $data: AdjustThreadResponseInput!) {
-  adjustThreadResponse(responseId: $responseId, data: $data) {
+    mutation AdjustThreadResponse($projectId: Int!, $responseId: Int!, $data: AdjustThreadResponseInput!) {
+  adjustThreadResponse(
+    projectId: $projectId
+    responseId: $responseId
+    data: $data
+  ) {
     ...CommonResponse
   }
 }
@@ -788,6 +830,7 @@ export type AdjustThreadResponseMutationFn = Apollo.MutationFunction<AdjustThrea
  * @example
  * const [adjustThreadResponseMutation, { data, loading, error }] = useAdjustThreadResponseMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      responseId: // value for 'responseId'
  *      data: // value for 'data'
  *   },
@@ -801,8 +844,8 @@ export type AdjustThreadResponseMutationHookResult = ReturnType<typeof useAdjust
 export type AdjustThreadResponseMutationResult = Apollo.MutationResult<AdjustThreadResponseMutation>;
 export type AdjustThreadResponseMutationOptions = Apollo.BaseMutationOptions<AdjustThreadResponseMutation, AdjustThreadResponseMutationVariables>;
 export const DeleteThreadDocument = gql`
-    mutation DeleteThread($where: ThreadUniqueWhereInput!) {
-  deleteThread(where: $where)
+    mutation DeleteThread($projectId: Int!, $where: ThreadUniqueWhereInput!) {
+  deleteThread(projectId: $projectId, where: $where)
 }
     `;
 export type DeleteThreadMutationFn = Apollo.MutationFunction<DeleteThreadMutation, DeleteThreadMutationVariables>;
@@ -820,6 +863,7 @@ export type DeleteThreadMutationFn = Apollo.MutationFunction<DeleteThreadMutatio
  * @example
  * const [deleteThreadMutation, { data, loading, error }] = useDeleteThreadMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      where: // value for 'where'
  *   },
  * });
@@ -832,8 +876,8 @@ export type DeleteThreadMutationHookResult = ReturnType<typeof useDeleteThreadMu
 export type DeleteThreadMutationResult = Apollo.MutationResult<DeleteThreadMutation>;
 export type DeleteThreadMutationOptions = Apollo.BaseMutationOptions<DeleteThreadMutation, DeleteThreadMutationVariables>;
 export const PreviewDataDocument = gql`
-    mutation PreviewData($where: PreviewDataInput!) {
-  previewData(where: $where)
+    mutation PreviewData($projectId: Int!, $where: PreviewDataInput!) {
+  previewData(projectId: $projectId, where: $where)
 }
     `;
 export type PreviewDataMutationFn = Apollo.MutationFunction<PreviewDataMutation, PreviewDataMutationVariables>;
@@ -851,6 +895,7 @@ export type PreviewDataMutationFn = Apollo.MutationFunction<PreviewDataMutation,
  * @example
  * const [previewDataMutation, { data, loading, error }] = usePreviewDataMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      where: // value for 'where'
  *   },
  * });
@@ -863,8 +908,8 @@ export type PreviewDataMutationHookResult = ReturnType<typeof usePreviewDataMuta
 export type PreviewDataMutationResult = Apollo.MutationResult<PreviewDataMutation>;
 export type PreviewDataMutationOptions = Apollo.BaseMutationOptions<PreviewDataMutation, PreviewDataMutationVariables>;
 export const PreviewBreakdownDataDocument = gql`
-    mutation PreviewBreakdownData($where: PreviewDataInput!) {
-  previewBreakdownData(where: $where)
+    mutation PreviewBreakdownData($projectId: Int!, $where: PreviewDataInput!) {
+  previewBreakdownData(projectId: $projectId, where: $where)
 }
     `;
 export type PreviewBreakdownDataMutationFn = Apollo.MutationFunction<PreviewBreakdownDataMutation, PreviewBreakdownDataMutationVariables>;
@@ -882,6 +927,7 @@ export type PreviewBreakdownDataMutationFn = Apollo.MutationFunction<PreviewBrea
  * @example
  * const [previewBreakdownDataMutation, { data, loading, error }] = usePreviewBreakdownDataMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      where: // value for 'where'
  *   },
  * });
@@ -894,8 +940,8 @@ export type PreviewBreakdownDataMutationHookResult = ReturnType<typeof usePrevie
 export type PreviewBreakdownDataMutationResult = Apollo.MutationResult<PreviewBreakdownDataMutation>;
 export type PreviewBreakdownDataMutationOptions = Apollo.BaseMutationOptions<PreviewBreakdownDataMutation, PreviewBreakdownDataMutationVariables>;
 export const GetNativeSqlDocument = gql`
-    query GetNativeSQL($responseId: Int!) {
-  nativeSql(responseId: $responseId)
+    query GetNativeSQL($projectId: Int!, $responseId: Int!) {
+  nativeSql(projectId: $projectId, responseId: $responseId)
 }
     `;
 
@@ -911,6 +957,7 @@ export const GetNativeSqlDocument = gql`
  * @example
  * const { data, loading, error } = useGetNativeSqlQuery({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      responseId: // value for 'responseId'
  *   },
  * });
@@ -927,8 +974,8 @@ export type GetNativeSqlQueryHookResult = ReturnType<typeof useGetNativeSqlQuery
 export type GetNativeSqlLazyQueryHookResult = ReturnType<typeof useGetNativeSqlLazyQuery>;
 export type GetNativeSqlQueryResult = Apollo.QueryResult<GetNativeSqlQuery, GetNativeSqlQueryVariables>;
 export const CreateInstantRecommendedQuestionsDocument = gql`
-    mutation CreateInstantRecommendedQuestions($data: InstantRecommendedQuestionsInput!) {
-  createInstantRecommendedQuestions(data: $data) {
+    mutation CreateInstantRecommendedQuestions($projectId: Int!, $data: InstantRecommendedQuestionsInput!) {
+  createInstantRecommendedQuestions(projectId: $projectId, data: $data) {
     id
   }
 }
@@ -948,6 +995,7 @@ export type CreateInstantRecommendedQuestionsMutationFn = Apollo.MutationFunctio
  * @example
  * const [createInstantRecommendedQuestionsMutation, { data, loading, error }] = useCreateInstantRecommendedQuestionsMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      data: // value for 'data'
  *   },
  * });
@@ -995,8 +1043,8 @@ export type InstantRecommendedQuestionsQueryHookResult = ReturnType<typeof useIn
 export type InstantRecommendedQuestionsLazyQueryHookResult = ReturnType<typeof useInstantRecommendedQuestionsLazyQuery>;
 export type InstantRecommendedQuestionsQueryResult = Apollo.QueryResult<InstantRecommendedQuestionsQuery, InstantRecommendedQuestionsQueryVariables>;
 export const GetThreadRecommendationQuestionsDocument = gql`
-    query GetThreadRecommendationQuestions($threadId: Int!) {
-  getThreadRecommendationQuestions(threadId: $threadId) {
+    query GetThreadRecommendationQuestions($projectId: Int!, $threadId: Int!) {
+  getThreadRecommendationQuestions(projectId: $projectId, threadId: $threadId) {
     ...CommonRecommendedQuestionsTask
   }
 }
@@ -1014,6 +1062,7 @@ export const GetThreadRecommendationQuestionsDocument = gql`
  * @example
  * const { data, loading, error } = useGetThreadRecommendationQuestionsQuery({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      threadId: // value for 'threadId'
  *   },
  * });
@@ -1030,8 +1079,8 @@ export type GetThreadRecommendationQuestionsQueryHookResult = ReturnType<typeof 
 export type GetThreadRecommendationQuestionsLazyQueryHookResult = ReturnType<typeof useGetThreadRecommendationQuestionsLazyQuery>;
 export type GetThreadRecommendationQuestionsQueryResult = Apollo.QueryResult<GetThreadRecommendationQuestionsQuery, GetThreadRecommendationQuestionsQueryVariables>;
 export const GetProjectRecommendationQuestionsDocument = gql`
-    query GetProjectRecommendationQuestions {
-  getProjectRecommendationQuestions {
+    query GetProjectRecommendationQuestions($projectId: Int!) {
+  getProjectRecommendationQuestions(projectId: $projectId) {
     ...CommonRecommendedQuestionsTask
   }
 }
@@ -1049,10 +1098,11 @@ export const GetProjectRecommendationQuestionsDocument = gql`
  * @example
  * const { data, loading, error } = useGetProjectRecommendationQuestionsQuery({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *   },
  * });
  */
-export function useGetProjectRecommendationQuestionsQuery(baseOptions?: Apollo.QueryHookOptions<GetProjectRecommendationQuestionsQuery, GetProjectRecommendationQuestionsQueryVariables>) {
+export function useGetProjectRecommendationQuestionsQuery(baseOptions: Apollo.QueryHookOptions<GetProjectRecommendationQuestionsQuery, GetProjectRecommendationQuestionsQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<GetProjectRecommendationQuestionsQuery, GetProjectRecommendationQuestionsQueryVariables>(GetProjectRecommendationQuestionsDocument, options);
       }
@@ -1064,8 +1114,8 @@ export type GetProjectRecommendationQuestionsQueryHookResult = ReturnType<typeof
 export type GetProjectRecommendationQuestionsLazyQueryHookResult = ReturnType<typeof useGetProjectRecommendationQuestionsLazyQuery>;
 export type GetProjectRecommendationQuestionsQueryResult = Apollo.QueryResult<GetProjectRecommendationQuestionsQuery, GetProjectRecommendationQuestionsQueryVariables>;
 export const GenerateProjectRecommendationQuestionsDocument = gql`
-    mutation GenerateProjectRecommendationQuestions {
-  generateProjectRecommendationQuestions
+    mutation GenerateProjectRecommendationQuestions($projectId: Int!) {
+  generateProjectRecommendationQuestions(projectId: $projectId)
 }
     `;
 export type GenerateProjectRecommendationQuestionsMutationFn = Apollo.MutationFunction<GenerateProjectRecommendationQuestionsMutation, GenerateProjectRecommendationQuestionsMutationVariables>;
@@ -1083,6 +1133,7 @@ export type GenerateProjectRecommendationQuestionsMutationFn = Apollo.MutationFu
  * @example
  * const [generateProjectRecommendationQuestionsMutation, { data, loading, error }] = useGenerateProjectRecommendationQuestionsMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *   },
  * });
  */
@@ -1094,8 +1145,11 @@ export type GenerateProjectRecommendationQuestionsMutationHookResult = ReturnTyp
 export type GenerateProjectRecommendationQuestionsMutationResult = Apollo.MutationResult<GenerateProjectRecommendationQuestionsMutation>;
 export type GenerateProjectRecommendationQuestionsMutationOptions = Apollo.BaseMutationOptions<GenerateProjectRecommendationQuestionsMutation, GenerateProjectRecommendationQuestionsMutationVariables>;
 export const GenerateThreadRecommendationQuestionsDocument = gql`
-    mutation GenerateThreadRecommendationQuestions($threadId: Int!) {
-  generateThreadRecommendationQuestions(threadId: $threadId)
+    mutation GenerateThreadRecommendationQuestions($projectId: Int!, $threadId: Int!) {
+  generateThreadRecommendationQuestions(
+    projectId: $projectId
+    threadId: $threadId
+  )
 }
     `;
 export type GenerateThreadRecommendationQuestionsMutationFn = Apollo.MutationFunction<GenerateThreadRecommendationQuestionsMutation, GenerateThreadRecommendationQuestionsMutationVariables>;
@@ -1113,6 +1167,7 @@ export type GenerateThreadRecommendationQuestionsMutationFn = Apollo.MutationFun
  * @example
  * const [generateThreadRecommendationQuestionsMutation, { data, loading, error }] = useGenerateThreadRecommendationQuestionsMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      threadId: // value for 'threadId'
  *   },
  * });
@@ -1125,8 +1180,8 @@ export type GenerateThreadRecommendationQuestionsMutationHookResult = ReturnType
 export type GenerateThreadRecommendationQuestionsMutationResult = Apollo.MutationResult<GenerateThreadRecommendationQuestionsMutation>;
 export type GenerateThreadRecommendationQuestionsMutationOptions = Apollo.BaseMutationOptions<GenerateThreadRecommendationQuestionsMutation, GenerateThreadRecommendationQuestionsMutationVariables>;
 export const GenerateThreadResponseAnswerDocument = gql`
-    mutation GenerateThreadResponseAnswer($responseId: Int!) {
-  generateThreadResponseAnswer(responseId: $responseId) {
+    mutation GenerateThreadResponseAnswer($projectId: Int!, $responseId: Int!) {
+  generateThreadResponseAnswer(projectId: $projectId, responseId: $responseId) {
     ...CommonResponse
   }
 }
@@ -1146,6 +1201,7 @@ export type GenerateThreadResponseAnswerMutationFn = Apollo.MutationFunction<Gen
  * @example
  * const [generateThreadResponseAnswerMutation, { data, loading, error }] = useGenerateThreadResponseAnswerMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      responseId: // value for 'responseId'
  *   },
  * });
@@ -1158,8 +1214,8 @@ export type GenerateThreadResponseAnswerMutationHookResult = ReturnType<typeof u
 export type GenerateThreadResponseAnswerMutationResult = Apollo.MutationResult<GenerateThreadResponseAnswerMutation>;
 export type GenerateThreadResponseAnswerMutationOptions = Apollo.BaseMutationOptions<GenerateThreadResponseAnswerMutation, GenerateThreadResponseAnswerMutationVariables>;
 export const GenerateThreadResponseChartDocument = gql`
-    mutation GenerateThreadResponseChart($responseId: Int!) {
-  generateThreadResponseChart(responseId: $responseId) {
+    mutation GenerateThreadResponseChart($projectId: Int!, $responseId: Int!) {
+  generateThreadResponseChart(projectId: $projectId, responseId: $responseId) {
     ...CommonResponse
   }
 }
@@ -1179,6 +1235,7 @@ export type GenerateThreadResponseChartMutationFn = Apollo.MutationFunction<Gene
  * @example
  * const [generateThreadResponseChartMutation, { data, loading, error }] = useGenerateThreadResponseChartMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      responseId: // value for 'responseId'
  *   },
  * });
@@ -1191,8 +1248,12 @@ export type GenerateThreadResponseChartMutationHookResult = ReturnType<typeof us
 export type GenerateThreadResponseChartMutationResult = Apollo.MutationResult<GenerateThreadResponseChartMutation>;
 export type GenerateThreadResponseChartMutationOptions = Apollo.BaseMutationOptions<GenerateThreadResponseChartMutation, GenerateThreadResponseChartMutationVariables>;
 export const AdjustThreadResponseChartDocument = gql`
-    mutation AdjustThreadResponseChart($responseId: Int!, $data: AdjustThreadResponseChartInput!) {
-  adjustThreadResponseChart(responseId: $responseId, data: $data) {
+    mutation AdjustThreadResponseChart($projectId: Int!, $responseId: Int!, $data: AdjustThreadResponseChartInput!) {
+  adjustThreadResponseChart(
+    projectId: $projectId
+    responseId: $responseId
+    data: $data
+  ) {
     ...CommonResponse
   }
 }
@@ -1212,6 +1273,7 @@ export type AdjustThreadResponseChartMutationFn = Apollo.MutationFunction<Adjust
  * @example
  * const [adjustThreadResponseChartMutation, { data, loading, error }] = useAdjustThreadResponseChartMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      responseId: // value for 'responseId'
  *      data: // value for 'data'
  *   },
@@ -1301,8 +1363,8 @@ export type CancelAdjustmentTaskMutationHookResult = ReturnType<typeof useCancel
 export type CancelAdjustmentTaskMutationResult = Apollo.MutationResult<CancelAdjustmentTaskMutation>;
 export type CancelAdjustmentTaskMutationOptions = Apollo.BaseMutationOptions<CancelAdjustmentTaskMutation, CancelAdjustmentTaskMutationVariables>;
 export const RerunAdjustmentTaskDocument = gql`
-    mutation RerunAdjustmentTask($responseId: Int!) {
-  rerunAdjustmentTask(responseId: $responseId)
+    mutation RerunAdjustmentTask($projectId: Int!, $responseId: Int!) {
+  rerunAdjustmentTask(projectId: $projectId, responseId: $responseId)
 }
     `;
 export type RerunAdjustmentTaskMutationFn = Apollo.MutationFunction<RerunAdjustmentTaskMutation, RerunAdjustmentTaskMutationVariables>;
@@ -1320,6 +1382,7 @@ export type RerunAdjustmentTaskMutationFn = Apollo.MutationFunction<RerunAdjustm
  * @example
  * const [rerunAdjustmentTaskMutation, { data, loading, error }] = useRerunAdjustmentTaskMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      responseId: // value for 'responseId'
  *   },
  * });

@@ -1,22 +1,23 @@
 import { gql } from '@apollo/client';
 
 export const CREATE_RELATIONSHIP = gql`
-  mutation CreateRelationship($data: RelationInput!) {
-    createRelation(data: $data)
+  mutation CreateRelationship($projectId: Int!, $data: RelationInput!) {
+    createRelation(projectId: $projectId, data: $data)
   }
 `;
 
 export const UPDATE_RELATIONSHIP = gql`
   mutation UpdateRelationship(
+    $projectId: Int!
     $where: WhereIdInput!
     $data: UpdateRelationInput!
   ) {
-    updateRelation(where: $where, data: $data)
+    updateRelation(projectId: $projectId, where: $where, data: $data)
   }
 `;
 
 export const DELETE_RELATIONSHIP = gql`
-  mutation DeleteRelationship($where: WhereIdInput!) {
-    deleteRelation(where: $where)
+  mutation DeleteRelationship($projectId: Int!, $where: WhereIdInput!) {
+    deleteRelation(projectId: $projectId, where: $where)
   }
 `;

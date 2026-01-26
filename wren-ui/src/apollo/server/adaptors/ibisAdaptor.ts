@@ -164,6 +164,11 @@ const dataSourceUrlMap: Record<SupportedDataSource, string> = {
   [SupportedDataSource.DATABRICKS]: 'databricks',
 };
 
+const stripDefaultPostgresSchemaPrefix = (name: string) => {
+  if (!name) return name;
+  return name.startsWith('public.') ? name.slice('public.'.length) : name;
+};
+
 export interface TableResponse {
   tables: CompactTable[];
 }
@@ -371,7 +376,24 @@ export class IbisAdaptor implements IIbisAdaptor {
           body,
         );
 
-        return this.transformDescriptionToProperties(res.data);
+        const tables = this.transformDescriptionToProperties(res.data);
+
+        // For Postgres, ibis may return table names like "public.grades".
+        // We don't want default schema "public" to be encoded into model/table names,
+        // because later we convert dots into underscores for referenceName, producing
+        // wrong identifiers like "public_grades".
+        if (dataSource === DataSourceName.POSTGRES) {
+          return tables.map((table) => {
+            const nextName = stripDefaultPostgresSchemaPrefix(table.name);
+            const properties = table?.properties || {};
+            if (table.name?.startsWith('public.')) {
+              properties.schema = 'public';
+            }
+            return { ...table, name: nextName, properties };
+          });
+        }
+
+        return tables;
       };
 
       connectionInfo = this.updateConnectionInfo(connectionInfo);
@@ -415,6 +437,15 @@ export class IbisAdaptor implements IIbisAdaptor {
         `${this.ibisServerEndpoint}/${this.getIbisApiVersion(IBIS_API_TYPE.METADATA)}/connector/${dataSourceUrlMap[dataSource]}/metadata/constraints`,
         body,
       );
+
+      if (dataSource === DataSourceName.POSTGRES) {
+        return res.data.map((c) => ({
+          ...c,
+          constraintTable: stripDefaultPostgresSchemaPrefix(c.constraintTable),
+          constraintedTable: stripDefaultPostgresSchemaPrefix(c.constraintedTable),
+        }));
+      }
+
       return res.data;
     } catch (e) {
       logger.debug(`Get constraints error: ${e.response?.data || e.message}`);
@@ -580,13 +611,16 @@ export class IbisAdaptor implements IIbisAdaptor {
     defaultMessage: string,
     errorMessageBuilder?: CallableFunction,
   ) {
-    const customMessage =
+    let customMessage =
       e.response?.data?.message ||
       e.response?.data ||
       e.message ||
       defaultMessage;
 
-    const errorData = e.response?.data;
+    if (typeof customMessage === 'object') {
+      customMessage = JSON.stringify(customMessage);
+    }
+
     throw Errors.create(Errors.GeneralErrorCodes.IBIS_SERVER_ERROR, {
       customMessage: errorMessageBuilder
         ? errorMessageBuilder(customMessage)
@@ -595,7 +629,6 @@ export class IbisAdaptor implements IIbisAdaptor {
       other: {
         correlationId: e.response?.headers['x-correlation-id'],
         processTime: e.response?.headers['x-process-time'],
-        ...errorData,
       },
     });
   }

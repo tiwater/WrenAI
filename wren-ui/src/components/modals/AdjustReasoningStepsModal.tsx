@@ -8,6 +8,7 @@ import useAutoComplete, { convertMention } from '@/hooks/useAutoComplete';
 import { ModalAction } from '@/hooks/useModalAction';
 import MarkdownEditor from '@/components/editor/MarkdownEditor';
 import { useListModelsQuery } from '@/apollo/client/graphql/model.generated';
+import { useSelectedProject } from '@/contexts/ProjectContext';
 
 const MultiSelect = styled(Select)`
   .ant-select-selector {
@@ -35,13 +36,17 @@ type Props = ModalAction<{
 export default function AdjustReasoningStepsModal(props: Props) {
   const { visible, defaultValue, loading, onSubmit, onClose } = props;
   const [form] = Form.useForm();
+  const projectId = useSelectedProject();
 
   const mentions = useAutoComplete({
     convertor: convertMention,
     includeColumns: true,
     skip: !visible,
   });
-  const listModelsResult = useListModelsQuery({ skip: !visible });
+  const listModelsResult = useListModelsQuery({
+    variables: { projectId: projectId! },
+    skip: !visible || !projectId,
+  });
   const modelNameMap = keyBy(
     listModelsResult.data?.listModels,
     'referenceName',
@@ -113,10 +118,11 @@ export default function AdjustReasoningStepsModal(props: Props) {
 
   return (
     <Modal
-      title="Adjust steps"
+      title="调整推理步骤"
       width={640}
       visible={visible}
-      okText="Regenerate answer"
+      okText="重新生成答案"
+      cancelText="取消"
       onOk={submit}
       onCancel={onClose}
       confirmLoading={loading}
@@ -127,7 +133,7 @@ export default function AdjustReasoningStepsModal(props: Props) {
     >
       <Form form={form} preserve={false} layout="vertical">
         <Form.Item
-          label="Selected models"
+          label="已选模型"
           name="tables"
           required={false}
           rules={[
@@ -138,33 +144,32 @@ export default function AdjustReasoningStepsModal(props: Props) {
           ]}
           extra={
             <div className="text-sm gray-6 mt-1">
-              Select the tables needed to answer your question.{' '}
+              请选择回答问题所需使用的模型/表。{' '}
               <span className="gray-7">
-                Tables not selected won't be used in SQL generation.
+                未选择的模型不会参与 SQL 生成。
               </span>
             </div>
           }
         >
           <MultiSelect
             mode="multiple"
-            placeholder="Select models"
+            placeholder="选择模型"
             options={modelOptions}
             tagRender={tagRender}
           />
         </Form.Item>
         <Form.Item
-          label="Reasoning steps"
+          label="推理步骤"
           className="pb-0"
           extra={
             <div className="text-sm gray-6 mt-1">
               <QuestionCircleOutlined className="mr-1" />
-              Protip: Use @ to choose model in the textarea.
+              小提示：在文本框中输入 @ 可选择模型。
             </div>
           }
         >
           <div className="text-sm gray-6 mb-1">
-            Edit the reasoning logic below. Each step should build toward
-            answering the question accurately.
+            你可以在下方编辑推理逻辑。每一步应逐步推进，以更准确地回答问题。
           </div>
           <Form.Item
             noStyle

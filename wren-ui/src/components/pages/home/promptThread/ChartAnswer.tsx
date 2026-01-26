@@ -21,6 +21,7 @@ import {
 import { useCreateDashboardItemMutation } from '@/apollo/client/graphql/dashboard.generated';
 import { DashboardItemType } from '@/apollo/server/repositories';
 import usePromptThreadStore from './store';
+import { useProject } from '@/contexts/ProjectContext';
 
 const Chart = dynamic(() => import('@/components/chart'), {
   ssr: false,
@@ -78,6 +79,7 @@ const getDynamicProperties = (chartType: ChartType) => {
 };
 
 export default function ChartAnswer(props: AnswerResultProps) {
+  const { selectedProjectId: projectId } = useProject();
   const { onGenerateChartAnswer, onAdjustChartAnswer } = usePromptThreadStore();
   const { threadResponse } = props;
   const [regenerating, setRegenerating] = useState(false);
@@ -89,9 +91,7 @@ export default function ChartAnswer(props: AnswerResultProps) {
   const { chartDetail } = threadResponse;
   const { error, status, adjustment } = chartDetail || {};
 
-  const [previewData, previewDataResult] = usePreviewDataMutation({
-    onError: (error) => console.error(error),
-  });
+  const [previewData, previewDataResult] = usePreviewDataMutation();
 
   const [createDashboardItem] = useCreateDashboardItemMutation({
     onError: (error) => console.error(error),
@@ -102,10 +102,11 @@ export default function ChartAnswer(props: AnswerResultProps) {
 
   // initial trigger when render
   useEffect(() => {
+    if (!projectId) return;
     previewData({
-      variables: { where: { responseId: threadResponse.id } },
+      variables: { projectId, where: { responseId: threadResponse.id } },
     });
-  }, []);
+  }, [projectId, threadResponse.id]);
 
   const chartSpec = useMemo(() => {
     if (
@@ -179,12 +180,17 @@ export default function ChartAnswer(props: AnswerResultProps) {
   };
 
   const onPin = () => {
+    if (!projectId) {
+      message.error('No project selected. Please select a project first.');
+      return;
+    }
     Modal.confirm({
       title: 'Are you sure you want to pin this chart to the dashboard?',
       okText: 'Save',
       onOk: async () =>
         await createDashboardItem({
           variables: {
+            projectId,
             data: {
               // DashboardItemType is compatible with ChartType
               itemType: chartType as unknown as DashboardItemType,

@@ -8,6 +8,7 @@ import SQLEditor from '@/components/editor/SQLEditor';
 import ErrorCollapse from '@/components/ErrorCollapse';
 import PreviewData from '@/components/dataPreview/PreviewData';
 import { usePreviewSqlMutation } from '@/apollo/client/graphql/sql.generated';
+import { useOptionalSelectedProject } from '@/contexts/ProjectContext';
 
 type Props = ModalAction<{ sql: string; responseId: number }> & {
   loading?: boolean;
@@ -17,6 +18,7 @@ export function FixSQLModal(props: Props) {
   const { visible, defaultValue, loading, onSubmit, onClose } = props;
   const [previewLoading, setPreviewLoading] = useState(false);
   const [form] = Form.useForm();
+  const projectId = useOptionalSelectedProject();
 
   // Handle errors via try/catch blocks rather than onError callback
   const [previewSqlMutation, previewSqlResult] = usePreviewSqlMutation();
@@ -35,7 +37,7 @@ export function FixSQLModal(props: Props) {
   const validateSql = async () => {
     const sql = form.getFieldValue('sql');
     await previewSqlMutation({
-      variables: { data: { sql, limit: 1, dryRun: true } },
+      variables: { projectId: projectId!, data: { sql, limit: 1, dryRun: true } },
     });
   };
 
@@ -47,7 +49,7 @@ export function FixSQLModal(props: Props) {
           previewSqlMutation,
           setPreviewLoading,
         )({
-          variables: { data: { sql: values.sql, limit: 50 } },
+          variables: { projectId: projectId!, data: { sql: values.sql, limit: 50 } },
         });
       })
       .catch(console.error);

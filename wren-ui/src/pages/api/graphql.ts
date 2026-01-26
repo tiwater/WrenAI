@@ -89,6 +89,35 @@ const bootstrapServer = async () => {
   const apolloServer: ApolloServer = new ApolloServer({
     typeDefs,
     resolvers,
+    plugins: [
+      {
+        async requestDidStart() {
+          return {
+            async didEncounterErrors(requestContext) {
+              const hasMissingProjectId = (requestContext.errors || []).some(
+                (e) =>
+                  typeof e?.message === 'string' &&
+                  e.message.includes('Variable "$projectId"') &&
+                  e.message.includes('was not provided'),
+              );
+
+              if (!hasMissingProjectId) return;
+
+              const operationName = requestContext.request.operationName;
+              const variables = requestContext.request.variables;
+              const query = requestContext.request.query;
+              const queryHead = query ? query.split('\n').slice(0, 20).join('\n') : '';
+
+              logger.error(
+                `Missing required $projectId. operationName=${operationName || 'UNKNOWN'} variables=${JSON.stringify(
+                  variables,
+                )} queryHead=\n${queryHead}`,
+              );
+            },
+          };
+        },
+      },
+    ],
     formatError: (error: GraphQLError) => {
       // stop print error stacktrace of dry run error
       if (error.extensions?.code === GeneralErrorCodes.DRY_RUN_ERROR) {

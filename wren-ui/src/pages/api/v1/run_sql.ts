@@ -9,6 +9,7 @@ import {
   ApiError,
   respondWith,
   handleApiError,
+  getProjectIdFromRequest,
 } from '@/apollo/server/utils/apiUtils';
 import { transformToObjects } from '@server/utils/dataUtils';
 
@@ -57,7 +58,8 @@ export default async function handler(
       throw new ApiError('SQL is required', 400);
     }
 
-    project = await projectService.getCurrentProject();
+    const projectId = await getProjectIdFromRequest(req);
+    project = await projectService.getProjectById(projectId);
 
     const deployment = await deployService.getLastDeployment(project.id);
 

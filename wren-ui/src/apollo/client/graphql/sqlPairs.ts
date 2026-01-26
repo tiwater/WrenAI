@@ -12,8 +12,8 @@ const SQL_PAIR = gql`
 `;
 
 export const LIST_SQL_PAIRS = gql`
-  query SqlPairs {
-    sqlPairs {
+  query SqlPairs($projectId: Int!) {
+    sqlPairs(projectId: $projectId) {
       ...SqlPair
     }
   }
@@ -22,8 +22,8 @@ export const LIST_SQL_PAIRS = gql`
 `;
 
 export const CREATE_SQL_PAIR = gql`
-  mutation CreateSqlPair($data: CreateSqlPairInput!) {
-    createSqlPair(data: $data) {
+  mutation CreateSqlPair($projectId: Int!, $data: CreateSqlPairInput!) {
+    createSqlPair(projectId: $projectId, data: $data) {
       ...SqlPair
     }
   }
@@ -33,10 +33,11 @@ export const CREATE_SQL_PAIR = gql`
 
 export const UPDATE_SQL_PAIR = gql`
   mutation UpdateSqlPair(
+    $projectId: Int!
     $where: SqlPairWhereUniqueInput!
     $data: UpdateSqlPairInput!
   ) {
-    updateSqlPair(where: $where, data: $data) {
+    updateSqlPair(projectId: $projectId, where: $where, data: $data) {
       ...SqlPair
     }
   }
@@ -45,7 +46,7 @@ export const UPDATE_SQL_PAIR = gql`
 `;
 
 export const DELETE_SQL_PAIR = gql`
-  mutation DeleteSqlPair($where: SqlPairWhereUniqueInput!) {
-    deleteSqlPair(where: $where)
+  mutation DeleteSqlPair($projectId: Int!, $where: SqlPairWhereUniqueInput!) {
+    deleteSqlPair(projectId: $projectId, where: $where)
   }
 `;

@@ -3,15 +3,17 @@ import * as Types from './__types__';
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
 const defaultOptions = {} as const;
-export type OnboardingStatusQueryVariables = Types.Exact<{ [key: string]: never; }>;
+export type OnboardingStatusQueryVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
+}>;
 
 
 export type OnboardingStatusQuery = { __typename?: 'Query', onboardingStatus: { __typename?: 'OnboardingStatusResponse', status?: Types.OnboardingStatus | null } };
 
 
 export const OnboardingStatusDocument = gql`
-    query OnboardingStatus {
-  onboardingStatus {
+    query OnboardingStatus($projectId: Int!) {
+  onboardingStatus(projectId: $projectId) {
     status
   }
 }
@@ -29,10 +31,11 @@ export const OnboardingStatusDocument = gql`
  * @example
  * const { data, loading, error } = useOnboardingStatusQuery({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *   },
  * });
  */
-export function useOnboardingStatusQuery(baseOptions?: Apollo.QueryHookOptions<OnboardingStatusQuery, OnboardingStatusQueryVariables>) {
+export function useOnboardingStatusQuery(baseOptions: Apollo.QueryHookOptions<OnboardingStatusQuery, OnboardingStatusQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<OnboardingStatusQuery, OnboardingStatusQueryVariables>(OnboardingStatusDocument, options);
       }

@@ -24,6 +24,7 @@ import { Props as AnswerResultProps } from '@/components/pages/home/promptThread
 import usePromptThreadStore from '@/components/pages/home/promptThread/store';
 import PreviewData from '@/components/dataPreview/PreviewData';
 import { usePreviewDataMutation } from '@/apollo/client/graphql/home.generated';
+import { useProject } from '@/contexts/ProjectContext';
 
 const SQLCodeBlock = dynamic(() => import('@/components/code/SQLCodeBlock'), {
   ssr: false,
@@ -49,14 +50,21 @@ const StyledToolBar = styled.div`
 export default function ViewSQLTabContent(props: AnswerResultProps) {
   const { isLastThreadResponse, onInitPreviewDone, threadResponse } = props;
 
+  const { selectedProjectId: projectId } = useProject();
+
   const { onOpenAdjustSQLModal } = usePromptThreadStore();
   const { fetchNativeSQL, nativeSQLResult } = useNativeSQL();
-  const [previewData, previewDataResult] = usePreviewDataMutation({
-    onError: (error) => console.error(error),
-  });
+  const [previewData, previewDataResult] = usePreviewDataMutation();
+
+  const { id, sql } = threadResponse;
 
   const onPreviewData = async () => {
-    await previewData({ variables: { where: { responseId: id } } });
+    if (!projectId) return;
+    try {
+      await previewData({ variables: { projectId, where: { responseId: id } } });
+    } catch (e: any) {
+      message.error(e?.message || '查询失败');
+    }
   };
 
   const autoTriggerPreviewDataButton = async () => {
@@ -72,8 +80,6 @@ export default function ViewSQLTabContent(props: AnswerResultProps) {
       autoTriggerPreviewDataButton();
     }
   }, [isLastThreadResponse]);
-
-  const { id, sql } = threadResponse;
 
   const { hasNativeSQL, dataSourceType } = nativeSQLResult;
   const showNativeSQL = hasNativeSQL;
@@ -112,17 +118,9 @@ export default function ViewSQLTabContent(props: AnswerResultProps) {
         className="mb-3 adm-alert-info"
         message={
           <>
-            You’re viewing Wren SQL by default. If you want to run this query on
+            You’re viewing BI SQL by default. If you want to run this query on
             your own database, click “Show original SQL” to get the exact
             syntax.
-            <Typography.Link
-              className="underline ml-1"
-              href="https://docs.getwren.ai/oss/guide/home/wren_sql"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learn more about Wren SQL
-            </Typography.Link>
           </>
         }
         type="info"
@@ -208,9 +206,11 @@ export default function ViewSQLTabContent(props: AnswerResultProps) {
           data-ph-capture="true"
           data-ph-capture-attribute-name="view_sql_preview_data"
         >
-          View results
+          查看查询结果
         </Button>
-        {previewDataResult?.data?.previewData && (
+        {(previewDataResult.loading ||
+          previewDataResult.error ||
+          previewDataResult?.data?.previewData) && (
           <div className="mt-2 mb-3">
             <PreviewData
               error={previewDataResult.error}

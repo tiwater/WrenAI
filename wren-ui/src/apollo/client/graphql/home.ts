@@ -153,8 +153,8 @@ const COMMON_RECOMMENDED_QUESTIONS_TASK = gql`
 `;
 
 export const SUGGESTED_QUESTIONS = gql`
-  query SuggestedQuestions {
-    suggestedQuestions {
+  query SuggestedQuestions($projectId: Int!) {
+    suggestedQuestions(projectId: $projectId) {
       questions {
         label
         question
@@ -173,8 +173,8 @@ export const ASKING_TASK = gql`
 `;
 
 export const THREADS = gql`
-  query Threads {
-    threads {
+  query Threads($projectId: Int!) {
+    threads(projectId: $projectId) {
       id
       summary
     }
@@ -182,8 +182,8 @@ export const THREADS = gql`
 `;
 
 export const THREAD = gql`
-  query Thread($threadId: Int!) {
-    thread(threadId: $threadId) {
+  query Thread($projectId: Int!, $threadId: Int!) {
+    thread(projectId: $projectId, threadId: $threadId) {
       id
       responses {
         ...CommonResponse
@@ -194,8 +194,8 @@ export const THREAD = gql`
 `;
 
 export const THREAD_RESPONSE = gql`
-  query ThreadResponse($responseId: Int!) {
-    threadResponse(responseId: $responseId) {
+  query ThreadResponse($projectId: Int!, $responseId: Int!) {
+    threadResponse(projectId: $projectId, responseId: $responseId) {
       ...CommonResponse
     }
   }
@@ -203,8 +203,8 @@ export const THREAD_RESPONSE = gql`
 `;
 
 export const CREATE_ASKING_TASK = gql`
-  mutation CreateAskingTask($data: AskingTaskInput!) {
-    createAskingTask(data: $data) {
+  mutation CreateAskingTask($projectId: Int!, $data: AskingTaskInput!) {
+    createAskingTask(projectId: $projectId, data: $data) {
       id
     }
   }
@@ -217,16 +217,16 @@ export const CANCEL_ASKING_TASK = gql`
 `;
 
 export const RERUN_ASKING_TASK = gql`
-  mutation RerunAskingTask($responseId: Int!) {
-    rerunAskingTask(responseId: $responseId) {
+  mutation RerunAskingTask($projectId: Int!, $responseId: Int!) {
+    rerunAskingTask(projectId: $projectId, responseId: $responseId) {
       id
     }
   }
 `;
 
 export const CREATE_THREAD = gql`
-  mutation CreateThread($data: CreateThreadInput!) {
-    createThread(data: $data) {
+  mutation CreateThread($projectId: Int!, $data: CreateThreadInput!) {
+    createThread(projectId: $projectId, data: $data) {
       id
     }
   }
@@ -234,10 +234,11 @@ export const CREATE_THREAD = gql`
 
 export const CREATE_THREAD_RESPONSE = gql`
   mutation CreateThreadResponse(
+    $projectId: Int!
     $threadId: Int!
     $data: CreateThreadResponseInput!
   ) {
-    createThreadResponse(threadId: $threadId, data: $data) {
+    createThreadResponse(projectId: $projectId, threadId: $threadId, data: $data) {
       ...CommonResponse
     }
   }
@@ -246,10 +247,11 @@ export const CREATE_THREAD_RESPONSE = gql`
 
 export const UPDATE_THREAD = gql`
   mutation UpdateThread(
+    $projectId: Int!
     $where: ThreadUniqueWhereInput!
     $data: UpdateThreadInput!
   ) {
-    updateThread(where: $where, data: $data) {
+    updateThread(projectId: $projectId, where: $where, data: $data) {
       id
       summary
     }
@@ -258,10 +260,11 @@ export const UPDATE_THREAD = gql`
 
 export const UPDATE_THREAD_RESPONSE = gql`
   mutation UpdateThreadResponse(
+    $projectId: Int!
     $where: ThreadResponseUniqueWhereInput!
     $data: UpdateThreadResponseInput!
   ) {
-    updateThreadResponse(where: $where, data: $data) {
+    updateThreadResponse(projectId: $projectId, where: $where, data: $data) {
       ...CommonResponse
     }
   }
@@ -271,10 +274,11 @@ export const UPDATE_THREAD_RESPONSE = gql`
 // For adjust reasoning steps or SQL
 export const ADJUST_THREAD_RESPONSE = gql`
   mutation AdjustThreadResponse(
+    $projectId: Int!
     $responseId: Int!
     $data: AdjustThreadResponseInput!
   ) {
-    adjustThreadResponse(responseId: $responseId, data: $data) {
+    adjustThreadResponse(projectId: $projectId, responseId: $responseId, data: $data) {
       ...CommonResponse
     }
   }
@@ -282,35 +286,36 @@ export const ADJUST_THREAD_RESPONSE = gql`
 `;
 
 export const DELETE_THREAD = gql`
-  mutation DeleteThread($where: ThreadUniqueWhereInput!) {
-    deleteThread(where: $where)
+  mutation DeleteThread($projectId: Int!, $where: ThreadUniqueWhereInput!) {
+    deleteThread(projectId: $projectId, where: $where)
   }
 `;
 
 // For text-based answer & chart-based answer
 export const PREVIEW_DATA = gql`
-  mutation PreviewData($where: PreviewDataInput!) {
-    previewData(where: $where)
+  mutation PreviewData($projectId: Int!, $where: PreviewDataInput!) {
+    previewData(projectId: $projectId, where: $where)
   }
 `;
 
 export const PREVIEW_BREAKDOWN_DATA = gql`
-  mutation PreviewBreakdownData($where: PreviewDataInput!) {
-    previewBreakdownData(where: $where)
+  mutation PreviewBreakdownData($projectId: Int!, $where: PreviewDataInput!) {
+    previewBreakdownData(projectId: $projectId, where: $where)
   }
 `;
 
 export const GET_NATIVE_SQL = gql`
-  query GetNativeSQL($responseId: Int!) {
-    nativeSql(responseId: $responseId)
+  query GetNativeSQL($projectId: Int!, $responseId: Int!) {
+    nativeSql(projectId: $projectId, responseId: $responseId)
   }
 `;
 
 export const CREATE_INSTANT_RECOMMENDED_QUESTIONS = gql`
   mutation CreateInstantRecommendedQuestions(
+    $projectId: Int!
     $data: InstantRecommendedQuestionsInput!
   ) {
-    createInstantRecommendedQuestions(data: $data) {
+    createInstantRecommendedQuestions(projectId: $projectId, data: $data) {
       id
     }
   }
@@ -326,8 +331,8 @@ export const INSTANT_RECOMMENDED_QUESTIONS = gql`
 `;
 
 export const GET_THREAD_RECOMMENDATION_QUESTIONS = gql`
-  query GetThreadRecommendationQuestions($threadId: Int!) {
-    getThreadRecommendationQuestions(threadId: $threadId) {
+  query GetThreadRecommendationQuestions($projectId: Int!, $threadId: Int!) {
+    getThreadRecommendationQuestions(projectId: $projectId, threadId: $threadId) {
       ...CommonRecommendedQuestionsTask
     }
   }
@@ -336,8 +341,8 @@ export const GET_THREAD_RECOMMENDATION_QUESTIONS = gql`
 `;
 
 export const GET_PROJECT_RECOMMENDATION_QUESTIONS = gql`
-  query GetProjectRecommendationQuestions {
-    getProjectRecommendationQuestions {
+  query GetProjectRecommendationQuestions($projectId: Int!) {
+    getProjectRecommendationQuestions(projectId: $projectId) {
       ...CommonRecommendedQuestionsTask
     }
   }
@@ -346,20 +351,20 @@ export const GET_PROJECT_RECOMMENDATION_QUESTIONS = gql`
 `;
 
 export const GENERATE_PROJECT_RECOMMENDATION_QUESTIONS = gql`
-  mutation GenerateProjectRecommendationQuestions {
-    generateProjectRecommendationQuestions
+  mutation GenerateProjectRecommendationQuestions($projectId: Int!) {
+    generateProjectRecommendationQuestions(projectId: $projectId)
   }
 `;
 
 export const GENERATE_THREAD_RECOMMENDATION_QUESTIONS = gql`
-  mutation GenerateThreadRecommendationQuestions($threadId: Int!) {
-    generateThreadRecommendationQuestions(threadId: $threadId)
+  mutation GenerateThreadRecommendationQuestions($projectId: Int!, $threadId: Int!) {
+    generateThreadRecommendationQuestions(projectId: $projectId, threadId: $threadId)
   }
 `;
 
 export const GENERATE_THREAD_RESPONSE_ANSWER = gql`
-  mutation GenerateThreadResponseAnswer($responseId: Int!) {
-    generateThreadResponseAnswer(responseId: $responseId) {
+  mutation GenerateThreadResponseAnswer($projectId: Int!, $responseId: Int!) {
+    generateThreadResponseAnswer(projectId: $projectId, responseId: $responseId) {
       ...CommonResponse
     }
   }
@@ -368,8 +373,8 @@ export const GENERATE_THREAD_RESPONSE_ANSWER = gql`
 `;
 
 export const GENERATE_THREAD_RESPONSE_CHART = gql`
-  mutation GenerateThreadResponseChart($responseId: Int!) {
-    generateThreadResponseChart(responseId: $responseId) {
+  mutation GenerateThreadResponseChart($projectId: Int!, $responseId: Int!) {
+    generateThreadResponseChart(projectId: $projectId, responseId: $responseId) {
       ...CommonResponse
     }
   }
@@ -378,10 +383,11 @@ export const GENERATE_THREAD_RESPONSE_CHART = gql`
 
 export const ADJUST_THREAD_RESPONSE_CHART = gql`
   mutation AdjustThreadResponseChart(
+    $projectId: Int!
     $responseId: Int!
     $data: AdjustThreadResponseChartInput!
   ) {
-    adjustThreadResponseChart(responseId: $responseId, data: $data) {
+    adjustThreadResponseChart(projectId: $projectId, responseId: $responseId, data: $data) {
       ...CommonResponse
     }
   }
@@ -413,7 +419,7 @@ export const CANCEL_ADJUSTMENT_TASK = gql`
 `;
 
 export const RERUN_ADJUSTMENT_TASK = gql`
-  mutation RerunAdjustmentTask($responseId: Int!) {
-    rerunAdjustmentTask(responseId: $responseId)
+  mutation RerunAdjustmentTask($projectId: Int!, $responseId: Int!) {
+    rerunAdjustmentTask(projectId: $projectId, responseId: $responseId)
   }
 `;

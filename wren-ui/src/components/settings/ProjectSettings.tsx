@@ -7,6 +7,7 @@ import {
 } from '@/apollo/client/graphql/settings.generated';
 import { getLanguageText } from '@/utils/language';
 import { ProjectLanguage } from '@/apollo/client/graphql/__types__';
+import { useOptionalSelectedProject } from '@/contexts/ProjectContext';
 
 interface Props {
   data: { language: string };
@@ -15,6 +16,7 @@ interface Props {
 export default function ProjectSettings(props: Props) {
   const { data } = props;
   const router = useRouter();
+  const projectId = useOptionalSelectedProject();
   const [form] = Form.useForm();
   const [resetCurrentProject, { client }] = useResetCurrentProjectMutation({
     onError: (error) => console.error(error),
@@ -37,7 +39,8 @@ export default function ProjectSettings(props: Props) {
       okButtonProps: { danger: true },
       okText: 'Reset',
       onOk: async () => {
-        await resetCurrentProject();
+        if (!projectId) return;
+        await resetCurrentProject({ variables: { projectId } });
         client.clearStore();
         router.push(Path.OnboardingConnection);
       },
@@ -48,7 +51,8 @@ export default function ProjectSettings(props: Props) {
     form
       .validateFields()
       .then((values) => {
-        updateCurrentProject({ variables: { data: values } });
+        if (!projectId) return;
+        updateCurrentProject({ variables: { projectId, data: values } });
       })
       .catch((error) => console.error(error));
   };

@@ -38,8 +38,8 @@ const COMMON_RELATION = gql`
 `;
 
 export const LIST_MODELS = gql`
-  query ListModels {
-    listModels {
+  query ListModels($projectId: Int!) {
+    listModels(projectId: $projectId) {
       id
       displayName
       referenceName
@@ -61,8 +61,8 @@ export const LIST_MODELS = gql`
 `;
 
 export const GET_MODEL = gql`
-  query GetModel($where: ModelWhereInput!) {
-    model(where: $where) {
+  query GetModel($projectId: Int!, $where: ModelWhereInput!) {
+    model(projectId: $projectId, where: $where) {
       displayName
       referenceName
       sourceTableName
@@ -88,25 +88,25 @@ export const GET_MODEL = gql`
 `;
 
 export const CREATE_MODEL = gql`
-  mutation CreateModel($data: CreateModelInput!) {
-    createModel(data: $data)
+  mutation CreateModel($projectId: Int!, $data: CreateModelInput!) {
+    createModel(projectId: $projectId, data: $data)
   }
 `;
 
 export const UPDATE_MODEL = gql`
-  mutation UpdateModel($where: ModelWhereInput!, $data: UpdateModelInput!) {
-    updateModel(where: $where, data: $data)
+  mutation UpdateModel($projectId: Int!, $where: ModelWhereInput!, $data: UpdateModelInput!) {
+    updateModel(projectId: $projectId, where: $where, data: $data)
   }
 `;
 
 export const DELETE_MODEL = gql`
-  mutation DeleteModel($where: ModelWhereInput!) {
-    deleteModel(where: $where)
+  mutation DeleteModel($projectId: Int!, $where: ModelWhereInput!) {
+    deleteModel(projectId: $projectId, where: $where)
   }
 `;
 
 export const PREVIEW_MODEL_DATA = gql`
-  mutation PreviewModelData($where: WhereIdInput!) {
-    previewModelData(where: $where)
+  mutation PreviewModelData($projectId: Int!, $where: WhereIdInput!) {
+    previewModelData(projectId: $projectId, where: $where)
   }
 `;

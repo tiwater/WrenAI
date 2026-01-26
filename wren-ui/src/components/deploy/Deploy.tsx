@@ -6,6 +6,7 @@ import WarningOutlined from '@ant-design/icons/WarningOutlined';
 import { SyncStatus } from '@/apollo/client/graphql/__types__';
 import { useDeployMutation } from '@/apollo/client/graphql/deploy.generated';
 import { useDeployStatusContext } from '@/components/deploy/Context';
+import { useSelectedProject } from '@/contexts/ProjectContext';
 
 const { Text } = Typography;
 
@@ -37,6 +38,7 @@ const getDeployStatus = (deploying: boolean, status: SyncStatus) => {
 };
 
 export default function Deploy() {
+  const projectId = useSelectedProject();
   const deployContext = useDeployStatusContext();
   const { data, loading, startPolling, stopPolling } = deployContext;
 
@@ -66,7 +68,13 @@ export default function Deploy() {
   const syncStatus = data?.modelSync.status;
 
   const onDeploy = () => {
-    deployMutation();
+    if (!projectId) {
+      message.error('No project selected');
+      return;
+    }
+    // If already synced, force redeploy
+    const force = syncStatus === SyncStatus.SYNCRONIZED;
+    deployMutation({ variables: { projectId, force } });
     startPolling(1000);
   };
 
@@ -77,7 +85,7 @@ export default function Deploy() {
   const disabled =
     deploying ||
     loading ||
-    [SyncStatus.SYNCRONIZED, SyncStatus.IN_PROGRESS].includes(syncStatus);
+    syncStatus === SyncStatus.IN_PROGRESS;
 
   return (
     <Space size={[8, 0]}>

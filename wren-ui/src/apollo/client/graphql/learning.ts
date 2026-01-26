@@ -1,16 +1,16 @@
 import { gql } from '@apollo/client';
 
 export const LEARNING_RECORD = gql`
-  query LearningRecord {
-    learningRecord {
+  query LearningRecord($projectId: Int!) {
+    learningRecord(projectId: $projectId) {
       paths
     }
   }
 `;
 
 export const SAVE_LEARNING_RECORD = gql`
-  mutation SaveLearningRecord($data: SaveLearningRecordInput!) {
-    saveLearningRecord(data: $data) {
+  mutation SaveLearningRecord($projectId: Int!, $data: SaveLearningRecordInput!) {
+    saveLearningRecord(projectId: $projectId, data: $data) {
       paths
     }
   }

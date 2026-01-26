@@ -27,6 +27,7 @@ import {
 import { DIAGRAM } from '@/apollo/client/graphql/diagram';
 import { LIST_MODELS } from '@/apollo/client/graphql/model';
 import { getRelativeTime } from '@/utils/time';
+import { useOptionalSelectedProject } from '@/contexts/ProjectContext';
 
 interface Props {
   [key: string]: any;
@@ -44,6 +45,8 @@ const getHasSchemaChange = (schemaChange: SchemaChange) => {
 
 export default function ModelTree(props: Props) {
   const { onOpenModelDrawer, models } = props;
+
+  const projectId = useOptionalSelectedProject();
 
   const schemaChangeModal = useModalAction();
   const [triggerDataSourceDetection, { loading: isDetecting }] =
@@ -75,10 +78,17 @@ export default function ModelTree(props: Props) {
           schemaChangeModal.closeModal();
         }
       },
-      refetchQueries: [{ query: DIAGRAM }, { query: LIST_MODELS }],
+      refetchQueries: projectId
+        ? [
+            { query: DIAGRAM, variables: { projectId } },
+            { query: LIST_MODELS, variables: { projectId } },
+          ]
+        : [],
     });
   const { data: schemaChangeData, refetch: refetchSchemaChange } =
     useSchemaChangeQuery({
+      variables: { projectId: projectId! },
+      skip: !projectId,
       fetchPolicy: 'cache-and-network',
     });
   const hasSchemaChange = useMemo(
@@ -89,7 +99,8 @@ export default function ModelTree(props: Props) {
     schemaChangeModal.openModal();
   };
   const onResolveSchemaChange = (type: SchemaChangeType) => {
-    resolveSchemaChange({ variables: { where: { type } } });
+    if (!projectId) return;
+    resolveSchemaChange({ variables: { projectId, where: { type } } });
   };
 
   const getModelGroupNode = createTreeGroupNode({
@@ -107,7 +118,9 @@ export default function ModelTree(props: Props) {
                 ? `Last refresh ${getRelativeTime(schemaChangeData?.schemaChange.lastSchemaChangeTime)}`
                 : ''
             }
-            onClick={() => triggerDataSourceDetection()}
+            onClick={() =>
+              projectId && triggerDataSourceDetection({ variables: { projectId } })
+            }
           />
         ),
       },

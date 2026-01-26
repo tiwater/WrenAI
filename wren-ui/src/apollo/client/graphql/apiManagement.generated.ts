@@ -4,6 +4,7 @@ import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
 const defaultOptions = {} as const;
 export type ApiHistoryQueryVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   filter?: Types.InputMaybe<Types.ApiHistoryFilterInput>;
   pagination: Types.ApiHistoryPaginationInput;
 }>;
@@ -13,8 +14,8 @@ export type ApiHistoryQuery = { __typename?: 'Query', apiHistory: { __typename?:
 
 
 export const ApiHistoryDocument = gql`
-    query ApiHistory($filter: ApiHistoryFilterInput, $pagination: ApiHistoryPaginationInput!) {
-  apiHistory(filter: $filter, pagination: $pagination) {
+    query ApiHistory($projectId: Int!, $filter: ApiHistoryFilterInput, $pagination: ApiHistoryPaginationInput!) {
+  apiHistory(projectId: $projectId, filter: $filter, pagination: $pagination) {
     items {
       id
       projectId
@@ -46,6 +47,7 @@ export const ApiHistoryDocument = gql`
  * @example
  * const { data, loading, error } = useApiHistoryQuery({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      filter: // value for 'filter'
  *      pagination: // value for 'pagination'
  *   },

@@ -22,7 +22,7 @@ import useAskingStreamTask from './useAskingStreamTask';
 import { THREAD } from '@/apollo/client/graphql/home';
 import { ApolloClient, NormalizedCacheObject } from '@apollo/client';
 import { nextTick } from '@/utils/time';
-
+import { useProject } from '@/contexts/ProjectContext';
 export interface AskPromptData {
   originalQuestion: string;
   askingTask?: AskingTask;
@@ -80,20 +80,21 @@ const isNeedPreparing = (askingTask: AskingTask) =>
 const handleUpdateThreadCache = (
   threadId: number,
   askingTask: AskingTask,
+  projectId: number,
   client: ApolloClient<NormalizedCacheObject>,
 ) => {
   if (!askingTask) return;
 
   const result = client.cache.readQuery<{ thread: DetailedThread }>({
     query: THREAD,
-    variables: { threadId },
+    variables: { projectId, threadId },
   });
 
   if (result?.thread) {
     client.cache.updateQuery(
       {
         query: THREAD,
-        variables: { threadId },
+        variables: { projectId, threadId },
       },
       (existingData) => {
         return {
@@ -119,13 +120,14 @@ const handleUpdateRerunAskingTaskCache = (
   threadId: number,
   threadResponseId: number,
   askingTask: AskingTask,
+  projectId: number,
   client: ApolloClient<NormalizedCacheObject>,
 ) => {
   if (!askingTask) return;
 
   const result = client.cache.readQuery<{ thread: DetailedThread }>({
     query: THREAD,
-    variables: { threadId },
+    variables: { projectId, threadId },
   });
 
   if (result?.thread) {
@@ -138,7 +140,7 @@ const handleUpdateRerunAskingTaskCache = (
     client.cache.updateQuery(
       {
         query: THREAD,
-        variables: { threadId },
+        variables: { projectId, threadId },
       },
       (existingData) => {
         return {
@@ -158,6 +160,7 @@ const handleUpdateRerunAskingTaskCache = (
 };
 
 export default function useAskPrompt(threadId?: number) {
+  const { selectedProjectId: projectId } = useProject();
   const [originalQuestion, setOriginalQuestion] = useState<string>('');
   const [threadQuestions, setThreadQuestions] = useState<string[]>([]);
   // Handle errors via try/catch blocks rather than onError callback
@@ -213,13 +216,25 @@ export default function useAskPrompt(threadId?: number) {
       ...uniq(threadQuestions).slice(-5),
       originalQuestion,
     ];
-    const response = await createInstantRecommendedQuestions({
-      variables: { data: { previousQuestions } },
-    });
-    fetchInstantRecommendedQuestions({
-      variables: { taskId: response.data.createInstantRecommendedQuestions.id },
-    });
-  }, [originalQuestion]);
+    if (projectId) {
+      const response = await createInstantRecommendedQuestions({
+        variables: { projectId, data: { previousQuestions } },
+      });
+
+      const taskId = response.data?.createInstantRecommendedQuestions?.id;
+      if (!taskId) {
+        console.warn(
+          '[useAskPrompt] createInstantRecommendedQuestions returned empty data; skip polling instantRecommendedQuestions',
+          { errors: response.errors },
+        );
+        return;
+      }
+
+      fetchInstantRecommendedQuestions({
+        variables: { taskId },
+      });
+    }
+  }, [originalQuestion, projectId]);
 
   const checkFetchAskingStreamTask = useCallback(
     (task: AskingTask) => {
@@ -237,11 +252,18 @@ export default function useAskPrompt(threadId?: number) {
     // handle update cache for preparing component
     if (isNeedPreparing(askingTask)) {
       if (threadId) {
-        handleUpdateThreadCache(threadId, askingTask, askingTaskResult.client);
+        if (projectId) {
+          handleUpdateThreadCache(
+            threadId,
+            askingTask,
+            projectId,
+            askingTaskResult.client,
+          );
+        }
         checkFetchAskingStreamTask(askingTask);
       }
     }
-  }, [askingTask?.status, threadId, checkFetchAskingStreamTask]);
+  }, [askingTask?.status, threadId, checkFetchAskingStreamTask, projectId]);
 
   useEffect(() => {
     // handle instant recommended questions
@@ -276,9 +298,11 @@ export default function useAskPrompt(threadId?: number) {
   const onReRun = async (threadResponse: ThreadResponse) => {
     askingStreamTaskResult.reset();
     setOriginalQuestion(threadResponse.question);
+    if (!projectId) return;
+
     try {
       const response = await rerunAskingTask({
-        variables: { responseId: threadResponse.id },
+        variables: { projectId, responseId: threadResponse.id },
       });
       const { data } = await fetchAskingTask({
         variables: { taskId: response.data.rerunAskingTask.id },
@@ -288,6 +312,7 @@ export default function useAskPrompt(threadId?: number) {
         threadId,
         threadResponse.id,
         data.askingTask,
+        projectId,
         askingTaskResult.client,
       );
     } catch (error) {
@@ -298,9 +323,11 @@ export default function useAskPrompt(threadId?: number) {
   const onSubmit = async (value) => {
     askingStreamTaskResult.reset();
     setOriginalQuestion(value);
+    if (!projectId) return;
+
     try {
       const response = await createAskingTask({
-        variables: { data: { question: value, threadId } },
+        variables: { projectId, data: { question: value, threadId } },
       });
       await fetchAskingTask({
         variables: { taskId: response.data.createAskingTask.id },

@@ -42,6 +42,7 @@ export interface ProjectData {
   displayName: string;
   type: DataSourceName;
   connectionInfo: WREN_AI_CONNECTION_INFO;
+  name?: string;
 }
 
 export interface ProjectRecommendationQuestionsResult {
@@ -69,17 +70,18 @@ export interface IProjectService {
     projectId?: number,
   ) => Promise<RecommendConstraint[]>;
 
-  getCurrentProject: () => Promise<Project>;
   getProjectById: (projectId: number) => Promise<Project>;
+  listProjects: () => Promise<Project[]>;
+  duplicateProject: (projectId: number, name: string) => Promise<Project>;
   writeCredentialFile: (
     credentials: JSON,
     persistCredentialDir: string,
   ) => string;
   deleteProject: (projectId: number) => Promise<void>;
-  getProjectRecommendationQuestions: () => Promise<ProjectRecommendationQuestionsResult>;
+  getProjectRecommendationQuestions: (projectId: number) => Promise<ProjectRecommendationQuestionsResult>;
 
   // recommend questions
-  generateProjectRecommendationQuestions: () => Promise<void>;
+  generateProjectRecommendationQuestions: (projectId: number) => Promise<void>;
 }
 
 export class ProjectService implements IProjectService {
@@ -123,23 +125,23 @@ export class ProjectService implements IProjectService {
     project?: Project,
     projectId?: number,
   ): Promise<string> {
-    const usedProject = project
-      ? project
-      : projectId
-        ? await this.getProjectById(projectId)
-        : await this.getCurrentProject();
+    if (!project && !projectId) {
+      throw new Error('Either project or projectId must be provided');
+    }
+    const usedProject = project || await this.getProjectById(projectId!);
     return await this.metadataService.getVersion(usedProject);
   }
 
-  public async generateProjectRecommendationQuestions(): Promise<void> {
-    const project = await this.getCurrentProject();
+  public async generateProjectRecommendationQuestions(projectId: number): Promise<void> {
+    const project = await this.getProjectById(projectId);
     if (!project) {
       throw new Error(`Project not found`);
     }
-    const { manifest } = await this.mdlService.makeCurrentModelMDL();
+    const { manifest } = await this.mdlService.makeCurrentModelMDL(projectId);
     const recommendQuestionResult =
       await this.wrenAIAdaptor.generateRecommendationQuestions({
         manifest,
+        projectId: projectId.toString(),
         ...this.getProjectRecommendationQuestionsConfig(project),
       });
 
@@ -161,8 +163,8 @@ export class ProjectService implements IProjectService {
     }
   }
 
-  public async getProjectRecommendationQuestions() {
-    const project = await this.projectRepository.getCurrentProject();
+  public async getProjectRecommendationQuestions(projectId: number) {
+    const project = await this.getProjectById(projectId);
     if (!project) {
       throw new Error(`Project not found`);
     }
@@ -181,23 +183,44 @@ export class ProjectService implements IProjectService {
     return result;
   }
 
-  public async getCurrentProject() {
-    return await this.projectRepository.getCurrentProject();
-  }
 
   public async getProjectById(projectId: number) {
-    return await this.projectRepository.findOneBy({ id: projectId });
+    return await this.projectRepository.getProjectById(projectId);
+  }
+
+  public async listProjects() {
+    return await this.projectRepository.listProjects();
+  }
+
+  // switchProject removed - project selection is now handled on client side
+
+  public async duplicateProject(projectId: number, name: string) {
+    const sourceProject = await this.getProjectById(projectId);
+    if (!sourceProject) {
+      throw new Error(`Project with id ${projectId} not found`);
+    }
+
+    // Create a new project with the same configuration
+    const newProject = await this.createProject({
+      displayName: sourceProject.displayName,
+      type: sourceProject.type,
+      connectionInfo: sourceProject.connectionInfo,
+    });
+
+    // Update the name
+    await this.updateProject(newProject.id, { name });
+
+    return newProject;
   }
 
   public async getProjectDataSourceTables(
     project?: Project,
     projectId?: number,
   ) {
-    const usedProject = project
-      ? project
-      : projectId
-        ? await this.getProjectById(projectId)
-        : await this.getCurrentProject();
+    if (!project && !projectId) {
+      throw new Error('Either project or projectId must be provided');
+    }
+    const usedProject = project || await this.getProjectById(projectId!);
     return await this.metadataService.listTables(usedProject);
   }
 
@@ -205,11 +228,10 @@ export class ProjectService implements IProjectService {
     project?: Project,
     projectId?: number,
   ) {
-    const usedProject = project
-      ? project
-      : projectId
-        ? await this.getProjectById(projectId)
-        : await this.getCurrentProject();
+    if (!project && !projectId) {
+      throw new Error('Either project or projectId must be provided');
+    }
+    const usedProject = project || await this.getProjectById(projectId!);
     return await this.metadataService.listConstraints(usedProject);
   }
 
@@ -223,6 +245,9 @@ export class ProjectService implements IProjectService {
         projectData.type,
         projectData.connectionInfo,
       ),
+      name: projectData.name || projectData.displayName,
+      // isActive field removed - project selection is now handled on client side
+      lastAccessedAt: new Date(),
     };
     logger.debug('Creating project...');
     const project = await this.projectRepository.createOne(projectValue);

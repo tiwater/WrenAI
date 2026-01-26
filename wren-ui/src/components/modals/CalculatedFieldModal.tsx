@@ -19,6 +19,7 @@ import DescriptiveSelector from '@/components/selectors/DescriptiveSelector';
 import ErrorCollapse from '@/components/ErrorCollapse';
 import { useValidateCalculatedFieldMutation } from '@/apollo/client/graphql/calculatedField.generated';
 import { CreateCalculatedFieldInput } from '@/apollo/client/graphql/__types__';
+import { useProject } from '@/contexts/ProjectContext';
 
 export type CalculatedFieldValue = {
   name: string;
@@ -60,22 +61,33 @@ export default function AddCalculatedFieldModal(props: Props) {
 
   const expressionOptions = useExpressionFieldOptions();
 
+  const { selectedProjectId: projectId } = useProject();
+
   const models = useMemo(() => payload?.models, [payload]);
   const sourceModel = useMemo(() => payload?.sourceModel, [payload]);
+  const sourceModelId = sourceModel?.modelId;
 
   const [validateCalculatedField] = useValidateCalculatedFieldMutation();
   const validateCalculatedFieldName = useCallback(
-    async (name: string) =>
-      await validateCalculatedField({
+    async (name: string) => {
+      if (!projectId) {
+        throw new Error('Project not selected');
+      }
+      if (!sourceModelId) {
+        throw new Error('Model not selected');
+      }
+      return await validateCalculatedField({
         variables: {
+          projectId,
           data: {
             name,
-            modelId: sourceModel.modelId,
+            modelId: sourceModelId,
             columnId: defaultValue?.columnId,
           },
         },
-      }),
-    [sourceModel, defaultValue],
+      });
+    },
+    [defaultValue?.columnId, projectId, sourceModelId, validateCalculatedField],
   );
 
   useEffect(() => {
@@ -85,7 +97,7 @@ export default function AddCalculatedFieldModal(props: Props) {
 
   const fetchOptions = useCallback(
     async (value) => {
-      const selectedModel = models.find(
+      const selectedModel = models?.find(
         (model) => model.referenceName === value.referenceName,
       );
       // use current model options when initial
@@ -110,7 +122,10 @@ export default function AddCalculatedFieldModal(props: Props) {
       .validateFields()
       .then(async (values) => {
         const id = defaultValue?.columnId;
-        const modelId = !id ? sourceModel.modelId : undefined;
+        if (!sourceModelId) {
+          throw new Error('Model not selected');
+        }
+        const modelId = !id ? sourceModelId : undefined;
 
         await onSubmit({
           id,

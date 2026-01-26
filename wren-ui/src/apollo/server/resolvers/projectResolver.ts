@@ -47,6 +47,46 @@ export enum OnboardingStatusEnum {
   WITH_SAMPLE_DATASET = 'WITH_SAMPLE_DATASET',
 }
 
+// Helper function to safely convert date to string
+const toDateString = (date: Date | string | null | undefined | any): string | null => {
+  if (!date) return null;
+  if (typeof date === 'string') return date;
+  // Check if it's a valid Date object
+  if (date instanceof Date && !isNaN(date.getTime())) {
+    return date.toISOString();
+  }
+  // Try to parse as date if it's an object with toString
+  if (typeof date === 'object' && date.toString) {
+    const str = date.toString();
+    // If it looks like a date string, return it
+    if (str && str !== '[object Object]') {
+      return str;
+    }
+  }
+  // If all else fails, try to create a Date from it
+  try {
+    const parsedDate = new Date(date);
+    if (!isNaN(parsedDate.getTime())) {
+      return parsedDate.toISOString();
+    }
+  } catch (e) {
+    // Ignore parse errors
+  }
+  return null;
+};
+
+// Helper function to format project for GraphQL response
+const formatProjectInfo = (project: any) => ({
+  id: project.id,
+  name: project.name || project.displayName || 'Unnamed Project',  // Ensure name is never null
+  displayName: project.displayName || '',
+  type: project.type,
+  language: project.language || 'EN',
+  lastAccessedAt: toDateString(project.lastAccessedAt),
+  createdAt: toDateString(project.createdAt),
+  sampleDataset: project.sampleDataset,
+});
+
 export class ProjectResolver {
   constructor() {
     this.getSettings = this.getSettings.bind(this);
@@ -65,10 +105,18 @@ export class ProjectResolver {
     this.getSchemaChange = this.getSchemaChange.bind(this);
     this.getProjectRecommendationQuestions =
       this.getProjectRecommendationQuestions.bind(this);
+
+    // New multi-project methods
+    this.listProjects = this.listProjects.bind(this);
+    this.getProject = this.getProject.bind(this);
+    this.createProject = this.createProject.bind(this);
+    this.updateProject = this.updateProject.bind(this);
+    this.deleteProject = this.deleteProject.bind(this);
+    this.duplicateProject = this.duplicateProject.bind(this);
   }
 
-  public async getSettings(_root: any, _arg: any, ctx: IContext) {
-    const project = await ctx.projectService.getCurrentProject();
+  public async getSettings(_root: any, _arg: { projectId: number }, ctx: IContext) {
+    const project = await ctx.projectService.getProjectById(_arg.projectId);
     const generalConnectionInfo =
       ctx.projectService.getGeneralConnectionInfo(project);
     const dataSourceType = project.type;
@@ -89,34 +137,34 @@ export class ProjectResolver {
 
   public async getProjectRecommendationQuestions(
     _root: any,
-    _arg: any,
+    _arg: { projectId: number },
     ctx: IContext,
   ) {
-    return ctx.projectService.getProjectRecommendationQuestions();
+    return ctx.projectService.getProjectRecommendationQuestions(_arg.projectId);
   }
 
   public async updateCurrentProject(
     _root: any,
-    arg: { data: { language: string } },
+    arg: { projectId: number; data: { language: string } },
     ctx: IContext,
   ) {
     const { language } = arg.data;
-    const project = await ctx.projectService.getCurrentProject();
+    const project = await ctx.projectService.getProjectById(arg.projectId);
     await ctx.projectRepository.updateOne(project.id, {
       language,
     });
 
     // only generating for user's data source
     if (project.sampleDataset === null) {
-      await ctx.projectService.generateProjectRecommendationQuestions();
+      await ctx.projectService.generateProjectRecommendationQuestions(project.id);
     }
     return true;
   }
 
-  public async resetCurrentProject(_root: any, _arg: any, ctx: IContext) {
+  public async resetCurrentProject(_root: any, arg: { projectId: number }, ctx: IContext) {
     let project;
     try {
-      project = await ctx.projectService.getCurrentProject();
+      project = await ctx.projectService.getProjectById(arg.projectId);
     } catch {
       // no project found
       return true;
@@ -152,7 +200,7 @@ export class ProjectResolver {
 
   public async startSampleDataset(
     _root: any,
-    _arg: { data: SampleDatasetData },
+    _arg: { projectId: number; data: SampleDatasetData },
     ctx: IContext,
   ) {
     const { name } = _arg.data;
@@ -170,14 +218,21 @@ export class ProjectResolver {
     try {
       // create duckdb datasource
       const initSql = buildInitSql(name as SampleDatasetName);
+
+      // Get project name from sessionStorage if available
+      const projectName = _arg.data['projectName'] || name;
+
       const duckdbDatasourceProperties = {
+        name: projectName,  // Add project name
+        displayName: name,   // Display name is the dataset name
         initSql,
         extensions: [],
         configurations: {},
       };
-      await this.saveDataSource(
+      const dataSourceResult = await this.saveDataSource(
         _root,
         {
+          projectId: 0, // Will create a new project
           data: {
             type: DataSourceName.DUCKDB,
             properties: duckdbDatasourceProperties,
@@ -185,18 +240,18 @@ export class ProjectResolver {
         },
         ctx,
       );
-      const project = await ctx.projectService.getCurrentProject();
+      const project = await ctx.projectService.getProjectById(dataSourceResult.projectId);
 
       // list all the tables in the data source
-      const tables = await this.listDataSourceTables(_root, _arg, ctx);
+      const tables = await this.listDataSourceTables(_root, { projectId: project.id }, ctx);
       const tableNames = tables.map((table) => table.name);
 
       // save tables as model and modelColumns
       await this.overwriteModelsAndColumns(tableNames, ctx, project);
 
-      await ctx.modelService.updatePrimaryKeys(dataset.tables);
-      await ctx.modelService.batchUpdateModelProperties(dataset.tables);
-      await ctx.modelService.batchUpdateColumnProperties(dataset.tables);
+      await ctx.modelService.updatePrimaryKeys(project.id, dataset.tables);
+      await ctx.modelService.batchUpdateModelProperties(project.id, dataset.tables);
+      await ctx.modelService.batchUpdateColumnProperties(project.id, dataset.tables);
 
       // save relations
       const relations = getRelations(name as SampleDatasetName);
@@ -207,16 +262,16 @@ export class ProjectResolver {
         models,
         columns,
       );
-      await ctx.modelService.saveRelations(mappedRelations);
+      await ctx.modelService.saveRelations(project.id, mappedRelations);
 
       // mark current project as using sample dataset
       await ctx.projectRepository.updateOne(project.id, {
         sampleDataset: name,
       });
-      await this.deploy(ctx);
+      await this.deploy(ctx, project.id);
       // telemetry
       ctx.telemetry.sendEvent(eventName, eventProperties);
-      return { name };
+      return { name, projectId: project.id };
     } catch (err: any) {
       ctx.telemetry.sendEvent(
         eventName,
@@ -228,10 +283,10 @@ export class ProjectResolver {
     }
   }
 
-  public async getOnboardingStatus(_root: any, _arg: any, ctx: IContext) {
+  public async getOnboardingStatus(_root: any, arg: { projectId: number }, ctx: IContext) {
     let project: Project | null;
     try {
-      project = await ctx.projectRepository.getCurrentProject();
+      project = await ctx.projectService.getProjectById(arg.projectId);
     } catch (_err: any) {
       return {
         status: OnboardingStatusEnum.NOT_STARTED,
@@ -258,25 +313,30 @@ export class ProjectResolver {
   public async saveDataSource(
     _root: any,
     args: {
+      projectId: number;
       data: DataSource;
     },
     ctx: IContext,
   ) {
     const { type, properties } = args.data;
-    // Currently only can create one project
-    await this.resetCurrentProject(_root, args, ctx);
+    // Don't reset project in multi-project mode
+    // await this.resetCurrentProject(_root, args, ctx);
 
-    const { displayName, ...connectionInfo } = properties;
+    const { displayName, ...connectionInfo } = properties as any;
     const project = await ctx.projectService.createProject({
+      name: (properties as any).name || displayName,
       displayName,
       type,
       connectionInfo,
     } as ProjectData);
     logger.debug(`Project created.`);
 
+    // Update last accessed time for the new project
+    await ctx.projectRepository.updateLastAccessed(project.id);
+
     // init dashboard
     logger.debug('Dashboard init...');
-    await ctx.dashboardService.initDashboard();
+    await ctx.dashboardService.initDashboard(project.id);
     logger.debug('Dashboard created.');
 
     const eventName = TelemetryEvent.CONNECTION_SAVE_DATA_SOURCE;
@@ -327,17 +387,18 @@ export class ProjectResolver {
         displayName: project.displayName,
         ...ctx.projectService.getGeneralConnectionInfo(project),
       },
+      projectId: project.id,
     };
   }
 
   public async updateDataSource(
     _root: any,
-    args: { data: DataSource },
+    args: { projectId: number; data: DataSource },
     ctx: IContext,
   ) {
     const { properties } = args.data;
     const { displayName, ...connectionInfo } = properties;
-    const project = await ctx.projectService.getCurrentProject();
+    const project = await ctx.projectService.getProjectById(args.projectId);
     const dataSourceType = project.type;
 
     // only new connection info needed to encrypt
@@ -381,13 +442,14 @@ export class ProjectResolver {
     };
   }
 
-  public async listDataSourceTables(_root: any, _arg, ctx: IContext) {
-    return await ctx.projectService.getProjectDataSourceTables();
+  public async listDataSourceTables(_root: any, arg: { projectId: number }, ctx: IContext) {
+    return await ctx.projectService.getProjectDataSourceTables(null, arg.projectId);
   }
 
   public async saveTables(
     _root: any,
     arg: {
+      projectId: number;
       data: { tables: string[] };
     },
     ctx: IContext,
@@ -395,7 +457,7 @@ export class ProjectResolver {
     const eventName = TelemetryEvent.CONNECTION_SAVE_TABLES;
 
     // get current project
-    const project = await ctx.projectService.getCurrentProject();
+    const project = await ctx.projectService.getProjectById(arg.projectId);
     try {
       // delete existing models and columns
       const { models, columns } = await this.overwriteModelsAndColumns(
@@ -411,7 +473,7 @@ export class ProjectResolver {
       });
 
       // async deploy to wren-engine and ai service
-      this.deploy(ctx);
+      this.deploy(ctx, project.id);
       return { models: models, columns };
     } catch (err: any) {
       ctx.telemetry.sendEvent(
@@ -424,8 +486,8 @@ export class ProjectResolver {
     }
   }
 
-  public async autoGenerateRelation(_root: any, _arg: any, ctx: IContext) {
-    const project = await ctx.projectService.getCurrentProject();
+  public async autoGenerateRelation(_root: any, arg: { projectId: number }, ctx: IContext) {
+    const project = await ctx.projectService.getProjectById(arg.projectId);
 
     // get models and columns
     const models = await ctx.modelRepository.findAllBy({
@@ -500,16 +562,17 @@ export class ProjectResolver {
 
   public async saveRelations(
     _root: any,
-    arg: { data: { relations: RelationData[] } },
+    arg: { projectId: number; data: { relations: RelationData[] } },
     ctx: IContext,
   ) {
     const eventName = TelemetryEvent.CONNECTION_SAVE_RELATION;
     try {
       const savedRelations = await ctx.modelService.saveRelations(
+        arg.projectId,
         arg.data.relations,
       );
       // async deploy
-      this.deploy(ctx);
+      this.deploy(ctx, arg.projectId);
       ctx.telemetry.sendEvent(eventName, {
         relationCount: savedRelations.length,
       });
@@ -525,8 +588,8 @@ export class ProjectResolver {
     }
   }
 
-  public async getSchemaChange(_root: any, _arg: any, ctx: IContext) {
-    const project = await ctx.projectService.getCurrentProject();
+  public async getSchemaChange(_root: any, arg: { projectId: number }, ctx: IContext) {
+    const project = await ctx.projectService.getProjectById(arg.projectId);
     const lastSchemaChange =
       await ctx.schemaChangeRepository.findLastSchemaChange(project.id);
 
@@ -581,10 +644,10 @@ export class ProjectResolver {
 
   public async triggerDataSourceDetection(
     _root: any,
-    _arg: any,
+    arg: { projectId: number },
     ctx: IContext,
   ) {
-    const project = await ctx.projectService.getCurrentProject();
+    const project = await ctx.projectService.getProjectById(arg.projectId);
     const schemaDetector = new DataSourceSchemaDetector({
       ctx,
       projectId: project.id,
@@ -607,11 +670,11 @@ export class ProjectResolver {
 
   public async resolveSchemaChange(
     _root: any,
-    arg: { where: { type: SchemaChangeType } },
+    arg: { projectId: number; where: { type: SchemaChangeType } },
     ctx: IContext,
   ) {
     const { type } = arg.where;
-    const project = await ctx.projectService.getCurrentProject();
+    const project = await ctx.projectService.getProjectById(arg.projectId);
     const schemaDetector = new DataSourceSchemaDetector({
       ctx,
       projectId: project.id,
@@ -632,14 +695,14 @@ export class ProjectResolver {
     return true;
   }
 
-  private async deploy(ctx: IContext) {
-    const project = await ctx.projectService.getCurrentProject();
-    const { manifest } = await ctx.mdlService.makeCurrentModelMDL();
+  private async deploy(ctx: IContext, projectId: number) {
+    const project = await ctx.projectService.getProjectById(projectId);
+    const { manifest } = await ctx.mdlService.makeCurrentModelMDL(projectId);
     const deployRes = await ctx.deployService.deploy(manifest, project.id);
 
     // only generating for user's data source
     if (project.sampleDataset === null) {
-      await ctx.projectService.generateProjectRecommendationQuestions();
+      await ctx.projectService.generateProjectRecommendationQuestions(projectId);
     }
     return deployRes;
   }
@@ -793,5 +856,83 @@ export class ProjectResolver {
       'wren.datasource.type': 'duckdb',
     };
     await ctx.wrenEngineAdaptor.patchConfig(config);
+  }
+
+  // New multi-project resolver methods
+  public async listProjects(_root: any, _arg: any, ctx: IContext) {
+    const projects = await ctx.projectService.listProjects();
+    const projectInfos = projects.map(formatProjectInfo);
+
+    return {
+      projects: projectInfos,
+    };
+  }
+
+  public async getProject(_root: any, arg: { projectId: number }, ctx: IContext) {
+    const project = await ctx.projectService.getProjectById(arg.projectId);
+    return formatProjectInfo(project);
+  }
+
+  // getActiveProject removed - project selection is now handled on client side
+
+  public async createProject(
+    _root: any,
+    arg: { data: { name: string; type: DataSourceName; properties: any } },
+    ctx: IContext,
+  ) {
+    const { name, type, properties } = arg.data;
+    const { displayName, ...connectionInfo } = properties;
+
+    const project = await ctx.projectService.createProject({
+      name,
+      displayName,
+      type,
+      connectionInfo,
+    } as ProjectData);
+
+    // Update last accessed time for the new project
+    await ctx.projectRepository.updateLastAccessed(project.id);
+
+    // Initialize dashboard for new project
+    await ctx.dashboardService.initDashboard(project.id);
+
+    return formatProjectInfo(project);
+  }
+
+  public async updateProject(
+    _root: any,
+    arg: { projectId: number; data: { name?: string; language?: string } },
+    ctx: IContext,
+  ) {
+    const { projectId, data } = arg;
+    const project = await ctx.projectService.updateProject(projectId, data);
+    return formatProjectInfo(project);
+  }
+
+  // switchProject removed - project selection is now handled on client side
+
+  public async deleteProject(_root: any, arg: { projectId: number }, ctx: IContext) {
+    const { projectId } = arg;
+
+    // Delete all related data
+    await ctx.schemaChangeRepository.deleteAllBy({ projectId });
+    await ctx.deployService.deleteAllByProjectId(projectId);
+    await ctx.askingService.deleteAllByProjectId(projectId);
+    await ctx.modelService.deleteAllViewsByProjectId(projectId);
+    await ctx.modelService.deleteAllModelsByProjectId(projectId);
+    await ctx.projectService.deleteProject(projectId);
+    await ctx.wrenAIAdaptor.delete(projectId);
+
+    return true;
+  }
+
+  public async duplicateProject(
+    _root: any,
+    arg: { projectId: number; name: string },
+    ctx: IContext,
+  ) {
+    const { projectId, name } = arg;
+    const project = await ctx.projectService.duplicateProject(projectId, name);
+    return formatProjectInfo(project);
   }
 }

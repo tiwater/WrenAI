@@ -1,19 +1,19 @@
 import { gql } from '@apollo/client';
 
 export const PREVIEW_SQL_STATEMENT = gql`
-  mutation PreviewSQL($data: PreviewSQLDataInput!) {
-    previewSql(data: $data)
+  mutation PreviewSQL($projectId: Int!, $data: PreviewSQLDataInput!) {
+    previewSql(projectId: $projectId, data: $data)
   }
 `;
 
 export const GENERATE_QUESTION = gql`
-  mutation GenerateQuestion($data: GenerateQuestionInput!) {
-    generateQuestion(data: $data)
+  mutation GenerateQuestion($projectId: Int!, $data: GenerateQuestionInput!) {
+    generateQuestion(projectId: $projectId, data: $data)
   }
 `;
 
 export const MODEL_SUBSTITUDE = gql`
-  mutation ModelSubstitute($data: ModelSubstituteInput!) {
-    modelSubstitute(data: $data)
+  mutation ModelSubstitute($projectId: Int!, $data: ModelSubstituteInput!) {
+    modelSubstitute(projectId: $projectId, data: $data)
   }
 `;

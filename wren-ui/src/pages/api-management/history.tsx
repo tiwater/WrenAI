@@ -14,6 +14,7 @@ import SQLCodeBlock from '@/components/code/SQLCodeBlock';
 import DetailsDrawer from '@/components/pages/apiManagement/DetailsDrawer';
 import { useApiHistoryQuery } from '@/apollo/client/graphql/apiManagement.generated';
 import { ApiType, ApiHistoryResponse } from '@/apollo/client/graphql/__types__';
+import { useOptionalSelectedProject } from '@/contexts/ProjectContext';
 
 const PAGE_SIZE = 10;
 
@@ -22,9 +23,13 @@ export default function APIHistory() {
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [filters, setFilters] = useState<Record<string, any>>({});
 
+  const projectId = useOptionalSelectedProject();
+
   const { data, loading } = useApiHistoryQuery({
     fetchPolicy: 'cache-and-network',
+    skip: !projectId,
     variables: {
+      projectId: projectId!,
       pagination: {
         offset: (currentPage - 1) * PAGE_SIZE,
         limit: PAGE_SIZE,

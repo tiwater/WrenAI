@@ -4,6 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import { forwardRef, useEffect, useMemo, useRef } from 'react';
 import { message } from 'antd';
 import styled from 'styled-components';
+import { useSelectedProject } from '@/contexts/ProjectContext';
 import { MORE_ACTION, NODE_TYPE } from '@/utils/enum';
 import { editCalculatedField } from '@/utils/modelingHelper';
 import SiderLayout from '@/components/layouts/SiderLayout';
@@ -60,9 +61,12 @@ const DiagramWrapper = styled.div`
 export default function Modeling() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const projectId = useSelectedProject();
   const diagramRef = useRef(null);
 
   const { data } = useDiagramQuery({
+    variables: { projectId: projectId! },
+    skip: !projectId,
     fetchPolicy: 'cache-and-network',
     onCompleted: () => {
       diagramRef.current?.fitView();
@@ -70,12 +74,14 @@ export default function Modeling() {
   });
 
   const deployStatusQueryResult = useDeployStatusQuery({
+    variables: { projectId: projectId! },
+    skip: !projectId,
     pollInterval: 1000,
     fetchPolicy: 'no-cache',
   });
 
-  const refetchQueries = [{ query: DIAGRAM }];
-  const refetchQueriesForModel = [...refetchQueries, { query: LIST_MODELS }];
+  const refetchQueries = [{ query: DIAGRAM, variables: { projectId } }];
+  const refetchQueriesForModel = [...refetchQueries, { query: LIST_MODELS, variables: { projectId } }];
   const getBaseOptions = (options) => {
     return {
       onError: (error) => console.error(error),
@@ -325,22 +331,22 @@ export default function Modeling() {
         switch (nodeType) {
           case NODE_TYPE.MODEL:
             await deleteModelMutation({
-              variables: { where: { id: data.modelId } },
+              variables: { projectId: projectId!, where: { id: data.modelId } },
             });
             break;
           case NODE_TYPE.CALCULATED_FIELD:
             await deleteCalculatedField({
-              variables: { where: { id: data.columnId } },
+              variables: { projectId: projectId!, where: { id: data.columnId } },
             });
             break;
           case NODE_TYPE.RELATION:
             await deleteRelationshipMutation({
-              variables: { where: { id: data.relationId } },
+              variables: { projectId: projectId!, where: { id: data.relationId } },
             });
             break;
           case NODE_TYPE.VIEW:
             await deleteViewMutation({
-              variables: { where: { id: data.viewId } },
+              variables: { projectId: projectId!, where: { id: data.viewId } },
             });
             break;
 
@@ -410,14 +416,14 @@ export default function Modeling() {
             switch (nodeType) {
               case NODE_TYPE.MODEL: {
                 await updateModelMetadata({
-                  variables: { where: { id: modelId }, data: metadata },
+                  variables: { projectId: projectId!, where: { id: modelId }, data: metadata },
                 });
                 break;
               }
 
               case NODE_TYPE.VIEW: {
                 await updateViewMetadata({
-                  variables: { where: { id: viewId }, data: metadata },
+                  variables: { projectId: projectId!, where: { id: viewId }, data: metadata },
                 });
                 break;
               }
@@ -434,9 +440,9 @@ export default function Modeling() {
           submitting={modelLoading}
           onSubmit={async ({ id, data }) => {
             if (id) {
-              await updateModelMutation({ variables: { where: { id }, data } });
+              await updateModelMutation({ variables: { projectId: projectId!, where: { id }, data } });
             } else {
-              await createModelMutation({ variables: { data } });
+              await createModelMutation({ variables: { projectId: projectId!, data } });
             }
           }}
         />
@@ -447,10 +453,10 @@ export default function Modeling() {
           onSubmit={async ({ id, data }) => {
             if (id) {
               await updateCalculatedField({
-                variables: { where: { id }, data },
+                variables: { projectId: projectId!, where: { id }, data },
               });
             } else {
-              await createCalculatedField({ variables: { data } });
+              await createCalculatedField({ variables: { projectId: projectId!, data } });
             }
           }}
         />
@@ -465,6 +471,7 @@ export default function Modeling() {
             if (values.relationId) {
               await updateRelationshipMutation({
                 variables: {
+                  projectId: projectId!,
                   where: { id: values.relationId },
                   data: { type: relation.type },
                 },
@@ -472,6 +479,7 @@ export default function Modeling() {
             } else {
               await createRelationshipMutation({
                 variables: {
+                  projectId: projectId!,
                   data: {
                     fromModelId: Number(relation.fromField.modelId),
                     fromColumnId: Number(relation.fromField.fieldId),

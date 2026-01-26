@@ -7,6 +7,7 @@ import { GlobalConfigProvider } from '@/hooks/useGlobalConfig';
 import { PostHogProvider } from 'posthog-js/react';
 import { ApolloProvider } from '@apollo/client';
 import { defaultIndicator } from '@/components/PageLoading';
+import { ProjectProvider } from '@/contexts/ProjectContext';
 
 require('../styles/index.less');
 
@@ -21,11 +22,13 @@ function App({ Component, pageProps }: AppProps) {
       </Head>
       <GlobalConfigProvider>
         <ApolloProvider client={apolloClient}>
-          <PostHogProvider client={posthog}>
-            <main className="app">
-              <Component {...pageProps} />
-            </main>
-          </PostHogProvider>
+          <ProjectProvider>
+            <PostHogProvider client={posthog}>
+              <main className="app">
+                <Component {...pageProps} />
+              </main>
+            </PostHogProvider>
+          </ProjectProvider>
         </ApolloProvider>
       </GlobalConfigProvider>
     </>

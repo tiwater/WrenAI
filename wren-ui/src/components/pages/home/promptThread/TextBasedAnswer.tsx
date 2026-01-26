@@ -8,6 +8,7 @@ import styled from 'styled-components';
 import { BinocularsIcon } from '@/utils/icons';
 import { nextTick } from '@/utils/time';
 import { MORE_ACTION } from '@/utils/enum';
+import { message } from 'antd';
 import usePromptThreadStore from './store';
 import useDropdown from '@/hooks/useDropdown';
 import useTextBasedAnswerStreamTask from '@/hooks/useTextBasedAnswerStreamTask';
@@ -17,6 +18,7 @@ import PreviewData from '@/components/dataPreview/PreviewData';
 import { AdjustAnswerDropdown } from '@/components/diagram/CustomDropdown';
 import { usePreviewDataMutation } from '@/apollo/client/graphql/home.generated';
 import { ThreadResponseAnswerStatus } from '@/apollo/client/graphql/__types__';
+import { useProject } from '@/contexts/ProjectContext';
 
 const { Text } = Typography;
 
@@ -39,6 +41,7 @@ const getIsLoadingFinished = (status: ThreadResponseAnswerStatus) =>
   status === ThreadResponseAnswerStatus.STREAMING;
 
 export default function TextBasedAnswer(props: AnswerResultProps) {
+  const { selectedProjectId: projectId } = useProject();
   const {
     onGenerateTextBasedAnswer,
     onOpenAdjustReasoningStepsModal,
@@ -113,13 +116,16 @@ export default function TextBasedAnswer(props: AnswerResultProps) {
 
   const allowPreviewData = useMemo(() => Boolean(rowsUsed > 0), [rowsUsed]);
 
-  const [previewData, previewDataResult] = usePreviewDataMutation({
-    onError: (error) => console.error(error),
-  });
+  const [previewData, previewDataResult] = usePreviewDataMutation();
   const hasPreviewData = !!previewDataResult.data?.previewData;
 
   const onPreviewData = async () => {
-    await previewData({ variables: { where: { responseId: id } } });
+    if (!projectId) return;
+    try {
+      await previewData({ variables: { projectId, where: { responseId: id } } });
+    } catch (e: any) {
+      message.error(e?.message || '查询失败');
+    }
   };
 
   const autoTriggerPreviewDataButton = async () => {
@@ -173,7 +179,7 @@ export default function TextBasedAnswer(props: AnswerResultProps) {
         icon={<EditOutlined />}
         onClick={(event) => event.stopPropagation()}
       >
-        Adjust the answer
+        调整问答
         <CaretDownOutlined
           className="ml-1"
           rotate={adjustResultsDropdown.visible ? 180 : 0}
@@ -219,7 +225,7 @@ export default function TextBasedAnswer(props: AnswerResultProps) {
               title="Regenerate answer"
               onClick={onRegenerateAnswer}
             >
-              Regenerate
+              重新生成
             </Button>
           </div>
         )}
@@ -240,7 +246,7 @@ export default function TextBasedAnswer(props: AnswerResultProps) {
               data-ph-capture="true"
               data-ph-capture-attribute-name="cta_text-answer_preview_data"
             >
-              View results
+              查看查询结果
             </Button>
 
             <div className="mt-2 mb-3" data-guideid="text-answer-preview-data">

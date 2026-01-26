@@ -61,16 +61,21 @@ export class ApiHistoryResolver {
   public async getApiHistory(
     _root: unknown,
     args: {
+      projectId: number;
       filter?: ApiHistoryFilter;
       pagination: ApiHistoryPagination;
     },
     ctx: IContext,
   ) {
-    const { filter, pagination } = args;
+    const { projectId, filter, pagination } = args;
     const { offset, limit } = pagination;
 
     // Build filter criteria
     const filterCriteria: Partial<ApiHistory> = {};
+
+    if (projectId) {
+      filterCriteria.projectId = projectId;
+    }
 
     if (filter) {
       if (filter.apiType) {

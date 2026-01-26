@@ -58,6 +58,7 @@ export interface Task {
 export interface AskingPayload {
   threadId?: number;
   language: string;
+  projectId: number;
 }
 
 export interface AskingTaskInput {
@@ -139,13 +140,13 @@ export interface IAskingService {
   /**
    * Asking detail task.
    */
-  createThread(input: AskingDetailTaskInput): Promise<Thread>;
+  createThread(input: AskingDetailTaskInput, projectId: number): Promise<Thread>;
   updateThread(
     threadId: number,
     input: Partial<AskingDetailTaskUpdateInput>,
   ): Promise<Thread>;
   deleteThread(threadId: number): Promise<void>;
-  listThreads(): Promise<Thread[]>;
+  listThreads(projectId: number): Promise<Thread[]>;
   createThreadResponse(
     input: AskingDetailTaskInput,
     threadId: number,
@@ -165,10 +166,12 @@ export interface IAskingService {
     configurations: { language: string },
   ): Promise<ThreadResponse>;
   generateThreadResponseChart(
+    projectId: number,
     threadResponseId: number,
     configurations: { language: string },
   ): Promise<ThreadResponse>;
   adjustThreadResponseChart(
+    projectId: number,
     threadResponseId: number,
     input: ChartAdjustmentOption,
     configurations: { language: string },
@@ -195,8 +198,13 @@ export interface IAskingService {
     status: ThreadResponseAnswerStatus,
     content?: string,
   ): Promise<ThreadResponse>;
-  previewData(responseId: number, limit?: number): Promise<PreviewDataResponse>;
+  previewData(
+    projectId: number,
+    responseId: number,
+    limit?: number,
+  ): Promise<PreviewDataResponse>;
   previewBreakdownData(
+    projectId: number,
     responseId: number,
     stepIndex?: number,
     limit?: number,
@@ -206,12 +214,13 @@ export interface IAskingService {
    * Recommendation questions
    */
   createInstantRecommendedQuestions(
+    projectId: number,
     input: InstantRecommendedQuestionsInput,
   ): Promise<Task>;
   getInstantRecommendedQuestions(
     queryId: string,
   ): Promise<RecommendationQuestionsResult>;
-  generateThreadRecommendationQuestions(threadId: number): Promise<void>;
+  generateThreadRecommendationQuestions(projectId: number, threadId: number): Promise<void>;
   getThreadRecommendationQuestions(
     threadId: number,
   ): Promise<ThreadRecommendQuestionResult>;
@@ -459,6 +468,8 @@ export class AskingService implements IAskingService {
       new TextBasedAnswerBackgroundTracker({
         wrenAIAdaptor,
         threadResponseRepository,
+        threadRepository,
+        askingTaskRepository,
         projectService,
         deployService,
         queryService,
@@ -517,6 +528,7 @@ export class AskingService implements IAskingService {
   }
 
   public async generateThreadRecommendationQuestions(
+    projectId: number,
     threadId: number,
   ): Promise<void> {
     const thread = await this.threadRepository.findOneBy({ id: threadId });
@@ -531,8 +543,8 @@ export class AskingService implements IAskingService {
       return;
     }
 
-    const project = await this.projectService.getCurrentProject();
-    const { manifest } = await this.mdlService.makeCurrentModelMDL();
+    const project = await this.projectService.getProjectById(projectId);
+    const { manifest } = await this.mdlService.makeCurrentModelMDL(projectId);
 
     const threadResponses = await this.threadResponseRepository.findAllBy({
       threadId,
@@ -544,6 +556,7 @@ export class AskingService implements IAskingService {
     const questions = slicedThreadResponses.map(({ question }) => question);
     const recommendQuestionData: RecommendationQuestionsInput = {
       manifest,
+      projectId: projectId.toString(),
       previousQuestions: questions,
       ...this.getThreadRecommendationQuestionsConfig(project),
     };
@@ -591,8 +604,8 @@ export class AskingService implements IAskingService {
     previousTaskId?: number,
     threadResponseId?: number,
   ): Promise<Task> {
-    const { threadId, language } = payload;
-    const deployId = await this.getDeployId();
+    const { threadId, language, projectId } = payload;
+    const deployId = await this.getDeployId(projectId);
 
     // if it's a follow-up question, then the input will have a threadId
     // then use the threadId to get the sql and get the steps of last thread response
@@ -604,6 +617,8 @@ export class AskingService implements IAskingService {
       query: input.question,
       histories,
       deployId,
+      projectId,
+      threadId: threadId || undefined,
       configurations: { language },
       rerunFromCancelled,
       previousTaskId,
@@ -677,38 +692,41 @@ export class AskingService implements IAskingService {
    * 2. create a task on AI service to generate the detail
    * 3. update the thread response with the task id
    */
-  public async createThread(input: AskingDetailTaskInput): Promise<Thread> {
+  public async createThread(input: AskingDetailTaskInput, projectId: number): Promise<Thread> {
     // 1. create a thread and the first thread response
-    const { id } = await this.projectService.getCurrentProject();
     const thread = await this.threadRepository.createOne({
-      projectId: id,
+      projectId,
       summary: input.question,
     });
 
-    const threadResponse = await this.threadResponseRepository.createOne({
-      threadId: thread.id,
-      question: input.question,
-      sql: input.sql,
-      askingTaskId: input.trackedAskingResult?.taskId,
-    });
+    // Only create the first thread response when we have a tracked asking task
+    // (so SQL will be filled later) or when SQL is explicitly provided.
+    // This avoids creating a response with sql=null for question-only thread creation.
+    if (input.trackedAskingResult?.taskId || input.sql) {
+      const threadResponse = await this.threadResponseRepository.createOne({
+        threadId: thread.id,
+        question: input.question,
+        sql: input.sql,
+        askingTaskId: input.trackedAskingResult?.taskId,
+      });
 
-    // if queryId is provided, update asking task
-    if (input.trackedAskingResult?.taskId) {
-      await this.askingTaskTracker.bindThreadResponse(
-        input.trackedAskingResult.taskId,
-        input.trackedAskingResult.queryId,
-        thread.id,
-        threadResponse.id,
-      );
+      // if queryId is provided, update asking task
+      if (input.trackedAskingResult?.taskId) {
+        await this.askingTaskTracker.bindThreadResponse(
+          input.trackedAskingResult.taskId,
+          input.trackedAskingResult.queryId,
+          thread.id,
+          threadResponse.id,
+        );
+      }
     }
 
     // return the task id
     return thread;
   }
 
-  public async listThreads(): Promise<Thread[]> {
-    const { id } = await this.projectService.getCurrentProject();
-    return await this.threadRepository.listAllTimeDescOrder(id);
+  public async listThreads(projectId: number): Promise<Thread[]> {
+    return await this.threadRepository.listAllTimeDescOrder(projectId);
   }
 
   public async updateThread(
@@ -826,23 +844,102 @@ export class AskingService implements IAskingService {
       throw new Error(`Thread response ${threadResponseId} not found`);
     }
 
-    // update with initial status
-    const updatedThreadResponse = await this.threadResponseRepository.updateOne(
-      threadResponse.id,
-      {
-        answerDetail: {
-          status: ThreadResponseAnswerStatus.NOT_STARTED,
+    logger.info(`[DEBUG] generateThreadResponseAnswer: Fetched response ${threadResponse.id} with SQL: ${threadResponse.sql}`);
+
+    // CRITICAL: If the task has already been finalized (FAILED, INTERRUPTED, or FINISHED),
+    // do NOT reset its status or add it to the background tracker again.
+    const currentStatus = threadResponse.answerDetail?.status;
+    if (
+      currentStatus === ThreadResponseAnswerStatus.FAILED ||
+      currentStatus === ThreadResponseAnswerStatus.INTERRUPTED ||
+      currentStatus === ThreadResponseAnswerStatus.FINISHED
+    ) {
+      logger.info(
+        `[DEBUG] generateThreadResponseAnswer: Response ${threadResponse.id} is already ${currentStatus}. ` +
+        `Not resetting status. ${currentStatus === ThreadResponseAnswerStatus.FAILED ? `Error: ${JSON.stringify(threadResponse.answerDetail?.error)}` : ''}`
+      );
+      return threadResponse;
+    }
+
+    try {
+      // Self-healing: If SQL is missing but askingTaskId exists, try to recover it from the task
+      if (!threadResponse.sql && threadResponse.askingTaskId) {
+        logger.info(`[DEBUG] generateThreadResponseAnswer: SQL missing for response ${threadResponse.id}, attempting to recover from task ${threadResponse.askingTaskId}`);
+        const task = await this.askingTaskTracker.getAskingResultById(threadResponse.askingTaskId);
+        const recoveredSql = task?.response?.[0]?.sql;
+        
+        if (recoveredSql) {
+          logger.info(`[DEBUG] generateThreadResponseAnswer: Recovered SQL: ${recoveredSql}`);
+          await this.threadResponseRepository.updateOne(threadResponse.id, { sql: recoveredSql });
+          threadResponse.sql = recoveredSql;
+        } else {
+          logger.warn(`[DEBUG] generateThreadResponseAnswer: Failed to recover SQL for response ${threadResponse.id}`);
+        }
+      }
+
+      // If SQL is still missing and this response is backed by an asking task,
+      // enqueue the job and let the background tracker wait for SQL backfill.
+      // This avoids transient GraphQL errors when the UI triggers answer generation
+      // immediately after creating the response.
+      if (!threadResponse.sql && threadResponse.askingTaskId) {
+        const updatedThreadResponse = await this.threadResponseRepository.updateOne(
+          threadResponse.id,
+          {
+            answerDetail: {
+              status: ThreadResponseAnswerStatus.NOT_STARTED,
+            },
+          },
+        );
+        this.textBasedAnswerBackgroundTracker.addTask(updatedThreadResponse);
+        return updatedThreadResponse;
+      }
+
+      // Guard: don't enqueue a text-based answer job if SQL is still missing and
+      // there is no asking task to backfill it.
+      if (!threadResponse.sql) {
+        throw new Error(
+          `Thread response ${threadResponse.id} SQL is not ready. Refusing to generate answer.`,
+        );
+      }
+
+      // update with initial status
+      const updatedThreadResponse = await this.threadResponseRepository.updateOne(
+        threadResponse.id,
+        {
+          answerDetail: {
+            status: ThreadResponseAnswerStatus.NOT_STARTED,
+          },
         },
-      },
-    );
+      );
 
-    // put the task into background tracker
-    this.textBasedAnswerBackgroundTracker.addTask(updatedThreadResponse);
+      // put the task into background tracker
+      this.textBasedAnswerBackgroundTracker.addTask(updatedThreadResponse);
 
-    return updatedThreadResponse;
+      return updatedThreadResponse;
+    } catch (error: any) {
+      logger.error(`[ERROR] generateThreadResponseAnswer failed for response ${threadResponse.id}: ${error.message}`);
+      
+      // Update answerDetail.status to FAILED to stop frontend polling
+      const failedThreadResponse = await this.threadResponseRepository.updateOne(
+        threadResponse.id,
+        {
+          answerDetail: {
+            status: ThreadResponseAnswerStatus.FAILED,
+            error: {
+              code: 'GENERATION_FAILED',
+              message: error.message || 'Failed to generate answer',
+              shortMessage: 'Answer generation failed',
+            },
+          },
+        },
+      );
+      
+      return failedThreadResponse;
+    }
   }
 
   public async generateThreadResponseChart(
+    projectId: number,
     threadResponseId: number,
     configurations: { language: string },
   ): Promise<ThreadResponse> {
@@ -858,6 +955,7 @@ export class AskingService implements IAskingService {
     const response = await this.wrenAIAdaptor.generateChart({
       query: threadResponse.question,
       sql: threadResponse.sql,
+      projectId: projectId.toString(),
       configurations,
     });
 
@@ -879,6 +977,7 @@ export class AskingService implements IAskingService {
   }
 
   public async adjustThreadResponseChart(
+    projectId: number,
     threadResponseId: number,
     input: ChartAdjustmentOption,
     configurations: { language: string },
@@ -897,6 +996,7 @@ export class AskingService implements IAskingService {
       sql: threadResponse.sql,
       adjustmentOption: input,
       chartSchema: threadResponse.chartDetail?.chartSchema,
+      projectId: projectId.toString(),
       configurations,
     });
 
@@ -926,13 +1026,13 @@ export class AskingService implements IAskingService {
     return this.threadResponseRepository.findOneBy({ id: responseId });
   }
 
-  public async previewData(responseId: number, limit?: number) {
+  public async previewData(projectId: number, responseId: number, limit?: number) {
     const response = await this.getResponse(responseId);
     if (!response) {
       throw new Error(`Thread response ${responseId} not found`);
     }
-    const project = await this.projectService.getCurrentProject();
-    const deployment = await this.deployService.getLastDeployment(project.id);
+    const project = await this.projectService.getProjectById(projectId);
+    const deployment = await this.deployService.getLastDeployment(projectId);
     const mdl = deployment.manifest;
     const eventName = TelemetryEvent.HOME_PREVIEW_ANSWER;
     try {
@@ -963,6 +1063,7 @@ export class AskingService implements IAskingService {
    * @returns Promise<QueryResponse>
    */
   public async previewBreakdownData(
+    projectId: number,
     responseId: number,
     stepIndex?: number,
     limit?: number,
@@ -971,8 +1072,8 @@ export class AskingService implements IAskingService {
     if (!response) {
       throw new Error(`Thread response ${responseId} not found`);
     }
-    const project = await this.projectService.getCurrentProject();
-    const deployment = await this.deployService.getLastDeployment(project.id);
+    const project = await this.projectService.getProjectById(projectId);
+    const deployment = await this.deployService.getLastDeployment(projectId);
     const mdl = deployment.manifest;
     const steps = response?.breakdownDetail?.steps;
     const sql = safeFormatSQL(constructCteSql(steps, stepIndex));
@@ -997,13 +1098,15 @@ export class AskingService implements IAskingService {
   }
 
   public async createInstantRecommendedQuestions(
+    projectId: number,
     input: InstantRecommendedQuestionsInput,
   ): Promise<Task> {
-    const project = await this.projectService.getCurrentProject();
-    const { manifest } = await this.deployService.getLastDeployment(project.id);
+    const project = await this.projectService.getProjectById(projectId);
+    const { manifest } = await this.deployService.getLastDeployment(projectId);
 
     const response = await this.wrenAIAdaptor.generateRecommendationQuestions({
       manifest,
+      projectId: projectId.toString(),
       previousQuestions: input.previousQuestions,
       ...this.getThreadRecommendationQuestionsConfig(project),
     });
@@ -1053,9 +1156,40 @@ export class AskingService implements IAskingService {
     return updatedResponse;
   }
 
-  private async getDeployId() {
-    const { id } = await this.projectService.getCurrentProject();
-    const lastDeploy = await this.deployService.getLastDeployment(id);
+  private async getDeployId(projectId: number) {
+    const lastDeploy = await this.deployService.getLastDeployment(projectId);
+    if (!lastDeploy) {
+      logger.error(`[DEBUG] getDeployId: No deployment found for project ${projectId}`);
+      throw new Error(`No deployment found for project ${projectId}. Please deploy your model first.`);
+    }
+    const manifest = lastDeploy.manifest as any;
+    const modelCount = manifest?.models?.length || 0;
+    const manifestSize = JSON.stringify(lastDeploy.manifest).length;
+    logger.info(
+      `[DEBUG] getDeployId: projectId=${projectId}, deployId=${lastDeploy.hash}, ` +
+      `modelCount=${modelCount}, manifestSize=${manifestSize}`,
+    );
+    
+    // CRITICAL: Prevent asking tasks when manifest is empty or corrupted
+    if (modelCount === 0) {
+      const errorMsg = 
+        `Deployment ${lastDeploy.hash} has empty models array (manifestSize=${manifestSize}). ` +
+        `The AI cannot generate correct SQL without schema information. ` +
+        `Please redeploy your model to fix this issue.`;
+      logger.error(`[CRITICAL] getDeployId: ${errorMsg}`);
+      throw new Error(errorMsg);
+    }
+    
+    // Additional validation: check if manifest structure is valid
+    if (!manifest.models || !Array.isArray(manifest.models)) {
+      const errorMsg = 
+        `Deployment ${lastDeploy.hash} has invalid manifest structure. ` +
+        `Expected 'models' to be an array, got ${typeof manifest.models}. ` +
+        `Please redeploy your model.`;
+      logger.error(`[CRITICAL] getDeployId: ${errorMsg}`);
+      throw new Error(errorMsg);
+    }
+    
     return lastDeploy.hash;
   }
 

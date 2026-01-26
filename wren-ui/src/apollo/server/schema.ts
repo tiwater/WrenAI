@@ -146,6 +146,7 @@ export const typeDefs = gql`
     properties: JSON!
     # Show the name if the data source setup comes from a sample
     sampleDataset: SampleDatasetName
+    projectId: Int
   }
 
   input WhereIdInput {
@@ -159,6 +160,7 @@ export const typeDefs = gql`
 
   input SampleDatasetInput {
     name: SampleDatasetName!
+    projectName: String
   }
 
   type CompactTable {
@@ -851,6 +853,32 @@ export const typeDefs = gql`
     language: ProjectLanguage!
   }
 
+  input CreateProjectInput {
+    name: String!
+    type: DataSourceName!
+    properties: JSON!
+  }
+
+  input UpdateProjectInput {
+    name: String
+    language: ProjectLanguage
+  }
+
+  type ProjectInfo {
+    id: Int!
+    name: String!
+    displayName: String!
+    type: DataSourceName!
+    language: ProjectLanguage!
+    lastAccessedAt: String
+    createdAt: String!
+    sampleDataset: SampleDatasetName
+  }
+
+  type ProjectListResult {
+    projects: [ProjectInfo!]!
+  }
+
   type Settings {
     productVersion: String!
     dataSource: DataSource!
@@ -1113,57 +1141,62 @@ export const typeDefs = gql`
   # Query and Mutation
   type Query {
     # On Boarding Steps
-    listDataSourceTables: [CompactTable!]!
-    autoGenerateRelation: [RecommendRelations!]!
-    onboardingStatus: OnboardingStatusResponse!
+    listDataSourceTables(projectId: Int!): [CompactTable!]!
+    autoGenerateRelation(projectId: Int!): [RecommendRelations!]!
+    onboardingStatus(projectId: Int!): OnboardingStatusResponse!
 
     # Modeling Page
-    listModels: [ModelInfo!]!
-    model(where: ModelWhereInput!): DetailedModel!
-    modelSync: ModelSyncResponse!
-    diagram: Diagram!
-    schemaChange: SchemaChange!
+    listModels(projectId: Int!): [ModelInfo!]!
+    model(projectId: Int!, where: ModelWhereInput!): DetailedModel!
+    modelSync(projectId: Int!): ModelSyncResponse!
+    diagram(projectId: Int!): Diagram!
+    schemaChange(projectId: Int!): SchemaChange!
 
     # View
-    listViews: [ViewInfo!]!
-    view(where: ViewWhereUniqueInput!): ViewInfo!
+    listViews(projectId: Int!): [ViewInfo!]!
+    view(projectId: Int!, where: ViewWhereUniqueInput!): ViewInfo!
 
     # Ask
     askingTask(taskId: String!): AskingTask
-    suggestedQuestions: SuggestedQuestionResponse!
-    threads: [Thread!]!
-    thread(threadId: Int!): DetailedThread!
-    threadResponse(responseId: Int!): ThreadResponse!
-    nativeSql(responseId: Int!): String!
+    suggestedQuestions(projectId: Int!): SuggestedQuestionResponse!
+    threads(projectId: Int!): [Thread!]!
+    thread(projectId: Int!, threadId: Int!): DetailedThread!
+    threadResponse(projectId: Int!, responseId: Int!): ThreadResponse!
+    nativeSql(projectId: Int!, responseId: Int!): String!
 
     # Adjustment
     adjustmentTask(taskId: String!): AdjustmentTask
 
     # Settings
-    settings: Settings!
+    settings(projectId: Int!): Settings!
+
+    # Projects
+    listProjects: ProjectListResult!
+    getProject(projectId: Int!): ProjectInfo!
 
     # System
     getMDL(hash: String!): GetMDLResult!
 
     # Learning
-    learningRecord: LearningRecord!
+    learningRecord(projectId: Int!): LearningRecord!
 
     # Recommendation questions
-    getThreadRecommendationQuestions(threadId: Int!): RecommendedQuestionsTask!
-    getProjectRecommendationQuestions: RecommendedQuestionsTask!
+    getThreadRecommendationQuestions(projectId: Int!, threadId: Int!): RecommendedQuestionsTask!
+    getProjectRecommendationQuestions(projectId: Int!): RecommendedQuestionsTask!
     instantRecommendedQuestions(taskId: String!): RecommendedQuestionsTask!
 
     # Dashboard
-    dashboardItems: [DashboardItem!]!
-    dashboard: DetailedDashboard!
+    dashboardItems(projectId: Int!): [DashboardItem!]!
+    dashboard(projectId: Int!): DetailedDashboard!
 
     # SQL Pairs
-    sqlPairs: [SqlPair]!
+    sqlPairs(projectId: Int!): [SqlPair]!
     # Instructions
-    instructions: [Instruction]!
+    instructions(projectId: Int!): [Instruction]!
 
     # Api History
     apiHistory(
+      projectId: Int!
       filter: ApiHistoryFilterInput
       pagination: ApiHistoryPaginationInput!
     ): ApiHistoryPaginatedResponse!
@@ -1171,146 +1204,166 @@ export const typeDefs = gql`
 
   type Mutation {
     # On Boarding Steps
-    saveDataSource(data: DataSourceInput!): DataSource!
-    startSampleDataset(data: SampleDatasetInput!): JSON!
-    saveTables(data: SaveTablesInput!): JSON!
-    saveRelations(data: SaveRelationInput!): JSON!
-    deploy(force: Boolean): JSON!
+    saveDataSource(projectId: Int!, data: DataSourceInput!): DataSource!
+    startSampleDataset(projectId: Int!, data: SampleDatasetInput!): JSON!
+    saveTables(projectId: Int!, data: SaveTablesInput!): JSON!
+    saveRelations(projectId: Int!, data: SaveRelationInput!): JSON!
+    deploy(projectId: Int!, force: Boolean): JSON!
 
     # Modeling Page
-    createModel(data: CreateModelInput!): JSON!
-    updateModel(where: ModelWhereInput!, data: UpdateModelInput!): JSON!
-    deleteModel(where: ModelWhereInput!): Boolean!
-    previewModelData(where: WhereIdInput!): JSON!
-    triggerDataSourceDetection: Boolean!
-    resolveSchemaChange(where: ResolveSchemaChangeWhereInput!): Boolean!
+    createModel(projectId: Int!, data: CreateModelInput!): JSON!
+    updateModel(projectId: Int!, where: ModelWhereInput!, data: UpdateModelInput!): JSON!
+    deleteModel(projectId: Int!, where: ModelWhereInput!): Boolean!
+    previewModelData(projectId: Int!, where: WhereIdInput!): JSON!
+    triggerDataSourceDetection(projectId: Int!): Boolean!
+    resolveSchemaChange(projectId: Int!, where: ResolveSchemaChangeWhereInput!): Boolean!
 
     # Metadata
     updateModelMetadata(
+      projectId: Int!
       where: ModelWhereInput!
       data: UpdateModelMetadataInput!
     ): Boolean!
     updateViewMetadata(
+      projectId: Int!
       where: ViewWhereUniqueInput!
       data: UpdateViewMetadataInput!
     ): Boolean!
 
     # Relation
-    createRelation(data: RelationInput!): JSON!
-    updateRelation(data: UpdateRelationInput!, where: WhereIdInput!): JSON!
-    deleteRelation(where: WhereIdInput!): Boolean!
+    createRelation(projectId: Int!, data: RelationInput!): JSON!
+    updateRelation(projectId: Int!, data: UpdateRelationInput!, where: WhereIdInput!): JSON!
+    deleteRelation(projectId: Int!, where: WhereIdInput!): Boolean!
 
     # Calculated field
-    createCalculatedField(data: CreateCalculatedFieldInput!): JSON!
+    createCalculatedField(projectId: Int!, data: CreateCalculatedFieldInput!): JSON!
     updateCalculatedField(
+      projectId: Int!
       where: UpdateCalculatedFieldWhere!
       data: UpdateCalculatedFieldInput!
     ): JSON!
-    deleteCalculatedField(where: UpdateCalculatedFieldWhere): Boolean!
+    deleteCalculatedField(projectId: Int!, where: UpdateCalculatedFieldWhere): Boolean!
     validateCalculatedField(
+      projectId: Int!
       data: ValidateCalculatedFieldInput!
     ): CalculatedFieldValidationResponse!
 
     # View
-    createView(data: CreateViewInput!): ViewInfo!
-    deleteView(where: ViewWhereUniqueInput!): Boolean!
-    previewViewData(where: PreviewViewDataInput!): JSON!
-    validateView(data: ValidateViewInput!): ViewValidationResponse!
+    createView(projectId: Int!, data: CreateViewInput!): ViewInfo!
+    deleteView(projectId: Int!, where: ViewWhereUniqueInput!): Boolean!
+    previewViewData(projectId: Int!, where: PreviewViewDataInput!): JSON!
+    validateView(projectId: Int!, data: ValidateViewInput!): ViewValidationResponse!
 
     # Ask
-    createAskingTask(data: AskingTaskInput!): Task!
+    createAskingTask(projectId: Int!, data: AskingTaskInput!): Task!
     cancelAskingTask(taskId: String!): Boolean!
-    rerunAskingTask(responseId: Int!): Task!
+    rerunAskingTask(projectId: Int!, responseId: Int!): Task!
 
     # Thread
-    createThread(data: CreateThreadInput!): Thread!
+    createThread(projectId: Int!, data: CreateThreadInput!): Thread!
     updateThread(
+      projectId: Int!
       where: ThreadUniqueWhereInput!
       data: UpdateThreadInput!
     ): Thread!
-    deleteThread(where: ThreadUniqueWhereInput!): Boolean!
+    deleteThread(projectId: Int!, where: ThreadUniqueWhereInput!): Boolean!
 
     # Thread Response
     createThreadResponse(
+      projectId: Int!
       threadId: Int!
       data: CreateThreadResponseInput!
     ): ThreadResponse!
     updateThreadResponse(
+      projectId: Int!
       where: ThreadResponseUniqueWhereInput!
       data: UpdateThreadResponseInput!
     ): ThreadResponse!
-    previewData(where: PreviewDataInput!): JSON!
-    previewBreakdownData(where: PreviewDataInput!): JSON!
+    previewData(projectId: Int!, where: PreviewDataInput!): JSON!
+    previewBreakdownData(projectId: Int!, where: PreviewDataInput!): JSON!
 
     # Generate Thread Response Breakdown
-    generateThreadResponseBreakdown(responseId: Int!): ThreadResponse!
+    generateThreadResponseBreakdown(projectId: Int!, responseId: Int!): ThreadResponse!
 
     # Generate Thread Response Answer
-    generateThreadResponseAnswer(responseId: Int!): ThreadResponse!
+    generateThreadResponseAnswer(projectId: Int!, responseId: Int!): ThreadResponse!
 
     # Generate Thread Response Chart
-    generateThreadResponseChart(responseId: Int!): ThreadResponse!
+    generateThreadResponseChart(projectId: Int!, responseId: Int!): ThreadResponse!
 
     # Adjust Thread Response Chart
     adjustThreadResponseChart(
+      projectId: Int!
       responseId: Int!
       data: AdjustThreadResponseChartInput!
     ): ThreadResponse!
 
     # Adjustment
     adjustThreadResponse(
+      projectId: Int!
       responseId: Int!
       data: AdjustThreadResponseInput!
     ): ThreadResponse!
     cancelAdjustmentTask(taskId: String!): Boolean!
-    rerunAdjustmentTask(responseId: Int!): Boolean!
+    rerunAdjustmentTask(projectId: Int!, responseId: Int!): Boolean!
 
     # Settings
-    resetCurrentProject: Boolean!
-    updateCurrentProject(data: UpdateCurrentProjectInput!): Boolean!
-    updateDataSource(data: UpdateDataSourceInput!): DataSource!
+    resetCurrentProject(projectId: Int!): Boolean!
+    updateCurrentProject(projectId: Int!, data: UpdateCurrentProjectInput!): Boolean!
+    updateDataSource(projectId: Int!, data: UpdateDataSourceInput!): DataSource!
+
+    # Projects
+    createProject(data: CreateProjectInput!): ProjectInfo!
+    updateProject(projectId: Int!, data: UpdateProjectInput!): ProjectInfo!
+    deleteProject(projectId: Int!): Boolean!
+    duplicateProject(projectId: Int!, name: String!): ProjectInfo!
 
     # preview
-    previewSql(data: PreviewSQLDataInput): JSON!
+    previewSql(projectId: Int!, data: PreviewSQLDataInput): JSON!
 
     # Learning
-    saveLearningRecord(data: SaveLearningRecordInput!): LearningRecord!
+    saveLearningRecord(projectId: Int!, data: SaveLearningRecordInput!): LearningRecord!
 
     # Recommendation questions
-    generateThreadRecommendationQuestions(threadId: Int!): Boolean!
-    generateProjectRecommendationQuestions: Boolean!
+    generateThreadRecommendationQuestions(projectId: Int!, threadId: Int!): Boolean!
+    generateProjectRecommendationQuestions(projectId: Int!): Boolean!
     createInstantRecommendedQuestions(
+      projectId: Int!
       data: InstantRecommendedQuestionsInput!
     ): Task!
 
     # Dashboard
     updateDashboardItemLayouts(
+      projectId: Int!
       data: UpdateDashboardItemLayoutsInput!
     ): [DashboardItem!]!
-    createDashboardItem(data: CreateDashboardItemInput!): DashboardItem!
+    createDashboardItem(projectId: Int!, data: CreateDashboardItemInput!): DashboardItem!
     updateDashboardItem(
+      projectId: Int!
       where: DashboardItemWhereInput!
       data: UpdateDashboardItemInput!
     ): DashboardItem!
-    deleteDashboardItem(where: DashboardItemWhereInput!): Boolean!
-    previewItemSQL(data: PreviewItemSQLInput!): PreviewItemResponse!
-    setDashboardSchedule(data: SetDashboardScheduleInput!): Dashboard!
+    deleteDashboardItem(projectId: Int!, where: DashboardItemWhereInput!): Boolean!
+    previewItemSQL(projectId: Int!, data: PreviewItemSQLInput!): PreviewItemResponse!
+    setDashboardSchedule(projectId: Int!, data: SetDashboardScheduleInput!): Dashboard!
 
     # SQL Pairs
-    createSqlPair(data: CreateSqlPairInput!): SqlPair!
+    createSqlPair(projectId: Int!, data: CreateSqlPairInput!): SqlPair!
     updateSqlPair(
+      projectId: Int!
       where: SqlPairWhereUniqueInput!
       data: UpdateSqlPairInput!
     ): SqlPair!
-    deleteSqlPair(where: SqlPairWhereUniqueInput!): Boolean!
-    generateQuestion(data: GenerateQuestionInput!): String!
-    modelSubstitute(data: ModelSubstituteInput!): String!
+    deleteSqlPair(projectId: Int!, where: SqlPairWhereUniqueInput!): Boolean!
+    generateQuestion(projectId: Int!, data: GenerateQuestionInput!): String!
+    modelSubstitute(projectId: Int!, data: ModelSubstituteInput!): String!
     # Instructions
-    createInstruction(data: CreateInstructionInput!): Instruction!
+    createInstruction(projectId: Int!, data: CreateInstructionInput!): Instruction!
     updateInstruction(
+      projectId: Int!
       where: InstructionWhereInput!
       data: UpdateInstructionInput!
     ): Instruction!
-    deleteInstruction(where: InstructionWhereInput!): Boolean!
+    deleteInstruction(projectId: Int!, where: InstructionWhereInput!): Boolean!
   }
 `;

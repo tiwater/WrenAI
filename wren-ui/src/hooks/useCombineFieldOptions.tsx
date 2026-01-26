@@ -6,6 +6,7 @@ import {
 } from '@/utils/enum';
 import { RelationsDataType } from '@/components/table/ModelRelationSelectionTable';
 import { RelationFormValues } from '@/components/modals/RelationModal';
+import { useSelectedProject } from '@/contexts/ProjectContext';
 
 interface Props {
   // The initial base model of model select
@@ -86,6 +87,7 @@ export const convertDefaultValueToIdentifier = (defaultValue) => {
 
 export default function useCombineFieldOptions(props: Props) {
   const { model, excludeModels } = props;
+  const projectId = useSelectedProject();
 
   const [baseModel, setBaseModel] = useState<string>(model || '');
 
@@ -93,6 +95,8 @@ export default function useCombineFieldOptions(props: Props) {
   useEffect(() => setBaseModel(model), [model]);
 
   const { data } = useListModelsQuery({
+    variables: { projectId: projectId! },
+    skip: !projectId,
     fetchPolicy: 'cache-and-network',
   });
 

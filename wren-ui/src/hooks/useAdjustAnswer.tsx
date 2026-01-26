@@ -3,6 +3,7 @@ import { cloneDeep } from 'lodash';
 import { ApolloClient, NormalizedCacheObject } from '@apollo/client';
 import { THREAD } from '@/apollo/client/graphql/home';
 import { nextTick } from '@/utils/time';
+import { useSelectedProject } from '@/contexts/ProjectContext';
 import {
   useAdjustThreadResponseMutation,
   useCancelAdjustmentTaskMutation,
@@ -25,18 +26,19 @@ export const getIsFinished = (status: AskingTaskStatus) =>
 const handleUpdateThreadCache = (
   threadId: number,
   threadResponse: ThreadResponse,
+  projectId: number,
   client: ApolloClient<NormalizedCacheObject>,
 ) => {
   const result = client.cache.readQuery<{ thread: DetailedThread }>({
     query: THREAD,
-    variables: { threadId },
+    variables: { projectId, threadId },
   });
 
   if (result?.thread) {
     client.cache.updateQuery(
       {
         query: THREAD,
-        variables: { threadId },
+        variables: { projectId, threadId },
       },
       (existingData) => {
         const isNewResponse = !existingData.thread.responses
@@ -60,6 +62,7 @@ const handleUpdateThreadCache = (
 };
 
 export default function useAdjustAnswer(threadId?: number) {
+  const projectId = useSelectedProject();
   const [cancelAdjustmentTask] = useCancelAdjustmentTaskMutation({
     onError: (error) => console.error(error),
   });
@@ -96,8 +99,10 @@ export default function useAdjustAnswer(threadId?: number) {
     responseId: number,
     input: { tables: string[]; sqlGenerationReasoning: string },
   ) => {
+    if (!projectId) return;
     const response = await adjustThreadResponse({
       variables: {
+        projectId,
         responseId,
         data: {
           tables: input.tables,
@@ -109,29 +114,36 @@ export default function useAdjustAnswer(threadId?: number) {
     // start polling new thread response
     const nextThreadResponse = response.data?.adjustThreadResponse;
     await fetchThreadResponse({
-      variables: { responseId: nextThreadResponse.id },
+      variables: { projectId, responseId: nextThreadResponse.id },
     });
 
     // update new thread response to cache
-    handleUpdateThreadCache(
-      threadId,
-      nextThreadResponse,
-      threadResponseResult.client,
-    );
+    if (projectId) {
+      handleUpdateThreadCache(
+        threadId,
+        nextThreadResponse,
+        projectId,
+        threadResponseResult.client,
+      );
+    }
   };
 
   const onAdjustSQL = async (responseId: number, sql: string) => {
+    if (!projectId) return;
     const response = await adjustThreadResponse({
-      variables: { responseId, data: { sql } },
+      variables: { projectId, responseId, data: { sql } },
     });
 
     // update thread cache
     const nextThreadResponse = response.data?.adjustThreadResponse;
-    handleUpdateThreadCache(
-      threadId,
-      nextThreadResponse,
-      threadResponseResult.client,
-    );
+    if (projectId) {
+      handleUpdateThreadCache(
+        threadId,
+        nextThreadResponse,
+        projectId,
+        threadResponseResult.client,
+      );
+    }
 
     // It won't have adjusmentTask, no need to fetch
   };
@@ -150,8 +162,9 @@ export default function useAdjustAnswer(threadId?: number) {
 
   const onReRun = async (threadResponse: ThreadResponse) => {
     const responseId = threadResponse.id;
-    await rerunAdjustmentTask({ variables: { responseId } });
-    await fetchThreadResponse({ variables: { responseId } });
+    if (!projectId) return;
+    await rerunAdjustmentTask({ variables: { projectId, responseId } });
+    await fetchThreadResponse({ variables: { projectId, responseId } });
   };
 
   return {

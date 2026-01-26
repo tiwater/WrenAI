@@ -156,11 +156,26 @@ class AsyncQdrantDocumentStore(QdrantDocumentStore):
             metadata=metadata or {},
         )
 
+        # Ensure the collection exists before creating payload indexes.
+        self._set_up_collection(
+            self.index,
+            self.embedding_dim,
+            False,
+            self.similarity,
+            self.use_sparse_embeddings,
+            self.sparse_idf,
+            self.on_disk,
+            self.payload_fields_to_index,
+        )
+
         # to improve the indexing performance
         # see https://qdrant.tech/documentation/guides/multiple-partitions/?q=mul#calibrate-performance
-        self.client.create_payload_index(
-            collection_name=index, field_name="project_id", field_schema="keyword"
-        )
+        try:
+            self.client.create_payload_index(
+                collection_name=index, field_name="project_id", field_schema="keyword"
+            )
+        except Exception as e:
+            logger.warning(f"Failed to create payload index for project_id: {e}")
 
     async def _query_by_embedding(
         self,
@@ -240,6 +255,16 @@ class AsyncQdrantDocumentStore(QdrantDocumentStore):
             return []
 
     async def delete_documents(self, filters: Optional[Dict[str, Any]] = None):
+        self._set_up_collection(
+            self.index,
+            self.embedding_dim,
+            False,
+            self.similarity,
+            self.use_sparse_embeddings,
+            self.sparse_idf,
+            self.on_disk,
+            self.payload_fields_to_index,
+        )
         if not filters:
             qdrant_filters = rest.Filter()
         else:

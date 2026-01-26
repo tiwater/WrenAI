@@ -4,6 +4,7 @@ import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
 const defaultOptions = {} as const;
 export type UpdateModelMetadataMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   where: Types.ModelWhereInput;
   data: Types.UpdateModelMetadataInput;
 }>;
@@ -12,6 +13,7 @@ export type UpdateModelMetadataMutationVariables = Types.Exact<{
 export type UpdateModelMetadataMutation = { __typename?: 'Mutation', updateModelMetadata: boolean };
 
 export type UpdateViewMetadataMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
   where: Types.ViewWhereUniqueInput;
   data: Types.UpdateViewMetadataInput;
 }>;
@@ -21,8 +23,8 @@ export type UpdateViewMetadataMutation = { __typename?: 'Mutation', updateViewMe
 
 
 export const UpdateModelMetadataDocument = gql`
-    mutation UpdateModelMetadata($where: ModelWhereInput!, $data: UpdateModelMetadataInput!) {
-  updateModelMetadata(where: $where, data: $data)
+    mutation UpdateModelMetadata($projectId: Int!, $where: ModelWhereInput!, $data: UpdateModelMetadataInput!) {
+  updateModelMetadata(projectId: $projectId, where: $where, data: $data)
 }
     `;
 export type UpdateModelMetadataMutationFn = Apollo.MutationFunction<UpdateModelMetadataMutation, UpdateModelMetadataMutationVariables>;
@@ -40,6 +42,7 @@ export type UpdateModelMetadataMutationFn = Apollo.MutationFunction<UpdateModelM
  * @example
  * const [updateModelMetadataMutation, { data, loading, error }] = useUpdateModelMetadataMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      where: // value for 'where'
  *      data: // value for 'data'
  *   },
@@ -53,8 +56,8 @@ export type UpdateModelMetadataMutationHookResult = ReturnType<typeof useUpdateM
 export type UpdateModelMetadataMutationResult = Apollo.MutationResult<UpdateModelMetadataMutation>;
 export type UpdateModelMetadataMutationOptions = Apollo.BaseMutationOptions<UpdateModelMetadataMutation, UpdateModelMetadataMutationVariables>;
 export const UpdateViewMetadataDocument = gql`
-    mutation UpdateViewMetadata($where: ViewWhereUniqueInput!, $data: UpdateViewMetadataInput!) {
-  updateViewMetadata(where: $where, data: $data)
+    mutation UpdateViewMetadata($projectId: Int!, $where: ViewWhereUniqueInput!, $data: UpdateViewMetadataInput!) {
+  updateViewMetadata(projectId: $projectId, where: $where, data: $data)
 }
     `;
 export type UpdateViewMetadataMutationFn = Apollo.MutationFunction<UpdateViewMetadataMutation, UpdateViewMetadataMutationVariables>;
@@ -72,6 +75,7 @@ export type UpdateViewMetadataMutationFn = Apollo.MutationFunction<UpdateViewMet
  * @example
  * const [updateViewMetadataMutation, { data, loading, error }] = useUpdateViewMetadataMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *      where: // value for 'where'
  *      data: // value for 'data'
  *   },

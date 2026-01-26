@@ -27,6 +27,8 @@ export interface ThreadResponseAnswerDetail {
   error?: object;
   numRowsUsedInLLM?: number;
   content?: string;
+  sqlExecutionRetryCount?: number; // Track how many times we've retried SQL execution
+  lastSqlExecutionError?: object; // Store the last SQL execution error for retry context
 }
 
 export interface ThreadResponseChartDetail {

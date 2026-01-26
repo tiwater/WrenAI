@@ -1,4 +1,4 @@
-import { NextApiResponse } from 'next';
+import { NextApiRequest, NextApiResponse } from 'next';
 import { v4 as uuidv4 } from 'uuid';
 import { ApiType, ApiHistory } from '@server/repositories/apiHistoryRepository';
 import * as Errors from '@server/utils/error';
@@ -12,9 +12,38 @@ import {
   TextBasedAnswerStatus,
 } from '@/apollo/server/models/adaptor';
 
-const { apiHistoryRepository } = components;
+const { apiHistoryRepository, projectService } = components;
 
 export const MAX_WAIT_TIME = 1000 * 60 * 3; // 3 minutes
+
+/**
+ * Get projectId from request headers or query params
+ * Priority: header > query > body > default (first project)
+ */
+export const getProjectIdFromRequest = async (req: NextApiRequest): Promise<number> => {
+  // Try to get from header first
+  const headerProjectId = req.headers['x-project-id'] as string;
+  if (headerProjectId) {
+    return parseInt(headerProjectId, 10);
+  }
+
+  // Try to get from query params
+  if (req.query.projectId) {
+    return parseInt(req.query.projectId as string, 10);
+  }
+
+  // Try to get from body
+  if (req.body?.projectId) {
+    return parseInt(req.body.projectId, 10);
+  }
+
+  // Default: get first project (for backward compatibility)
+  const projects = await projectService.listProjects();
+  if (projects.length === 0) {
+    throw new ApiError('No projects found', 404);
+  }
+  return projects[0].id;
+};
 
 export const isAskResultFinished = (result: AskResult) => {
   return (

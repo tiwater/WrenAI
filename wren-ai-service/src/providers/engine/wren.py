@@ -33,9 +33,18 @@ class WrenUI(Engine):
         limit: int = 500,
         **kwargs,
     ) -> Tuple[bool, Optional[Dict[str, Any]], Optional[Dict[str, Any]]]:
+        if not project_id:
+            return (
+                False,
+                {},
+                {
+                    "error_message": "project_id is required for previewSql",
+                    "correlation_id": "",
+                },
+            )
+
         data = {
             "sql": remove_limit_statement(sql),
-            "projectId": project_id,
         }
         if dry_run:
             data["dryRun"] = True
@@ -47,8 +56,8 @@ class WrenUI(Engine):
             async with session.post(
                 f"{self._endpoint}/api/graphql",
                 json={
-                    "query": "mutation PreviewSql($data: PreviewSQLDataInput) { previewSql(data: $data) }",
-                    "variables": {"data": data},
+                    "query": "mutation PreviewSql($projectId: Int!, $data: PreviewSQLDataInput) { previewSql(projectId: $projectId, data: $data) }",
+                    "variables": {"projectId": int(project_id), "data": data},
                 },
                 timeout=aiohttp.ClientTimeout(total=timeout),
             ) as response:

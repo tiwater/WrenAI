@@ -9,6 +9,8 @@ import {
   isAskResultFinished,
   transformHistoryInput,
   validateAskResult,
+,
+  getProjectIdFromRequest,
 } from '@/apollo/server/utils/apiUtils';
 import {
   AskResult,
@@ -41,7 +43,7 @@ export default async function handler(
   let project;
 
   try {
-    project = await projectService.getCurrentProject();
+    project = await projectService.getProjectById(await getProjectIdFromRequest(req));
 
     // Only allow POST method
     if (req.method !== 'POST') {

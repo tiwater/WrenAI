@@ -110,7 +110,7 @@ export const errorMessages = {
 
   // asking task error
   [GeneralErrorCodes.IDENTIED_AS_GENERAL]:
-    'The question is identified as a general question, please follow-up ask with more specific questions.',
+    '该问题被判定为一般性问题，请继续追问更具体的问题，或提供更多的指引。',
   [GeneralErrorCodes.IDENTIED_AS_MISLEADING_QUERY]:
     'The question is identified as a misleading query, please follow-up ask with more specific questions.',
   [GeneralErrorCodes.DEPLOY_TIMEOUT_ERROR]:
@@ -150,7 +150,7 @@ export const shortMessages = {
   [GeneralErrorCodes.GENERATE_QUESTIONS_ERROR]: 'Generate questions error',
   [GeneralErrorCodes.INVALID_SQL_ERROR]:
     'Invalid SQL, please check your SQL syntax',
-  [GeneralErrorCodes.IDENTIED_AS_GENERAL]: 'Identified as general question',
+  [GeneralErrorCodes.IDENTIED_AS_GENERAL]: '判定为一般性问题',
   [GeneralErrorCodes.IDENTIED_AS_MISLEADING_QUERY]:
     'Identified as misleading query',
   [GeneralErrorCodes.DEPLOY_TIMEOUT_ERROR]: 'LLM deployment timed out',

@@ -2,10 +2,11 @@ import { gql } from '@apollo/client';
 
 export const API_HISTORY = gql`
   query ApiHistory(
+    $projectId: Int!
     $filter: ApiHistoryFilterInput
     $pagination: ApiHistoryPaginationInput!
   ) {
-    apiHistory(filter: $filter, pagination: $pagination) {
+    apiHistory(projectId: $projectId, filter: $filter, pagination: $pagination) {
       items {
         id
         projectId

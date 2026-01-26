@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useRouter } from 'next/router';
 import { Path } from '@/utils/enum';
+import { useProject } from '@/contexts/ProjectContext';
 import {
   useDeleteThreadMutation,
   useThreadsQuery,
@@ -8,8 +9,11 @@ import {
 } from '@/apollo/client/graphql/home.generated';
 
 export default function useHomeSidebar() {
+  const { selectedProjectId: projectId } = useProject();
   const router = useRouter();
   const { data, refetch } = useThreadsQuery({
+    variables: { projectId: projectId! },
+    skip: !projectId,
     fetchPolicy: 'cache-and-network',
   });
   const [updateThread] = useUpdateThreadMutation({
@@ -33,14 +37,16 @@ export default function useHomeSidebar() {
   };
 
   const onRename = async (id: string, newName: string) => {
+    if (!projectId) return;
     await updateThread({
-      variables: { where: { id: Number(id) }, data: { summary: newName } },
+      variables: { projectId: projectId!, where: { id: Number(id) }, data: { summary: newName } },
     });
     refetch();
   };
 
   const onDelete = async (id) => {
-    await deleteThread({ variables: { where: { id: Number(id) } } });
+    if (!projectId) return;
+    await deleteThread({ variables: { projectId: projectId!, where: { id: Number(id) } } });
     refetch();
   };
 

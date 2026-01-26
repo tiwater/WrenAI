@@ -5,6 +5,7 @@ import Icon from '@/import/icon';
 import ReloadOutlined from '@ant-design/icons/ReloadOutlined';
 import { CopilotSVG } from '@/utils/svgs';
 import { isRecommendedFinished } from '@/hooks/useAskPrompt';
+import { useProject } from '@/contexts/ProjectContext';
 import {
   ResultQuestion,
   RecommendedQuestionsTaskStatus,
@@ -32,6 +33,7 @@ const getGroupedQuestions = (
 };
 
 export default function useRecommendedQuestionsInstruction() {
+  const { selectedProjectId: projectId } = useProject();
   const [showRetry, setShowRetry] = useState<boolean>(false);
   const [generating, setGenerating] = useState<boolean>(false);
   const [isRegenerate, setIsRegenerate] = useState<boolean>(false);
@@ -61,8 +63,12 @@ export default function useRecommendedQuestionsInstruction() {
 
   useEffect(() => {
     const fetchRecommendationQuestionsData = async () => {
-      const result = await fetchRecommendationQuestions();
+      if (!projectId) return;
+      const result = await fetchRecommendationQuestions({
+        variables: { projectId }
+      });
       const data = result.data?.getProjectRecommendationQuestions;
+      if (!data) return;
 
       // for existing projects that do not have to generate recommended questions yet
       if (isRecommendedFinished(data.status)) {
@@ -76,7 +82,7 @@ export default function useRecommendedQuestionsInstruction() {
     };
 
     fetchRecommendationQuestionsData();
-  }, []);
+  }, [projectId]);
 
   useEffect(() => {
     if (isRecommendedFinished(recommendedQuestionsTask?.status)) {
@@ -88,7 +94,7 @@ export default function useRecommendedQuestionsInstruction() {
         if (
           showRecommendedQuestionsPromptMode &&
           recommendedQuestionsTask.status ===
-            RecommendedQuestionsTaskStatus.FAILED
+          RecommendedQuestionsTaskStatus.FAILED
         ) {
           message.error(
             `We couldn't regenerate questions right now. Let's try again later.`,
@@ -112,8 +118,14 @@ export default function useRecommendedQuestionsInstruction() {
     setGenerating(true);
     setIsRegenerate(true);
     try {
-      await generateProjectRecommendationQuestions();
-      fetchRecommendationQuestions();
+      if (projectId) {
+        await generateProjectRecommendationQuestions({
+          variables: { projectId }
+        });
+        fetchRecommendationQuestions({
+          variables: { projectId }
+        });
+      }
     } catch (error) {
       console.error(error);
     }
@@ -123,6 +135,7 @@ export default function useRecommendedQuestionsInstruction() {
     const baseProps = {
       loading: generating,
       onClick: onGetRecommendationQuestions,
+      disabled: !projectId,
     };
 
     if (showRecommendedQuestionsPromptMode && isRegenerate) {
@@ -146,7 +159,7 @@ export default function useRecommendedQuestionsInstruction() {
           ? 'Retry'
           : 'What could I ask?',
     };
-  }, [generating, isRegenerate, showRetry, showRecommendedQuestionsPromptMode]);
+  }, [generating, isRegenerate, projectId, showRetry, showRecommendedQuestionsPromptMode]);
 
   return {
     recommendedQuestions,

@@ -12,6 +12,7 @@ import { isEmpty } from 'lodash';
 import { message } from 'antd';
 import { Path } from '@/utils/enum';
 import useHomeSidebar from '@/hooks/useHomeSidebar';
+import { useProject } from '@/contexts/ProjectContext';
 import SiderLayout from '@/components/layouts/SiderLayout';
 import Prompt from '@/components/pages/home/prompt';
 import useAskPrompt, {
@@ -46,8 +47,14 @@ import {
   CreateThreadResponseInput,
   ThreadResponse,
   CreateSqlPairInput,
+  AskStep,
+  DetailedThread,
+  AskingTaskStatus,
 } from '@/apollo/client/graphql/__types__';
-import { useCreateSqlPairMutation } from '@/apollo/client/graphql/sqlPairs.generated';
+import {
+  SqlPairsDocument,
+  useCreateSqlPairMutation,
+} from '@/apollo/client/graphql/sqlPairs.generated';
 
 const getThreadResponseIsFinished = (threadResponse: ThreadResponse) => {
   const { answerDetail, breakdownDetail, chartDetail } = threadResponse || {};
@@ -74,6 +81,7 @@ export default function HomeThread() {
   const $prompt = useRef<ComponentRef<typeof Prompt>>(null);
   const router = useRouter();
   const params = useParams();
+  const { selectedProjectId: projectId, hydrated } = useProject();
   const homeSidebar = useHomeSidebar();
   const threadId = useMemo(() => Number(params?.id) || null, [params]);
   const askPrompt = useAskPrompt(threadId);
@@ -82,6 +90,11 @@ export default function HomeThread() {
   const questionSqlPairModal = useModalAction();
   const adjustReasoningStepsModal = useModalAction();
   const adjustSqlModal = useModalAction();
+
+  useEffect(() => {
+    if (!hydrated) return;
+    if (!projectId) router.replace(Path.Projects);
+  }, [hydrated, projectId, router]);
 
   const [showRecommendedQuestions, setShowRecommendedQuestions] =
     useState<boolean>(false);
@@ -92,9 +105,9 @@ export default function HomeThread() {
   });
 
   const { data, updateQuery: updateThreadQuery } = useThreadQuery({
-    variables: { threadId },
+    variables: { projectId, threadId },
     fetchPolicy: 'cache-and-network',
-    skip: threadId === null,
+    skip: threadId === null || !projectId,
     onError: () => router.push(Path.Home),
   });
   const [createThreadResponse] = useCreateThreadResponseMutation({
@@ -110,6 +123,8 @@ export default function HomeThread() {
           },
         };
       });
+
+      onGenerateThreadResponseAnswer(nextResponse.id);
     },
   });
   const [updateThreadResponse, { loading: threadResponseUpdating }] =
@@ -164,7 +179,9 @@ export default function HomeThread() {
 
   const [createSqlPairMutation, { loading: createSqlPairLoading }] =
     useCreateSqlPairMutation({
-      refetchQueries: ['SqlPairs'],
+      refetchQueries: projectId
+        ? [{ query: SqlPairsDocument, variables: { projectId } }]
+        : [],
       awaitRefetchQueries: true,
       onError: (error) => console.error(error),
       onCompleted: () => {
@@ -184,34 +201,41 @@ export default function HomeThread() {
   );
 
   const onFixSQLStatement = async (responseId: number, sql: string) => {
+    if (!projectId) return;
     await updateThreadResponse({
-      variables: { where: { id: responseId }, data: { sql } },
+      variables: { projectId, where: { id: responseId }, data: { sql } },
     });
   };
 
   const onGenerateThreadResponseAnswer = async (responseId: number) => {
-    await generateThreadResponseAnswer({ variables: { responseId } });
-    fetchThreadResponse({ variables: { responseId } });
+    if (!projectId) return;
+    await generateThreadResponseAnswer({ variables: { projectId, responseId } });
+    fetchThreadResponse({ variables: { projectId, responseId } });
   };
 
   const onGenerateThreadResponseChart = async (responseId: number) => {
-    await generateThreadResponseChart({ variables: { responseId } });
-    fetchThreadResponse({ variables: { responseId } });
+    if (!projectId) return;
+    await generateThreadResponseChart({ variables: { projectId, responseId } });
+    fetchThreadResponse({ variables: { projectId, responseId } });
   };
 
   const onAdjustThreadResponseChart = async (
     responseId: number,
     data: AdjustThreadResponseChartInput,
   ) => {
+    if (!projectId) return;
     await adjustThreadResponseChart({
-      variables: { responseId, data },
+      variables: { projectId, responseId, data },
     });
-    fetchThreadResponse({ variables: { responseId } });
+    fetchThreadResponse({ variables: { projectId, responseId } });
   };
 
   const onGenerateThreadRecommendedQuestions = async () => {
-    await generateThreadRecommendationQuestions({ variables: { threadId } });
-    fetchThreadRecommendationQuestions({ variables: { threadId } });
+    if (!projectId || threadId === null) return;
+    await generateThreadRecommendationQuestions({
+      variables: { projectId, threadId },
+    });
+    fetchThreadRecommendationQuestions({ variables: { projectId, threadId } });
   };
 
   const handleUnfinishedTasks = useCallback(
@@ -222,6 +246,20 @@ export default function HomeThread() {
           response?.askingTask && !getIsFinished(response?.askingTask?.status),
       );
       if (unfinishedAskingResponse) {
+        if (!projectId) return;
+
+        // If asking task has already failed/stopped, make sure we still fetch
+        // the latest threadResponse once so UI can show FAILED status/error.
+        if (
+          unfinishedAskingResponse.askingTask?.status === AskingTaskStatus.FAILED ||
+          unfinishedAskingResponse.askingTask?.status === AskingTaskStatus.STOPPED
+        ) {
+          fetchThreadResponse({
+            variables: { projectId, responseId: unfinishedAskingResponse.id },
+          });
+          return;
+        }
+
         askPrompt.onFetching(unfinishedAskingResponse?.askingTask?.queryId);
         return;
       }
@@ -235,12 +273,13 @@ export default function HomeThread() {
         canFetchThreadResponse(unfinishedThreadResponse?.askingTask) &&
         unfinishedThreadResponse
       ) {
+        if (!projectId) return;
         fetchThreadResponse({
-          variables: { responseId: unfinishedThreadResponse.id },
+          variables: { projectId, responseId: unfinishedThreadResponse.id },
         });
       }
     },
-    [askPrompt, fetchThreadResponse],
+    [askPrompt, fetchThreadResponse, projectId],
   );
 
   // store thread questions for instant recommended questions
@@ -254,8 +293,8 @@ export default function HomeThread() {
 
   // stop all requests when change thread
   useEffect(() => {
-    if (threadId !== null) {
-      fetchThreadRecommendationQuestions({ variables: { threadId } });
+    if (threadId !== null && projectId) {
+      fetchThreadRecommendationQuestions({ variables: { projectId, threadId } });
       setShowRecommendedQuestions(true);
     }
     return () => {
@@ -264,7 +303,7 @@ export default function HomeThread() {
       threadRecommendationQuestionsResult.stopPolling();
       $prompt.current?.close();
     };
-  }, [threadId]);
+  }, [threadId, projectId]);
 
   // initialize asking task
   useEffect(() => {
@@ -297,9 +336,11 @@ export default function HomeThread() {
     try {
       askPrompt.onStopPolling();
 
+      if (!projectId) return;
+
       const threadId = thread.id;
       await createThreadResponse({
-        variables: { threadId, data: payload },
+        variables: { projectId, threadId, data: payload },
       });
       setShowRecommendedQuestions(false);
     } catch (error) {
@@ -348,8 +389,9 @@ export default function HomeThread() {
         loading={creating}
         onClose={saveAsViewModal.closeModal}
         onSubmit={async (values) => {
+          if (!projectId) return;
           await createViewMutation({
-            variables: { data: values },
+            variables: { projectId, data: values },
           });
         }}
       />
@@ -358,7 +400,8 @@ export default function HomeThread() {
         onClose={questionSqlPairModal.closeModal}
         loading={createSqlPairLoading}
         onSubmit={async ({ data }: { data: CreateSqlPairInput }) => {
-          await createSqlPairMutation({ variables: { data } });
+          if (!projectId) return;
+          await createSqlPairMutation({ variables: { projectId, data } });
         }}
       />
 

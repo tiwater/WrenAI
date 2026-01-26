@@ -68,8 +68,8 @@ const FIELD = gql`
 `;
 
 export const DIAGRAM = gql`
-  query Diagram {
-    diagram {
+  query Diagram($projectId: Int!) {
+    diagram(projectId: $projectId) {
       models {
         id
         modelId

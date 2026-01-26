@@ -45,6 +45,18 @@ models:
       n: 1
       seed: 0
       reasoning_effort: minimal
+  # - api_base: http://<host_of_llm>/v1
+  #   model: openai/qwen3-235b-fp8  # Prefix of openai compatible model hosted in LiteLLM
+  #   alias: default
+  #   timeout: 600
+  #   api_key_env: CUSTOM_API_KEY  # Key name defined in your .env file
+  #   kwargs:
+  #     n: 1
+  #     temperature: 0.6  # Recommended for thinking mode
+  #     top_p: 0.95
+  #     top_k: 20
+  #     response_format:
+  #       type: text
 ---
 type: embedder
 provider: litellm_embedder
@@ -52,6 +64,15 @@ models:
   - model: text-embedding-3-large
     alias: default
     timeout: 120
+# models:
+#   # please refer to LiteLLM documentation for more details: https://docs.litellm.ai/docs/providers
+#   - model: openai/Qwen3-Embedding-0.6B  # Prefix of openai compatible model hosted in LiteLLM
+#     alias: default
+#     api_base: http://<host_of_model>/v1
+#     timeout: 300  # Increased timeout for stability
+#     batch_size: 1  # Reduce batch size to avoid VLLM crashes
+#     kwargs:
+#       max_retries: 3  # Add retry logic
 
 ---
 type: engine

@@ -237,6 +237,8 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
       const res = await axios.post(`${this.wrenAIBaseEndpoint}/v1/asks`, {
         query: input.query,
         id: input.deployId,
+        project_id: input.projectId ? input.projectId.toString() : undefined,
+        thread_id: input.threadId ? input.threadId.toString() : undefined,
         histories: this.transformHistoryInput(input.histories),
         configurations: input.configurations,
       });
@@ -333,13 +335,14 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
   }
 
   public async deploy(deployData: DeployData): Promise<WrenAIDeployResponse> {
-    const { manifest, hash } = deployData;
+    const { manifest, hash, projectId } = deployData;
     try {
       const res = await axios.post(
         `${this.wrenAIBaseEndpoint}/v1/semantics-preparations`,
         {
           mdl: JSON.stringify(manifest),
           id: hash,
+          project_id: projectId?.toString(),
         },
       );
       const deployId = res.data.id;
@@ -376,6 +379,7 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
       max_questions: input.maxQuestions,
       max_categories: input.maxCategories,
       configuration: input.configuration,
+      project_id: input.projectId?.toString(),
     };
     logger.info(`Wren AI: Generating recommendation questions`);
     try {
@@ -472,9 +476,14 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
 
   public async generateChart(input: ChartInput): Promise<AsyncQueryResponse> {
     try {
+      const body: any = { ...input };
+      if (input.projectId) {
+        body.project_id = input.projectId;
+        delete body.projectId;
+      }
       const res = await axios.post(
         `${this.wrenAIBaseEndpoint}/v1/charts`,
-        input,
+        body,
       );
       return { queryId: res.data.query_id };
     } catch (err: any) {
@@ -730,10 +739,12 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
   }
 
   private transformChartAdjustmentInput(input: ChartAdjustmentInput) {
-    const { query, sql, adjustmentOption, chartSchema, configurations } = input;
+    const { query, sql, adjustmentOption, chartSchema, configurations, projectId } =
+      input;
     return {
       query,
       sql,
+      project_id: projectId,
       adjustment_option: {
         chart_type: adjustmentOption.chartType.toLowerCase(),
         x_axis: adjustmentOption.xAxis,
@@ -800,9 +811,13 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
       const res = await axios.get(
         `${this.wrenAIBaseEndpoint}/v1/semantics-preparations/${deployId}/status`,
       );
-      if (res.data.error) {
+      if (res.data?.error) {
+        const errorMessage =
+          typeof res.data.error === 'string'
+            ? res.data.error
+            : res.data.error?.message || JSON.stringify(res.data.error);
         // passing AI response error string to catch block
-        throw new Error(res.data.error);
+        throw new Error(errorMessage);
       }
       return res.data?.status.toUpperCase() as WrenAISystemStatus;
     } catch (err: any) {
@@ -871,13 +886,13 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
 
   private transformStatusAndError(body: any): {
     status:
-      | AskResultStatus
-      | TextBasedAnswerStatus
-      | ChartStatus
-      | SqlPairStatus
-      | QuestionsStatus
-      | InstructionStatus
-      | AskFeedbackStatus;
+    | AskResultStatus
+    | TextBasedAnswerStatus
+    | ChartStatus
+    | SqlPairStatus
+    | QuestionsStatus
+    | InstructionStatus
+    | AskFeedbackStatus;
     error?: {
       code: Errors.GeneralErrorCodes;
       message: string;
@@ -899,22 +914,22 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
 
     const error = code
       ? Errors.create(
-          code,
-          isShowAIServiceErrorMessage
-            ? {
-                customMessage: body?.error?.message,
-              }
-            : undefined,
-        )
+        code,
+        isShowAIServiceErrorMessage
+          ? {
+            customMessage: body?.error?.message,
+          }
+          : undefined,
+      )
       : null;
 
     // format custom error into WrenAIError that is used in graphql
     const formattedError = error
       ? {
-          code: error.extensions.code as Errors.GeneralErrorCodes,
-          message: error.message,
-          shortMessage: error.extensions.shortMessage as string,
-        }
+        code: error.extensions.code as Errors.GeneralErrorCodes,
+        message: error.message,
+        shortMessage: error.extensions.shortMessage as string,
+      }
       : null;
 
     return {

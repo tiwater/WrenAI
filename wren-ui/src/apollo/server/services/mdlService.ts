@@ -8,13 +8,16 @@ import {
   IViewRepository,
 } from '../repositories';
 import { Manifest } from '../mdl/type';
+import { getLogger } from '@server/utils/logger';
+
+const logger = getLogger('MDLService');
 
 export interface MakeCurrentModelMDLResult {
   manifest: Manifest;
   mdlBuilder: MDLBuilder;
 }
 export interface IMDLService {
-  makeCurrentModelMDL(): Promise<MakeCurrentModelMDLResult>;
+  makeCurrentModelMDL(projectId: number): Promise<MakeCurrentModelMDLResult>;
 }
 
 export class MDLService implements IMDLService {
@@ -48,9 +51,11 @@ export class MDLService implements IMDLService {
     this.viewRepository = viewRepository;
   }
 
-  public async makeCurrentModelMDL() {
-    const project = await this.projectRepository.getCurrentProject();
-    const projectId = project.id;
+  public async makeCurrentModelMDL(projectId: number) {
+    const project = await this.projectRepository.findOneBy({ id: projectId });
+    if (!project) {
+      throw new Error('Project not found');
+    }
     const models = await this.modelRepository.findAllBy({ projectId });
     const modelIds = models.map((m) => m.id);
     const columns =
@@ -66,6 +71,21 @@ export class MDLService implements IMDLService {
     const relatedModels = models;
     const relatedColumns = columns;
     const relatedRelations = relations;
+    
+    // CRITICAL: Log when models array is empty to diagnose manifest corruption
+    if (models.length === 0) {
+      logger.error(
+        `[CRITICAL] makeCurrentModelMDL: No models found for project ${projectId}! ` +
+        `This will create an empty manifest and cause AI to fail. ` +
+        `Project exists: ${!!project}, Project name: ${project?.name}`
+      );
+    } else {
+      logger.info(
+        `[DEBUG] makeCurrentModelMDL: Building manifest for project ${projectId} ` +
+        `with ${models.length} models, ${columns.length} columns, ${relations.length} relations, ${views.length} views`
+      );
+    }
+    
     const mdlBuilder = new MDLBuilder({
       project,
       models,

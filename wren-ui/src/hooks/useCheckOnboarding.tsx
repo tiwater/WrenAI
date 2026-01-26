@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import { useOnboardingStatusQuery } from '@/apollo/client/graphql/onboarding.generated';
 import { OnboardingStatus } from '@/apollo/client/graphql/__types__';
 import { Path } from '@/utils/enum';
+import { useProject, useSelectedProject } from '@/contexts/ProjectContext';
 
 const redirectRoute = {
   [OnboardingStatus.DATASOURCE_SAVED]: Path.OnboardingModels,
@@ -13,17 +14,47 @@ const redirectRoute = {
 
 export const useWithOnboarding = () => {
   const router = useRouter();
-  const { data, loading } = useOnboardingStatusQuery();
+  const { selectedProjectId, hydrated } = useProject();
+
+  // If no project selected, redirect to projects page
+  // If no project selected, redirect to projects page
+  useEffect(() => {
+    if (!hydrated) return;
+    const isCreatingNewProject = typeof window !== 'undefined' &&
+      (sessionStorage.getItem('newProjectName') || sessionStorage.getItem('creatingNewProject') === 'true');
+
+    if (!selectedProjectId && router.pathname !== Path.Projects) {
+      // If creating new project, only allow staying on setup pages
+      if (isCreatingNewProject && router.pathname.startsWith(Path.Onboarding)) {
+        return;
+      }
+      router.push(Path.Projects);
+    }
+  }, [selectedProjectId, hydrated, router]);
+
+  const { data, loading } = useOnboardingStatusQuery({
+    variables: { projectId: selectedProjectId || 0 },
+    skip: !selectedProjectId,
+  });
 
   const onboardingStatus = data?.onboardingStatus?.status;
 
   useEffect(() => {
-    if (onboardingStatus) {
+    if (selectedProjectId && onboardingStatus) {
       const newPath = redirectRoute[onboardingStatus];
       const pathname = router.pathname;
 
+      // Check if user is creating a new project (has project name in sessionStorage)
+      const isCreatingNewProject = typeof window !== 'undefined' &&
+        (sessionStorage.getItem('newProjectName') || sessionStorage.getItem('creatingNewProject'));
+
       // redirect to new path if onboarding is not completed
       if (newPath && newPath !== Path.Modeling) {
+        // do not redirect if user is creating a new project
+        if (isCreatingNewProject) {
+          return;
+        }
+
         // do not redirect if the new path and router pathname are the same
         if (newPath === pathname) {
           return;
@@ -58,6 +89,11 @@ export const useWithOnboarding = () => {
         return;
       }
 
+      // Don't redirect if user is creating a new project
+      if (isCreatingNewProject) {
+        return;
+      }
+
       // redirect to home page when entering the connection page or select models page
       if (
         [Path.OnboardingConnection, Path.OnboardingModels].includes(
@@ -77,7 +113,11 @@ export const useWithOnboarding = () => {
 };
 
 export default function useOnboardingStatus() {
-  const { data, loading, error, refetch } = useOnboardingStatusQuery();
+  const { selectedProjectId } = useProject();
+  const { data, loading, error, refetch } = useOnboardingStatusQuery({
+    variables: { projectId: selectedProjectId || 0 },
+    skip: !selectedProjectId,
+  });
 
   return {
     loading,

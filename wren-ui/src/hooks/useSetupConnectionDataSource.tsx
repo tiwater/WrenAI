@@ -7,17 +7,30 @@ import {
 } from '@/utils/enum';
 import { useSaveDataSourceMutation } from '@/apollo/client/graphql/dataSource.generated';
 import { DataSourceName } from '@/apollo/client/graphql/__types__';
-
+import { useOptionalSelectedProject, useProject } from '@/contexts/ProjectContext';
 const PASSWORD_PLACEHOLDER = '************';
 
 export default function useSetupConnectionDataSource() {
+  const projectId = useOptionalSelectedProject();
+  const { setSelectedProjectId } = useProject();
   const router = useRouter();
   const [selected, setSelected] = useState<DataSourceName>();
 
   const [saveDataSourceMutation, { loading, error }] =
     useSaveDataSourceMutation({
       onError: (error) => console.error(error),
-      onCompleted: () => completedDataSourceSave(),
+      onCompleted: (data) => {
+        // Set the newly created project ID
+        if (data?.saveDataSource?.projectId) {
+          setSelectedProjectId(data.saveDataSource.projectId);
+          // Navigate after setting the project ID
+          setTimeout(() => {
+            completedDataSourceSave();
+          }, 100);
+        } else {
+          completedDataSourceSave();
+        }
+      },
     });
 
   const selectDataSourceNext = useCallback(
@@ -30,11 +43,22 @@ export default function useSetupConnectionDataSource() {
 
   const saveDataSource = useCallback(
     async (properties?: Record<string, any>) => {
+      // Get project name from sessionStorage if creating a new project
+      const projectName = sessionStorage.getItem('newProjectName');
+      const finalProperties = transformFormToProperties(properties, selected);
+      
+      // Add project name to properties if available
+      if (projectName) {
+        finalProperties.name = projectName;
+        sessionStorage.removeItem('newProjectName'); // Clean up after use
+      }
+      
       await saveDataSourceMutation({
         variables: {
+          projectId: 0, // Will create a new project
           data: {
             type: selected,
-            properties: transformFormToProperties(properties, selected),
+            properties: finalProperties,
           },
         },
       });
@@ -43,6 +67,8 @@ export default function useSetupConnectionDataSource() {
   );
 
   const completedDataSourceSave = useCallback(async () => {
+    // Clear the creating new project flag
+    sessionStorage.removeItem('creatingNewProject');
     router.push(Path.OnboardingModels);
   }, [selected, router]);
 

@@ -5,6 +5,8 @@ import {
   ApiError,
   respondWithSimple,
   handleApiError,
+,
+  getProjectIdFromRequest,
 } from '@/apollo/server/utils/apiUtils';
 import { getLogger } from '@server/utils';
 import { isNil } from 'lodash';
@@ -173,7 +175,7 @@ export default async function handler(
   let project;
 
   try {
-    project = await projectService.getCurrentProject();
+    project = await projectService.getProjectById(await getProjectIdFromRequest(req));
 
     // Handle GET method - list instructions
     if (req.method === 'GET') {

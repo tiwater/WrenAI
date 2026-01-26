@@ -13,6 +13,7 @@ import TableTransfer, {
 import { useListDataSourceTablesQuery } from '@/apollo/client/graphql/dataSource.generated';
 import { useListModelsQuery } from '@/apollo/client/graphql/model.generated';
 import { CompactTable, CompactColumn } from '@/apollo/client/graphql/__types__';
+import { useSelectedProject } from '@/contexts/ProjectContext';
 
 const { Option } = Select;
 
@@ -39,6 +40,7 @@ const primaryKeyValidator =
 
 export default function ModelForm(props: Props) {
   const { defaultValue, form, formMode } = props;
+  const projectId = useSelectedProject();
 
   const [selectedColumns, setSelectedColumns] = useState<string[]>([]);
   const [sourceTableName, setSourceTableName] = useState<string>(undefined);
@@ -48,11 +50,14 @@ export default function ModelForm(props: Props) {
 
   const { data: listModelsQueryResult, loading: listModelsQueryLoading } =
     useListModelsQuery({
+      variables: { projectId: projectId! },
+      skip: !projectId || isUpdateMode,
       fetchPolicy: 'cache-and-network',
-      skip: isUpdateMode,
     });
 
   const { data, loading: fetching } = useListDataSourceTablesQuery({
+    variables: { projectId: projectId! },
+    skip: !projectId,
     fetchPolicy: 'cache-and-network',
     onError: (error) => console.error(error),
   });
@@ -179,7 +184,7 @@ export default function ModelForm(props: Props) {
               onChange={onChangeColumns}
               filterOption={(inputValue: string, item: TransferItem) =>
                 item.name.toLowerCase().indexOf(inputValue.toLowerCase()) !==
-                  -1 ||
+                -1 ||
                 item.type.toLowerCase().indexOf(inputValue.toLowerCase()) !== -1
               }
               leftColumns={defaultColumns}

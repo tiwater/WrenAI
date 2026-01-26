@@ -1,0 +1,74 @@
+query ListProjects {
+  listProjects {
+    projects {
+      id
+      name
+      displayName
+      type
+      language
+      lastAccessedAt
+      createdAt
+      sampleDataset
+    }
+  }
+}
+
+# GetActiveProject query removed - project selection is now handled on client side
+
+query GetProject($projectId: Int!) {
+  getProject(projectId: $projectId) {
+    id
+    name
+    displayName
+    type
+    language
+    lastAccessedAt
+    createdAt
+    sampleDataset
+  }
+}
+
+mutation CreateProject($data: CreateProjectInput!) {
+  createProject(data: $data) {
+    id
+    name
+    displayName
+    type
+    language
+    lastAccessedAt
+    createdAt
+    sampleDataset
+  }
+}
+
+mutation UpdateProject($projectId: Int!, $data: UpdateProjectInput!) {
+  updateProject(projectId: $projectId, data: $data) {
+    id
+    name
+    displayName
+    type
+    language
+    lastAccessedAt
+    createdAt
+    sampleDataset
+  }
+}
+
+# SwitchProject mutation removed - project selection is now handled on client side
+
+mutation DeleteProject($projectId: Int!) {
+  deleteProject(projectId: $projectId)
+}
+
+mutation DuplicateProject($projectId: Int!, $name: String!) {
+  duplicateProject(projectId: $projectId, name: $name) {
+    id
+    name
+    displayName
+    type
+    language
+    lastAccessedAt
+    createdAt
+    sampleDataset
+  }
+}

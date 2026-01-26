@@ -24,6 +24,7 @@ import {
   DataSourceName,
   ItemLayoutInput,
 } from '@/apollo/client/graphql/__types__';
+import { useOptionalSelectedProject } from '@/contexts/ProjectContext';
 
 const isSupportCachedSettings = (dataSource: DataSource) => {
   // DuckDB not supported, sample dataset as well
@@ -34,10 +35,14 @@ const isSupportCachedSettings = (dataSource: DataSource) => {
 
 export default function Dashboard() {
   const router = useRouter();
+  const projectId = useOptionalSelectedProject();
   const dashboardGridRef = useRef<{ onRefreshAll: () => void }>(null);
   const homeSidebar = useHomeSidebar();
   const cacheSettingsDrawer = useDrawerAction();
-  const { data: settingsResult } = useGetSettingsQuery();
+  const { data: settingsResult } = useGetSettingsQuery({
+    variables: { projectId: projectId! },
+    skip: !projectId,
+  });
   const settings = settingsResult?.settings;
   const isSupportCached = useMemo(
     () => isSupportCachedSettings(settings?.dataSource),
@@ -49,6 +54,8 @@ export default function Dashboard() {
     loading,
     updateQuery: updateDashboardQuery,
   } = useDashboardQuery({
+    variables: { projectId: projectId! },
+    skip: !projectId,
     fetchPolicy: 'cache-and-network',
     onError: () => {
       message.error('Failed to fetch dashboard items.');
@@ -61,7 +68,7 @@ export default function Dashboard() {
   );
 
   const [setDashboardSchedule] = useSetDashboardScheduleMutation({
-    refetchQueries: ['Dashboard'],
+    refetchQueries: [{ query: 'Dashboard', variables: { projectId } }],
     onCompleted: () => {
       message.success('Successfully updated dashboard schedule.');
     },
@@ -95,12 +102,16 @@ export default function Dashboard() {
 
   const onUpdateChange = async (layouts: ItemLayoutInput[]) => {
     if (layouts && layouts.length > 0) {
-      await updateDashboardItemLayouts({ variables: { data: { layouts } } });
+      if (!projectId) return;
+      await updateDashboardItemLayouts({
+        variables: { projectId, data: { layouts } },
+      });
     }
   };
 
   const onDelete = async (id: number) => {
-    await deleteDashboardItem({ variables: { where: { id } } });
+    if (!projectId) return;
+    await deleteDashboardItem({ variables: { projectId, where: { id } } });
   };
 
   return (
@@ -135,7 +146,8 @@ export default function Dashboard() {
               {...cacheSettingsDrawer.state}
               onClose={cacheSettingsDrawer.closeDrawer}
               onSubmit={async (values) => {
-                await setDashboardSchedule({ variables: { data: values } });
+                if (!projectId) return;
+                await setDashboardSchedule({ variables: { projectId, data: values } });
               }}
             />
           )}

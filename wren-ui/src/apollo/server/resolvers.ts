@@ -55,6 +55,10 @@ const resolvers = {
     settings: projectResolver.getSettings,
     getMDL: modelResolver.getMDL,
 
+    // Projects
+    listProjects: projectResolver.listProjects,
+    getProject: projectResolver.getProject,
+
     // Learning
     learningRecord: learningResolver.getLearningRecord,
 
@@ -146,6 +150,13 @@ const resolvers = {
     resetCurrentProject: projectResolver.resetCurrentProject,
     updateCurrentProject: projectResolver.updateCurrentProject,
     updateDataSource: projectResolver.updateDataSource,
+
+    // Projects
+    createProject: projectResolver.createProject,
+    updateProject: projectResolver.updateProject,
+    // switchProject removed - project selection is now handled on client side
+    deleteProject: projectResolver.deleteProject,
+    duplicateProject: projectResolver.duplicateProject,
 
     // preview
     previewSql: modelResolver.previewSql,

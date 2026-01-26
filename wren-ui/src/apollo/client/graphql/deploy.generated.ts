@@ -3,20 +3,25 @@ import * as Types from './__types__';
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
 const defaultOptions = {} as const;
-export type DeployMutationVariables = Types.Exact<{ [key: string]: never; }>;
+export type DeployMutationVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
+  force?: Types.InputMaybe<Types.Scalars['Boolean']>;
+}>;
 
 
 export type DeployMutation = { __typename?: 'Mutation', deploy: any };
 
-export type DeployStatusQueryVariables = Types.Exact<{ [key: string]: never; }>;
+export type DeployStatusQueryVariables = Types.Exact<{
+  projectId: Types.Scalars['Int'];
+}>;
 
 
 export type DeployStatusQuery = { __typename?: 'Query', modelSync: { __typename?: 'ModelSyncResponse', status: Types.SyncStatus } };
 
 
 export const DeployDocument = gql`
-    mutation Deploy {
-  deploy
+    mutation Deploy($projectId: Int!, $force: Boolean) {
+  deploy(projectId: $projectId, force: $force)
 }
     `;
 export type DeployMutationFn = Apollo.MutationFunction<DeployMutation, DeployMutationVariables>;
@@ -34,6 +39,8 @@ export type DeployMutationFn = Apollo.MutationFunction<DeployMutation, DeployMut
  * @example
  * const [deployMutation, { data, loading, error }] = useDeployMutation({
  *   variables: {
+ *      projectId: // value for 'projectId'
+ *      force: // value for 'force'
  *   },
  * });
  */
@@ -45,8 +52,8 @@ export type DeployMutationHookResult = ReturnType<typeof useDeployMutation>;
 export type DeployMutationResult = Apollo.MutationResult<DeployMutation>;
 export type DeployMutationOptions = Apollo.BaseMutationOptions<DeployMutation, DeployMutationVariables>;
 export const DeployStatusDocument = gql`
-    query DeployStatus {
-  modelSync {
+    query DeployStatus($projectId: Int!) {
+  modelSync(projectId: $projectId) {
     status
   }
 }
@@ -64,10 +71,11 @@ export const DeployStatusDocument = gql`
  * @example
  * const { data, loading, error } = useDeployStatusQuery({
  *   variables: {
+ *      projectId: // value for 'projectId'
  *   },
  * });
  */
-export function useDeployStatusQuery(baseOptions?: Apollo.QueryHookOptions<DeployStatusQuery, DeployStatusQueryVariables>) {
+export function useDeployStatusQuery(baseOptions: Apollo.QueryHookOptions<DeployStatusQuery, DeployStatusQueryVariables>) {
         const options = {...defaultOptions, ...baseOptions}
         return Apollo.useQuery<DeployStatusQuery, DeployStatusQueryVariables>(DeployStatusDocument, options);
       }
