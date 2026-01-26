@@ -1,18 +1,14 @@
-name: Wren-UI Release image
+name: Bootstrap Release image
 
 on:
   workflow_dispatch:
     inputs:
-      docker_image_tag_name:
-        description: Docker image tag name (optional, default branch name/tag name replaced with hyphens)
+      tag_name:
+        description: Docker image tag name (Optional)
         type: string
 
 env:
-  WREN_UI_IMAGE: ghcr.io/${{ github.repository_owner }}/wren-ui
-
-defaults:
-  run:
-    working-directory: wren-ui
+  WREN_BOOTSTRAP_IMAGE: ghcr.io/${{ github.repository_owner }}/wren-bootstrap
 
 jobs:
   build-image:
@@ -28,27 +24,26 @@ jobs:
       - name: Prepare tag name
         id: tag-preparation
         run: |
-          if [ -n "${{ github.event.inputs.docker_image_tag_name }}" ]; then
-            tag_name=${{ github.event.inputs.docker_image_tag_name }}
+          if [ -n "${{ github.event.inputs.tag_name }}" ]; then
+            tag_name=${{ github.event.inputs.tag_name }}
           else
-            tag_name=$(echo ${{ github.ref_name }} | sed 's/[^a-zA-Z0-9]/-/g')-$(git log -1 --pretty=%h)
+            tag_name=commit-$(git log -1 --pretty=%h)
           fi
           echo "TAG_NAME=$tag_name" >> $GITHUB_OUTPUT
       - name: Docker meta
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.WREN_UI_IMAGE }}
+          images: ${{ env.WREN_BOOTSTRAP_IMAGE }}
           tags: |
             type=raw,value=${{ steps.tag-preparation.outputs.TAG_NAME }}
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: ./wren-ui
+          context: ./docker/bootstrap
+          file: ./docker/bootstrap/Dockerfile
           platforms: linux/amd64,linux/arm64
           labels: ${{ steps.meta.outputs.labels }}
           tags: ${{ steps.meta.outputs.tags }}
