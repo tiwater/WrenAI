@@ -41,15 +41,13 @@ jobs:
           images: ${{ env.WREN_UI_IMAGE }}
           tags: |
             type=raw,value=${{ steps.tag-preparation.outputs.TAG_NAME }}
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
           context: ./wren-ui
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           labels: ${{ steps.meta.outputs.labels }}
           tags: ${{ steps.meta.outputs.tags }}
           push: true

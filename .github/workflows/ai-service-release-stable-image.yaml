@@ -100,8 +100,6 @@ jobs:
           tags: |
             type=raw,value=${{ github.event.inputs.version }}
             type=raw,value=latest
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Build and push
@@ -109,7 +107,7 @@ jobs:
         with:
           context: ./wren-ai-service
           file: ./wren-ai-service/docker/Dockerfile
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/amd64
           labels: ${{ steps.meta.outputs.labels }}
           tags: ${{ steps.meta.outputs.tags }}
           push: true
