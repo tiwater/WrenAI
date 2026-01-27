@@ -3,22 +3,53 @@ import * as Types from './__types__';
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
 const defaultOptions = {} as const;
-export type InstructionFragment = { __typename?: 'Instruction', id: number, projectId: number, instruction: string, questions: Array<string>, isDefault: boolean, createdAt: string, updatedAt: string };
+export type InstructionFragment = {
+  __typename?: 'Instruction';
+  id: number;
+  projectId: number;
+  instruction: string;
+  questions: Array<string>;
+  isDefault: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
 
 export type InstructionsQueryVariables = Types.Exact<{
   projectId: Types.Scalars['Int'];
 }>;
 
-
-export type InstructionsQuery = { __typename?: 'Query', instructions: Array<{ __typename?: 'Instruction', id: number, projectId: number, instruction: string, questions: Array<string>, isDefault: boolean, createdAt: string, updatedAt: string } | null> };
+export type InstructionsQuery = {
+  __typename?: 'Query';
+  instructions: Array<{
+    __typename?: 'Instruction';
+    id: number;
+    projectId: number;
+    instruction: string;
+    questions: Array<string>;
+    isDefault: boolean;
+    createdAt: string;
+    updatedAt: string;
+  } | null>;
+};
 
 export type CreateInstructionMutationVariables = Types.Exact<{
   projectId: Types.Scalars['Int'];
   data: Types.CreateInstructionInput;
 }>;
 
-
-export type CreateInstructionMutation = { __typename?: 'Mutation', createInstruction: { __typename?: 'Instruction', id: number, projectId: number, instruction: string, questions: Array<string>, isDefault: boolean, createdAt: string, updatedAt: string } };
+export type CreateInstructionMutation = {
+  __typename?: 'Mutation';
+  createInstruction: {
+    __typename?: 'Instruction';
+    id: number;
+    projectId: number;
+    instruction: string;
+    questions: Array<string>;
+    isDefault: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
+};
 
 export type UpdateInstructionMutationVariables = Types.Exact<{
   projectId: Types.Scalars['Int'];
@@ -26,35 +57,49 @@ export type UpdateInstructionMutationVariables = Types.Exact<{
   data: Types.UpdateInstructionInput;
 }>;
 
-
-export type UpdateInstructionMutation = { __typename?: 'Mutation', updateInstruction: { __typename?: 'Instruction', id: number, projectId: number, instruction: string, questions: Array<string>, isDefault: boolean, createdAt: string, updatedAt: string } };
+export type UpdateInstructionMutation = {
+  __typename?: 'Mutation';
+  updateInstruction: {
+    __typename?: 'Instruction';
+    id: number;
+    projectId: number;
+    instruction: string;
+    questions: Array<string>;
+    isDefault: boolean;
+    createdAt: string;
+    updatedAt: string;
+  };
+};
 
 export type DeleteInstructionMutationVariables = Types.Exact<{
   projectId: Types.Scalars['Int'];
   where: Types.InstructionWhereInput;
 }>;
 
-
-export type DeleteInstructionMutation = { __typename?: 'Mutation', deleteInstruction: boolean };
+export type DeleteInstructionMutation = {
+  __typename?: 'Mutation';
+  deleteInstruction: boolean;
+};
 
 export const InstructionFragmentDoc = gql`
-    fragment Instruction on Instruction {
-  id
-  projectId
-  instruction
-  questions
-  isDefault
-  createdAt
-  updatedAt
-}
-    `;
-export const InstructionsDocument = gql`
-    query Instructions($projectId: Int!) {
-  instructions(projectId: $projectId) {
-    ...Instruction
+  fragment Instruction on Instruction {
+    id
+    projectId
+    instruction
+    questions
+    isDefault
+    createdAt
+    updatedAt
   }
-}
-    ${InstructionFragmentDoc}`;
+`;
+export const InstructionsDocument = gql`
+  query Instructions($projectId: Int!) {
+    instructions(projectId: $projectId) {
+      ...Instruction
+    }
+  }
+  ${InstructionFragmentDoc}
+`;
 
 /**
  * __useInstructionsQuery__
@@ -72,25 +117,52 @@ export const InstructionsDocument = gql`
  *   },
  * });
  */
-export function useInstructionsQuery(baseOptions: Apollo.QueryHookOptions<InstructionsQuery, InstructionsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<InstructionsQuery, InstructionsQueryVariables>(InstructionsDocument, options);
-      }
-export function useInstructionsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<InstructionsQuery, InstructionsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<InstructionsQuery, InstructionsQueryVariables>(InstructionsDocument, options);
-        }
-export type InstructionsQueryHookResult = ReturnType<typeof useInstructionsQuery>;
-export type InstructionsLazyQueryHookResult = ReturnType<typeof useInstructionsLazyQuery>;
-export type InstructionsQueryResult = Apollo.QueryResult<InstructionsQuery, InstructionsQueryVariables>;
-export const CreateInstructionDocument = gql`
-    mutation CreateInstruction($projectId: Int!, $data: CreateInstructionInput!) {
-  createInstruction(projectId: $projectId, data: $data) {
-    ...Instruction
-  }
+export function useInstructionsQuery(
+  baseOptions: Apollo.QueryHookOptions<
+    InstructionsQuery,
+    InstructionsQueryVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<InstructionsQuery, InstructionsQueryVariables>(
+    InstructionsDocument,
+    options,
+  );
 }
-    ${InstructionFragmentDoc}`;
-export type CreateInstructionMutationFn = Apollo.MutationFunction<CreateInstructionMutation, CreateInstructionMutationVariables>;
+export function useInstructionsLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    InstructionsQuery,
+    InstructionsQueryVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<InstructionsQuery, InstructionsQueryVariables>(
+    InstructionsDocument,
+    options,
+  );
+}
+export type InstructionsQueryHookResult = ReturnType<
+  typeof useInstructionsQuery
+>;
+export type InstructionsLazyQueryHookResult = ReturnType<
+  typeof useInstructionsLazyQuery
+>;
+export type InstructionsQueryResult = Apollo.QueryResult<
+  InstructionsQuery,
+  InstructionsQueryVariables
+>;
+export const CreateInstructionDocument = gql`
+  mutation CreateInstruction($projectId: Int!, $data: CreateInstructionInput!) {
+    createInstruction(projectId: $projectId, data: $data) {
+      ...Instruction
+    }
+  }
+  ${InstructionFragmentDoc}
+`;
+export type CreateInstructionMutationFn = Apollo.MutationFunction<
+  CreateInstructionMutation,
+  CreateInstructionMutationVariables
+>;
 
 /**
  * __useCreateInstructionMutation__
@@ -110,21 +182,43 @@ export type CreateInstructionMutationFn = Apollo.MutationFunction<CreateInstruct
  *   },
  * });
  */
-export function useCreateInstructionMutation(baseOptions?: Apollo.MutationHookOptions<CreateInstructionMutation, CreateInstructionMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateInstructionMutation, CreateInstructionMutationVariables>(CreateInstructionDocument, options);
-      }
-export type CreateInstructionMutationHookResult = ReturnType<typeof useCreateInstructionMutation>;
-export type CreateInstructionMutationResult = Apollo.MutationResult<CreateInstructionMutation>;
-export type CreateInstructionMutationOptions = Apollo.BaseMutationOptions<CreateInstructionMutation, CreateInstructionMutationVariables>;
-export const UpdateInstructionDocument = gql`
-    mutation UpdateInstruction($projectId: Int!, $where: InstructionWhereInput!, $data: UpdateInstructionInput!) {
-  updateInstruction(projectId: $projectId, where: $where, data: $data) {
-    ...Instruction
-  }
+export function useCreateInstructionMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    CreateInstructionMutation,
+    CreateInstructionMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    CreateInstructionMutation,
+    CreateInstructionMutationVariables
+  >(CreateInstructionDocument, options);
 }
-    ${InstructionFragmentDoc}`;
-export type UpdateInstructionMutationFn = Apollo.MutationFunction<UpdateInstructionMutation, UpdateInstructionMutationVariables>;
+export type CreateInstructionMutationHookResult = ReturnType<
+  typeof useCreateInstructionMutation
+>;
+export type CreateInstructionMutationResult =
+  Apollo.MutationResult<CreateInstructionMutation>;
+export type CreateInstructionMutationOptions = Apollo.BaseMutationOptions<
+  CreateInstructionMutation,
+  CreateInstructionMutationVariables
+>;
+export const UpdateInstructionDocument = gql`
+  mutation UpdateInstruction(
+    $projectId: Int!
+    $where: InstructionWhereInput!
+    $data: UpdateInstructionInput!
+  ) {
+    updateInstruction(projectId: $projectId, where: $where, data: $data) {
+      ...Instruction
+    }
+  }
+  ${InstructionFragmentDoc}
+`;
+export type UpdateInstructionMutationFn = Apollo.MutationFunction<
+  UpdateInstructionMutation,
+  UpdateInstructionMutationVariables
+>;
 
 /**
  * __useUpdateInstructionMutation__
@@ -145,19 +239,36 @@ export type UpdateInstructionMutationFn = Apollo.MutationFunction<UpdateInstruct
  *   },
  * });
  */
-export function useUpdateInstructionMutation(baseOptions?: Apollo.MutationHookOptions<UpdateInstructionMutation, UpdateInstructionMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UpdateInstructionMutation, UpdateInstructionMutationVariables>(UpdateInstructionDocument, options);
-      }
-export type UpdateInstructionMutationHookResult = ReturnType<typeof useUpdateInstructionMutation>;
-export type UpdateInstructionMutationResult = Apollo.MutationResult<UpdateInstructionMutation>;
-export type UpdateInstructionMutationOptions = Apollo.BaseMutationOptions<UpdateInstructionMutation, UpdateInstructionMutationVariables>;
-export const DeleteInstructionDocument = gql`
-    mutation DeleteInstruction($projectId: Int!, $where: InstructionWhereInput!) {
-  deleteInstruction(projectId: $projectId, where: $where)
+export function useUpdateInstructionMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UpdateInstructionMutation,
+    UpdateInstructionMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    UpdateInstructionMutation,
+    UpdateInstructionMutationVariables
+  >(UpdateInstructionDocument, options);
 }
-    `;
-export type DeleteInstructionMutationFn = Apollo.MutationFunction<DeleteInstructionMutation, DeleteInstructionMutationVariables>;
+export type UpdateInstructionMutationHookResult = ReturnType<
+  typeof useUpdateInstructionMutation
+>;
+export type UpdateInstructionMutationResult =
+  Apollo.MutationResult<UpdateInstructionMutation>;
+export type UpdateInstructionMutationOptions = Apollo.BaseMutationOptions<
+  UpdateInstructionMutation,
+  UpdateInstructionMutationVariables
+>;
+export const DeleteInstructionDocument = gql`
+  mutation DeleteInstruction($projectId: Int!, $where: InstructionWhereInput!) {
+    deleteInstruction(projectId: $projectId, where: $where)
+  }
+`;
+export type DeleteInstructionMutationFn = Apollo.MutationFunction<
+  DeleteInstructionMutation,
+  DeleteInstructionMutationVariables
+>;
 
 /**
  * __useDeleteInstructionMutation__
@@ -177,10 +288,24 @@ export type DeleteInstructionMutationFn = Apollo.MutationFunction<DeleteInstruct
  *   },
  * });
  */
-export function useDeleteInstructionMutation(baseOptions?: Apollo.MutationHookOptions<DeleteInstructionMutation, DeleteInstructionMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<DeleteInstructionMutation, DeleteInstructionMutationVariables>(DeleteInstructionDocument, options);
-      }
-export type DeleteInstructionMutationHookResult = ReturnType<typeof useDeleteInstructionMutation>;
-export type DeleteInstructionMutationResult = Apollo.MutationResult<DeleteInstructionMutation>;
-export type DeleteInstructionMutationOptions = Apollo.BaseMutationOptions<DeleteInstructionMutation, DeleteInstructionMutationVariables>;
+export function useDeleteInstructionMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    DeleteInstructionMutation,
+    DeleteInstructionMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    DeleteInstructionMutation,
+    DeleteInstructionMutationVariables
+  >(DeleteInstructionDocument, options);
+}
+export type DeleteInstructionMutationHookResult = ReturnType<
+  typeof useDeleteInstructionMutation
+>;
+export type DeleteInstructionMutationResult =
+  Apollo.MutationResult<DeleteInstructionMutation>;
+export type DeleteInstructionMutationOptions = Apollo.BaseMutationOptions<
+  DeleteInstructionMutation,
+  DeleteInstructionMutationVariables
+>;

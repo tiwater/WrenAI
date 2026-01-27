@@ -83,9 +83,7 @@ export default function Deploy() {
   }, [syncStatus]);
 
   const disabled =
-    deploying ||
-    loading ||
-    syncStatus === SyncStatus.IN_PROGRESS;
+    deploying || loading || syncStatus === SyncStatus.IN_PROGRESS;
 
   return (
     <Space size={[8, 0]}>

@@ -60,8 +60,6 @@ export function useCreateProjectMutation(options?: any) {
   return useMutation(CREATE_PROJECT, options);
 }
 
-
-
 const DELETE_PROJECT = gql`
   mutation DeleteProject($projectId: Int!) {
     deleteProject(projectId: $projectId)
@@ -89,7 +87,6 @@ const UPDATE_PROJECT = gql`
     }
   }
 `;
-
 
 export function useDeleteProjectMutation(options?: any) {
   return useMutation(DELETE_PROJECT, options);

@@ -76,7 +76,10 @@ export default function EditViewMetadata(props: Props) {
           displayName: [
             {
               required: true,
-              validator: createViewNameValidator(validateViewMutation, projectId || undefined),
+              validator: createViewNameValidator(
+                validateViewMutation,
+                projectId || undefined,
+              ),
             },
           ],
         }}

@@ -33,7 +33,9 @@ export class DiagramResolver {
     args: { projectId: number },
     ctx: IContext,
   ): Promise<Diagram> {
-    const project = await ctx.projectRepository.findOneBy({ id: args.projectId });
+    const project = await ctx.projectRepository.findOneBy({
+      id: args.projectId,
+    });
     if (!project) {
       throw new Error('Project not found');
     }

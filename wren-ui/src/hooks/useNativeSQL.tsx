@@ -38,7 +38,9 @@ export default function useNativeSQL() {
     fetchPolicy: 'cache-and-network',
   });
 
-  const fetchNativeSQLWithProject = (options: { variables: { responseId: number } }) => {
+  const fetchNativeSQLWithProject = (options: {
+    variables: { responseId: number };
+  }) => {
     return fetchNativeSQL({
       ...options,
       variables: {

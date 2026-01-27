@@ -65,7 +65,7 @@ export default function useRecommendedQuestionsInstruction() {
     const fetchRecommendationQuestionsData = async () => {
       if (!projectId) return;
       const result = await fetchRecommendationQuestions({
-        variables: { projectId }
+        variables: { projectId },
       });
       const data = result.data?.getProjectRecommendationQuestions;
       if (!data) return;
@@ -94,7 +94,7 @@ export default function useRecommendedQuestionsInstruction() {
         if (
           showRecommendedQuestionsPromptMode &&
           recommendedQuestionsTask.status ===
-          RecommendedQuestionsTaskStatus.FAILED
+            RecommendedQuestionsTaskStatus.FAILED
         ) {
           message.error(
             `We couldn't regenerate questions right now. Let's try again later.`,
@@ -120,10 +120,10 @@ export default function useRecommendedQuestionsInstruction() {
     try {
       if (projectId) {
         await generateProjectRecommendationQuestions({
-          variables: { projectId }
+          variables: { projectId },
         });
         fetchRecommendationQuestions({
-          variables: { projectId }
+          variables: { projectId },
         });
       }
     } catch (error) {
@@ -159,7 +159,13 @@ export default function useRecommendedQuestionsInstruction() {
           ? 'Retry'
           : 'What could I ask?',
     };
-  }, [generating, isRegenerate, projectId, showRetry, showRecommendedQuestionsPromptMode]);
+  }, [
+    generating,
+    isRegenerate,
+    projectId,
+    showRetry,
+    showRecommendedQuestionsPromptMode,
+  ]);
 
   return {
     recommendedQuestions,

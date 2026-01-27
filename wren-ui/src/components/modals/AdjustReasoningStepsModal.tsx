@@ -145,9 +145,7 @@ export default function AdjustReasoningStepsModal(props: Props) {
           extra={
             <div className="text-sm gray-6 mt-1">
               请选择回答问题所需使用的模型/表。{' '}
-              <span className="gray-7">
-                未选择的模型不会参与 SQL 生成。
-              </span>
+              <span className="gray-7">未选择的模型不会参与 SQL 生成。</span>
             </div>
           }
         >

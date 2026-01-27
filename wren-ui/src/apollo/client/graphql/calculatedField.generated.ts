@@ -8,16 +8,24 @@ export type ValidateCalculatedFieldMutationVariables = Types.Exact<{
   data: Types.ValidateCalculatedFieldInput;
 }>;
 
-
-export type ValidateCalculatedFieldMutation = { __typename?: 'Mutation', validateCalculatedField: { __typename?: 'CalculatedFieldValidationResponse', message?: string | null, valid: boolean } };
+export type ValidateCalculatedFieldMutation = {
+  __typename?: 'Mutation';
+  validateCalculatedField: {
+    __typename?: 'CalculatedFieldValidationResponse';
+    message?: string | null;
+    valid: boolean;
+  };
+};
 
 export type CreateCalculatedFieldMutationVariables = Types.Exact<{
   projectId: Types.Scalars['Int'];
   data: Types.CreateCalculatedFieldInput;
 }>;
 
-
-export type CreateCalculatedFieldMutation = { __typename?: 'Mutation', createCalculatedField: any };
+export type CreateCalculatedFieldMutation = {
+  __typename?: 'Mutation';
+  createCalculatedField: any;
+};
 
 export type UpdateCalculatedFieldMutationVariables = Types.Exact<{
   projectId: Types.Scalars['Int'];
@@ -25,27 +33,36 @@ export type UpdateCalculatedFieldMutationVariables = Types.Exact<{
   data: Types.UpdateCalculatedFieldInput;
 }>;
 
-
-export type UpdateCalculatedFieldMutation = { __typename?: 'Mutation', updateCalculatedField: any };
+export type UpdateCalculatedFieldMutation = {
+  __typename?: 'Mutation';
+  updateCalculatedField: any;
+};
 
 export type DeleteCalculatedFieldMutationVariables = Types.Exact<{
   projectId: Types.Scalars['Int'];
   where: Types.UpdateCalculatedFieldWhere;
 }>;
 
-
-export type DeleteCalculatedFieldMutation = { __typename?: 'Mutation', deleteCalculatedField: boolean };
-
+export type DeleteCalculatedFieldMutation = {
+  __typename?: 'Mutation';
+  deleteCalculatedField: boolean;
+};
 
 export const ValidateCalculatedFieldDocument = gql`
-    mutation ValidateCalculatedField($projectId: Int!, $data: ValidateCalculatedFieldInput!) {
-  validateCalculatedField(projectId: $projectId, data: $data) {
-    message
-    valid
+  mutation ValidateCalculatedField(
+    $projectId: Int!
+    $data: ValidateCalculatedFieldInput!
+  ) {
+    validateCalculatedField(projectId: $projectId, data: $data) {
+      message
+      valid
+    }
   }
-}
-    `;
-export type ValidateCalculatedFieldMutationFn = Apollo.MutationFunction<ValidateCalculatedFieldMutation, ValidateCalculatedFieldMutationVariables>;
+`;
+export type ValidateCalculatedFieldMutationFn = Apollo.MutationFunction<
+  ValidateCalculatedFieldMutation,
+  ValidateCalculatedFieldMutationVariables
+>;
 
 /**
  * __useValidateCalculatedFieldMutation__
@@ -65,19 +82,39 @@ export type ValidateCalculatedFieldMutationFn = Apollo.MutationFunction<Validate
  *   },
  * });
  */
-export function useValidateCalculatedFieldMutation(baseOptions?: Apollo.MutationHookOptions<ValidateCalculatedFieldMutation, ValidateCalculatedFieldMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<ValidateCalculatedFieldMutation, ValidateCalculatedFieldMutationVariables>(ValidateCalculatedFieldDocument, options);
-      }
-export type ValidateCalculatedFieldMutationHookResult = ReturnType<typeof useValidateCalculatedFieldMutation>;
-export type ValidateCalculatedFieldMutationResult = Apollo.MutationResult<ValidateCalculatedFieldMutation>;
-export type ValidateCalculatedFieldMutationOptions = Apollo.BaseMutationOptions<ValidateCalculatedFieldMutation, ValidateCalculatedFieldMutationVariables>;
-export const CreateCalculatedFieldDocument = gql`
-    mutation CreateCalculatedField($projectId: Int!, $data: CreateCalculatedFieldInput!) {
-  createCalculatedField(projectId: $projectId, data: $data)
+export function useValidateCalculatedFieldMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    ValidateCalculatedFieldMutation,
+    ValidateCalculatedFieldMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    ValidateCalculatedFieldMutation,
+    ValidateCalculatedFieldMutationVariables
+  >(ValidateCalculatedFieldDocument, options);
 }
-    `;
-export type CreateCalculatedFieldMutationFn = Apollo.MutationFunction<CreateCalculatedFieldMutation, CreateCalculatedFieldMutationVariables>;
+export type ValidateCalculatedFieldMutationHookResult = ReturnType<
+  typeof useValidateCalculatedFieldMutation
+>;
+export type ValidateCalculatedFieldMutationResult =
+  Apollo.MutationResult<ValidateCalculatedFieldMutation>;
+export type ValidateCalculatedFieldMutationOptions = Apollo.BaseMutationOptions<
+  ValidateCalculatedFieldMutation,
+  ValidateCalculatedFieldMutationVariables
+>;
+export const CreateCalculatedFieldDocument = gql`
+  mutation CreateCalculatedField(
+    $projectId: Int!
+    $data: CreateCalculatedFieldInput!
+  ) {
+    createCalculatedField(projectId: $projectId, data: $data)
+  }
+`;
+export type CreateCalculatedFieldMutationFn = Apollo.MutationFunction<
+  CreateCalculatedFieldMutation,
+  CreateCalculatedFieldMutationVariables
+>;
 
 /**
  * __useCreateCalculatedFieldMutation__
@@ -97,19 +134,40 @@ export type CreateCalculatedFieldMutationFn = Apollo.MutationFunction<CreateCalc
  *   },
  * });
  */
-export function useCreateCalculatedFieldMutation(baseOptions?: Apollo.MutationHookOptions<CreateCalculatedFieldMutation, CreateCalculatedFieldMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateCalculatedFieldMutation, CreateCalculatedFieldMutationVariables>(CreateCalculatedFieldDocument, options);
-      }
-export type CreateCalculatedFieldMutationHookResult = ReturnType<typeof useCreateCalculatedFieldMutation>;
-export type CreateCalculatedFieldMutationResult = Apollo.MutationResult<CreateCalculatedFieldMutation>;
-export type CreateCalculatedFieldMutationOptions = Apollo.BaseMutationOptions<CreateCalculatedFieldMutation, CreateCalculatedFieldMutationVariables>;
-export const UpdateCalculatedFieldDocument = gql`
-    mutation UpdateCalculatedField($projectId: Int!, $where: UpdateCalculatedFieldWhere!, $data: UpdateCalculatedFieldInput!) {
-  updateCalculatedField(projectId: $projectId, where: $where, data: $data)
+export function useCreateCalculatedFieldMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    CreateCalculatedFieldMutation,
+    CreateCalculatedFieldMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    CreateCalculatedFieldMutation,
+    CreateCalculatedFieldMutationVariables
+  >(CreateCalculatedFieldDocument, options);
 }
-    `;
-export type UpdateCalculatedFieldMutationFn = Apollo.MutationFunction<UpdateCalculatedFieldMutation, UpdateCalculatedFieldMutationVariables>;
+export type CreateCalculatedFieldMutationHookResult = ReturnType<
+  typeof useCreateCalculatedFieldMutation
+>;
+export type CreateCalculatedFieldMutationResult =
+  Apollo.MutationResult<CreateCalculatedFieldMutation>;
+export type CreateCalculatedFieldMutationOptions = Apollo.BaseMutationOptions<
+  CreateCalculatedFieldMutation,
+  CreateCalculatedFieldMutationVariables
+>;
+export const UpdateCalculatedFieldDocument = gql`
+  mutation UpdateCalculatedField(
+    $projectId: Int!
+    $where: UpdateCalculatedFieldWhere!
+    $data: UpdateCalculatedFieldInput!
+  ) {
+    updateCalculatedField(projectId: $projectId, where: $where, data: $data)
+  }
+`;
+export type UpdateCalculatedFieldMutationFn = Apollo.MutationFunction<
+  UpdateCalculatedFieldMutation,
+  UpdateCalculatedFieldMutationVariables
+>;
 
 /**
  * __useUpdateCalculatedFieldMutation__
@@ -130,19 +188,39 @@ export type UpdateCalculatedFieldMutationFn = Apollo.MutationFunction<UpdateCalc
  *   },
  * });
  */
-export function useUpdateCalculatedFieldMutation(baseOptions?: Apollo.MutationHookOptions<UpdateCalculatedFieldMutation, UpdateCalculatedFieldMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UpdateCalculatedFieldMutation, UpdateCalculatedFieldMutationVariables>(UpdateCalculatedFieldDocument, options);
-      }
-export type UpdateCalculatedFieldMutationHookResult = ReturnType<typeof useUpdateCalculatedFieldMutation>;
-export type UpdateCalculatedFieldMutationResult = Apollo.MutationResult<UpdateCalculatedFieldMutation>;
-export type UpdateCalculatedFieldMutationOptions = Apollo.BaseMutationOptions<UpdateCalculatedFieldMutation, UpdateCalculatedFieldMutationVariables>;
-export const DeleteCalculatedFieldDocument = gql`
-    mutation DeleteCalculatedField($projectId: Int!, $where: UpdateCalculatedFieldWhere!) {
-  deleteCalculatedField(projectId: $projectId, where: $where)
+export function useUpdateCalculatedFieldMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UpdateCalculatedFieldMutation,
+    UpdateCalculatedFieldMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    UpdateCalculatedFieldMutation,
+    UpdateCalculatedFieldMutationVariables
+  >(UpdateCalculatedFieldDocument, options);
 }
-    `;
-export type DeleteCalculatedFieldMutationFn = Apollo.MutationFunction<DeleteCalculatedFieldMutation, DeleteCalculatedFieldMutationVariables>;
+export type UpdateCalculatedFieldMutationHookResult = ReturnType<
+  typeof useUpdateCalculatedFieldMutation
+>;
+export type UpdateCalculatedFieldMutationResult =
+  Apollo.MutationResult<UpdateCalculatedFieldMutation>;
+export type UpdateCalculatedFieldMutationOptions = Apollo.BaseMutationOptions<
+  UpdateCalculatedFieldMutation,
+  UpdateCalculatedFieldMutationVariables
+>;
+export const DeleteCalculatedFieldDocument = gql`
+  mutation DeleteCalculatedField(
+    $projectId: Int!
+    $where: UpdateCalculatedFieldWhere!
+  ) {
+    deleteCalculatedField(projectId: $projectId, where: $where)
+  }
+`;
+export type DeleteCalculatedFieldMutationFn = Apollo.MutationFunction<
+  DeleteCalculatedFieldMutation,
+  DeleteCalculatedFieldMutationVariables
+>;
 
 /**
  * __useDeleteCalculatedFieldMutation__
@@ -162,10 +240,24 @@ export type DeleteCalculatedFieldMutationFn = Apollo.MutationFunction<DeleteCalc
  *   },
  * });
  */
-export function useDeleteCalculatedFieldMutation(baseOptions?: Apollo.MutationHookOptions<DeleteCalculatedFieldMutation, DeleteCalculatedFieldMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<DeleteCalculatedFieldMutation, DeleteCalculatedFieldMutationVariables>(DeleteCalculatedFieldDocument, options);
-      }
-export type DeleteCalculatedFieldMutationHookResult = ReturnType<typeof useDeleteCalculatedFieldMutation>;
-export type DeleteCalculatedFieldMutationResult = Apollo.MutationResult<DeleteCalculatedFieldMutation>;
-export type DeleteCalculatedFieldMutationOptions = Apollo.BaseMutationOptions<DeleteCalculatedFieldMutation, DeleteCalculatedFieldMutationVariables>;
+export function useDeleteCalculatedFieldMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    DeleteCalculatedFieldMutation,
+    DeleteCalculatedFieldMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    DeleteCalculatedFieldMutation,
+    DeleteCalculatedFieldMutationVariables
+  >(DeleteCalculatedFieldDocument, options);
+}
+export type DeleteCalculatedFieldMutationHookResult = ReturnType<
+  typeof useDeleteCalculatedFieldMutation
+>;
+export type DeleteCalculatedFieldMutationResult =
+  Apollo.MutationResult<DeleteCalculatedFieldMutation>;
+export type DeleteCalculatedFieldMutationOptions = Apollo.BaseMutationOptions<
+  DeleteCalculatedFieldMutation,
+  DeleteCalculatedFieldMutationVariables
+>;

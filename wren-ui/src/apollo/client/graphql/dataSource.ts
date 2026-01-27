@@ -140,7 +140,10 @@ export const TRIGGER_DATA_SOURCE_DETECTION = gql`
 `;
 
 export const RESOLVE_SCHEMA_CHANGE = gql`
-  mutation ResolveSchemaChange($projectId: Int!, $where: ResolveSchemaChangeWhereInput!) {
+  mutation ResolveSchemaChange(
+    $projectId: Int!
+    $where: ResolveSchemaChangeWhereInput!
+  ) {
     resolveSchemaChange(projectId: $projectId, where: $where)
   }
 `;

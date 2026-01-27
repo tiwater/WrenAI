@@ -71,7 +71,7 @@ export default function useSetupRelations() {
     await saveRelationsMutation({
       variables: {
         projectId,
-        data: { relations }
+        data: { relations },
       },
     });
   };

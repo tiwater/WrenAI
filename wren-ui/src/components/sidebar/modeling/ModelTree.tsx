@@ -119,7 +119,8 @@ export default function ModelTree(props: Props) {
                 : ''
             }
             onClick={() =>
-              projectId && triggerDataSourceDetection({ variables: { projectId } })
+              projectId &&
+              triggerDataSourceDetection({ variables: { projectId } })
             }
           />
         ),

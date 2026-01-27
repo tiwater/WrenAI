@@ -20,8 +20,10 @@ export const useWithOnboarding = () => {
   // If no project selected, redirect to projects page
   useEffect(() => {
     if (!hydrated) return;
-    const isCreatingNewProject = typeof window !== 'undefined' &&
-      (sessionStorage.getItem('newProjectName') || sessionStorage.getItem('creatingNewProject') === 'true');
+    const isCreatingNewProject =
+      typeof window !== 'undefined' &&
+      (sessionStorage.getItem('newProjectName') ||
+        sessionStorage.getItem('creatingNewProject') === 'true');
 
     if (!selectedProjectId && router.pathname !== Path.Projects) {
       // If creating new project, only allow staying on setup pages
@@ -45,8 +47,10 @@ export const useWithOnboarding = () => {
       const pathname = router.pathname;
 
       // Check if user is creating a new project (has project name in sessionStorage)
-      const isCreatingNewProject = typeof window !== 'undefined' &&
-        (sessionStorage.getItem('newProjectName') || sessionStorage.getItem('creatingNewProject'));
+      const isCreatingNewProject =
+        typeof window !== 'undefined' &&
+        (sessionStorage.getItem('newProjectName') ||
+          sessionStorage.getItem('creatingNewProject'));
 
       // redirect to new path if onboarding is not completed
       if (newPath && newPath !== Path.Modeling) {

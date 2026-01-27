@@ -1181,8 +1181,13 @@ export const typeDefs = gql`
     learningRecord(projectId: Int!): LearningRecord!
 
     # Recommendation questions
-    getThreadRecommendationQuestions(projectId: Int!, threadId: Int!): RecommendedQuestionsTask!
-    getProjectRecommendationQuestions(projectId: Int!): RecommendedQuestionsTask!
+    getThreadRecommendationQuestions(
+      projectId: Int!
+      threadId: Int!
+    ): RecommendedQuestionsTask!
+    getProjectRecommendationQuestions(
+      projectId: Int!
+    ): RecommendedQuestionsTask!
     instantRecommendedQuestions(taskId: String!): RecommendedQuestionsTask!
 
     # Dashboard
@@ -1212,11 +1217,18 @@ export const typeDefs = gql`
 
     # Modeling Page
     createModel(projectId: Int!, data: CreateModelInput!): JSON!
-    updateModel(projectId: Int!, where: ModelWhereInput!, data: UpdateModelInput!): JSON!
+    updateModel(
+      projectId: Int!
+      where: ModelWhereInput!
+      data: UpdateModelInput!
+    ): JSON!
     deleteModel(projectId: Int!, where: ModelWhereInput!): Boolean!
     previewModelData(projectId: Int!, where: WhereIdInput!): JSON!
     triggerDataSourceDetection(projectId: Int!): Boolean!
-    resolveSchemaChange(projectId: Int!, where: ResolveSchemaChangeWhereInput!): Boolean!
+    resolveSchemaChange(
+      projectId: Int!
+      where: ResolveSchemaChangeWhereInput!
+    ): Boolean!
 
     # Metadata
     updateModelMetadata(
@@ -1232,17 +1244,27 @@ export const typeDefs = gql`
 
     # Relation
     createRelation(projectId: Int!, data: RelationInput!): JSON!
-    updateRelation(projectId: Int!, data: UpdateRelationInput!, where: WhereIdInput!): JSON!
+    updateRelation(
+      projectId: Int!
+      data: UpdateRelationInput!
+      where: WhereIdInput!
+    ): JSON!
     deleteRelation(projectId: Int!, where: WhereIdInput!): Boolean!
 
     # Calculated field
-    createCalculatedField(projectId: Int!, data: CreateCalculatedFieldInput!): JSON!
+    createCalculatedField(
+      projectId: Int!
+      data: CreateCalculatedFieldInput!
+    ): JSON!
     updateCalculatedField(
       projectId: Int!
       where: UpdateCalculatedFieldWhere!
       data: UpdateCalculatedFieldInput!
     ): JSON!
-    deleteCalculatedField(projectId: Int!, where: UpdateCalculatedFieldWhere): Boolean!
+    deleteCalculatedField(
+      projectId: Int!
+      where: UpdateCalculatedFieldWhere
+    ): Boolean!
     validateCalculatedField(
       projectId: Int!
       data: ValidateCalculatedFieldInput!
@@ -1252,7 +1274,10 @@ export const typeDefs = gql`
     createView(projectId: Int!, data: CreateViewInput!): ViewInfo!
     deleteView(projectId: Int!, where: ViewWhereUniqueInput!): Boolean!
     previewViewData(projectId: Int!, where: PreviewViewDataInput!): JSON!
-    validateView(projectId: Int!, data: ValidateViewInput!): ViewValidationResponse!
+    validateView(
+      projectId: Int!
+      data: ValidateViewInput!
+    ): ViewValidationResponse!
 
     # Ask
     createAskingTask(projectId: Int!, data: AskingTaskInput!): Task!
@@ -1283,13 +1308,22 @@ export const typeDefs = gql`
     previewBreakdownData(projectId: Int!, where: PreviewDataInput!): JSON!
 
     # Generate Thread Response Breakdown
-    generateThreadResponseBreakdown(projectId: Int!, responseId: Int!): ThreadResponse!
+    generateThreadResponseBreakdown(
+      projectId: Int!
+      responseId: Int!
+    ): ThreadResponse!
 
     # Generate Thread Response Answer
-    generateThreadResponseAnswer(projectId: Int!, responseId: Int!): ThreadResponse!
+    generateThreadResponseAnswer(
+      projectId: Int!
+      responseId: Int!
+    ): ThreadResponse!
 
     # Generate Thread Response Chart
-    generateThreadResponseChart(projectId: Int!, responseId: Int!): ThreadResponse!
+    generateThreadResponseChart(
+      projectId: Int!
+      responseId: Int!
+    ): ThreadResponse!
 
     # Adjust Thread Response Chart
     adjustThreadResponseChart(
@@ -1309,7 +1343,10 @@ export const typeDefs = gql`
 
     # Settings
     resetCurrentProject(projectId: Int!): Boolean!
-    updateCurrentProject(projectId: Int!, data: UpdateCurrentProjectInput!): Boolean!
+    updateCurrentProject(
+      projectId: Int!
+      data: UpdateCurrentProjectInput!
+    ): Boolean!
     updateDataSource(projectId: Int!, data: UpdateDataSourceInput!): DataSource!
 
     # Projects
@@ -1322,10 +1359,16 @@ export const typeDefs = gql`
     previewSql(projectId: Int!, data: PreviewSQLDataInput): JSON!
 
     # Learning
-    saveLearningRecord(projectId: Int!, data: SaveLearningRecordInput!): LearningRecord!
+    saveLearningRecord(
+      projectId: Int!
+      data: SaveLearningRecordInput!
+    ): LearningRecord!
 
     # Recommendation questions
-    generateThreadRecommendationQuestions(projectId: Int!, threadId: Int!): Boolean!
+    generateThreadRecommendationQuestions(
+      projectId: Int!
+      threadId: Int!
+    ): Boolean!
     generateProjectRecommendationQuestions(projectId: Int!): Boolean!
     createInstantRecommendedQuestions(
       projectId: Int!
@@ -1337,15 +1380,27 @@ export const typeDefs = gql`
       projectId: Int!
       data: UpdateDashboardItemLayoutsInput!
     ): [DashboardItem!]!
-    createDashboardItem(projectId: Int!, data: CreateDashboardItemInput!): DashboardItem!
+    createDashboardItem(
+      projectId: Int!
+      data: CreateDashboardItemInput!
+    ): DashboardItem!
     updateDashboardItem(
       projectId: Int!
       where: DashboardItemWhereInput!
       data: UpdateDashboardItemInput!
     ): DashboardItem!
-    deleteDashboardItem(projectId: Int!, where: DashboardItemWhereInput!): Boolean!
-    previewItemSQL(projectId: Int!, data: PreviewItemSQLInput!): PreviewItemResponse!
-    setDashboardSchedule(projectId: Int!, data: SetDashboardScheduleInput!): Dashboard!
+    deleteDashboardItem(
+      projectId: Int!
+      where: DashboardItemWhereInput!
+    ): Boolean!
+    previewItemSQL(
+      projectId: Int!
+      data: PreviewItemSQLInput!
+    ): PreviewItemResponse!
+    setDashboardSchedule(
+      projectId: Int!
+      data: SetDashboardScheduleInput!
+    ): Dashboard!
 
     # SQL Pairs
     createSqlPair(projectId: Int!, data: CreateSqlPairInput!): SqlPair!
@@ -1358,7 +1413,10 @@ export const typeDefs = gql`
     generateQuestion(projectId: Int!, data: GenerateQuestionInput!): String!
     modelSubstitute(projectId: Int!, data: ModelSubstituteInput!): String!
     # Instructions
-    createInstruction(projectId: Int!, data: CreateInstructionInput!): Instruction!
+    createInstruction(
+      projectId: Int!
+      data: CreateInstructionInput!
+    ): Instruction!
     updateInstruction(
       projectId: Int!
       where: InstructionWhereInput!

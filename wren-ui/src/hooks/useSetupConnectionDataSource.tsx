@@ -7,7 +7,10 @@ import {
 } from '@/utils/enum';
 import { useSaveDataSourceMutation } from '@/apollo/client/graphql/dataSource.generated';
 import { DataSourceName } from '@/apollo/client/graphql/__types__';
-import { useOptionalSelectedProject, useProject } from '@/contexts/ProjectContext';
+import {
+  useOptionalSelectedProject,
+  useProject,
+} from '@/contexts/ProjectContext';
 const PASSWORD_PLACEHOLDER = '************';
 
 export default function useSetupConnectionDataSource() {
@@ -46,13 +49,13 @@ export default function useSetupConnectionDataSource() {
       // Get project name from sessionStorage if creating a new project
       const projectName = sessionStorage.getItem('newProjectName');
       const finalProperties = transformFormToProperties(properties, selected);
-      
+
       // Add project name to properties if available
       if (projectName) {
         finalProperties.name = projectName;
         sessionStorage.removeItem('newProjectName'); // Clean up after use
       }
-      
+
       await saveDataSourceMutation({
         variables: {
           projectId: 0, // Will create a new project

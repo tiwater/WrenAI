@@ -81,7 +81,10 @@ export default function Modeling() {
   });
 
   const refetchQueries = [{ query: DIAGRAM, variables: { projectId } }];
-  const refetchQueriesForModel = [...refetchQueries, { query: LIST_MODELS, variables: { projectId } }];
+  const refetchQueriesForModel = [
+    ...refetchQueries,
+    { query: LIST_MODELS, variables: { projectId } },
+  ];
   const getBaseOptions = (options) => {
     return {
       onError: (error) => console.error(error),
@@ -336,12 +339,18 @@ export default function Modeling() {
             break;
           case NODE_TYPE.CALCULATED_FIELD:
             await deleteCalculatedField({
-              variables: { projectId: projectId!, where: { id: data.columnId } },
+              variables: {
+                projectId: projectId!,
+                where: { id: data.columnId },
+              },
             });
             break;
           case NODE_TYPE.RELATION:
             await deleteRelationshipMutation({
-              variables: { projectId: projectId!, where: { id: data.relationId } },
+              variables: {
+                projectId: projectId!,
+                where: { id: data.relationId },
+              },
             });
             break;
           case NODE_TYPE.VIEW:
@@ -416,14 +425,22 @@ export default function Modeling() {
             switch (nodeType) {
               case NODE_TYPE.MODEL: {
                 await updateModelMetadata({
-                  variables: { projectId: projectId!, where: { id: modelId }, data: metadata },
+                  variables: {
+                    projectId: projectId!,
+                    where: { id: modelId },
+                    data: metadata,
+                  },
                 });
                 break;
               }
 
               case NODE_TYPE.VIEW: {
                 await updateViewMetadata({
-                  variables: { projectId: projectId!, where: { id: viewId }, data: metadata },
+                  variables: {
+                    projectId: projectId!,
+                    where: { id: viewId },
+                    data: metadata,
+                  },
                 });
                 break;
               }
@@ -440,9 +457,13 @@ export default function Modeling() {
           submitting={modelLoading}
           onSubmit={async ({ id, data }) => {
             if (id) {
-              await updateModelMutation({ variables: { projectId: projectId!, where: { id }, data } });
+              await updateModelMutation({
+                variables: { projectId: projectId!, where: { id }, data },
+              });
             } else {
-              await createModelMutation({ variables: { projectId: projectId!, data } });
+              await createModelMutation({
+                variables: { projectId: projectId!, data },
+              });
             }
           }}
         />
@@ -456,7 +477,9 @@ export default function Modeling() {
                 variables: { projectId: projectId!, where: { id }, data },
               });
             } else {
-              await createCalculatedField({ variables: { projectId: projectId!, data } });
+              await createCalculatedField({
+                variables: { projectId: projectId!, data },
+              });
             }
           }}
         />

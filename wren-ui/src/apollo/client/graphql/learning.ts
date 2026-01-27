@@ -9,7 +9,10 @@ export const LEARNING_RECORD = gql`
 `;
 
 export const SAVE_LEARNING_RECORD = gql`
-  mutation SaveLearningRecord($projectId: Int!, $data: SaveLearningRecordInput!) {
+  mutation SaveLearningRecord(
+    $projectId: Int!
+    $data: SaveLearningRecordInput!
+  ) {
     saveLearningRecord(projectId: $projectId, data: $data) {
       paths
     }

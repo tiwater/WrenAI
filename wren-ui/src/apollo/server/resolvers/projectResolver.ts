@@ -48,7 +48,9 @@ export enum OnboardingStatusEnum {
 }
 
 // Helper function to safely convert date to string
-const toDateString = (date: Date | string | null | undefined | any): string | null => {
+const toDateString = (
+  date: Date | string | null | undefined | any,
+): string | null => {
   if (!date) return null;
   if (typeof date === 'string') return date;
   // Check if it's a valid Date object
@@ -78,7 +80,7 @@ const toDateString = (date: Date | string | null | undefined | any): string | nu
 // Helper function to format project for GraphQL response
 const formatProjectInfo = (project: any) => ({
   id: project.id,
-  name: project.name || project.displayName || 'Unnamed Project',  // Ensure name is never null
+  name: project.name || project.displayName || 'Unnamed Project', // Ensure name is never null
   displayName: project.displayName || '',
   type: project.type,
   language: project.language || 'EN',
@@ -115,7 +117,11 @@ export class ProjectResolver {
     this.duplicateProject = this.duplicateProject.bind(this);
   }
 
-  public async getSettings(_root: any, _arg: { projectId: number }, ctx: IContext) {
+  public async getSettings(
+    _root: any,
+    _arg: { projectId: number },
+    ctx: IContext,
+  ) {
     const project = await ctx.projectService.getProjectById(_arg.projectId);
     const generalConnectionInfo =
       ctx.projectService.getGeneralConnectionInfo(project);
@@ -156,12 +162,18 @@ export class ProjectResolver {
 
     // only generating for user's data source
     if (project.sampleDataset === null) {
-      await ctx.projectService.generateProjectRecommendationQuestions(project.id);
+      await ctx.projectService.generateProjectRecommendationQuestions(
+        project.id,
+      );
     }
     return true;
   }
 
-  public async resetCurrentProject(_root: any, arg: { projectId: number }, ctx: IContext) {
+  public async resetCurrentProject(
+    _root: any,
+    arg: { projectId: number },
+    ctx: IContext,
+  ) {
     let project;
     try {
       project = await ctx.projectService.getProjectById(arg.projectId);
@@ -223,8 +235,8 @@ export class ProjectResolver {
       const projectName = _arg.data['projectName'] || name;
 
       const duckdbDatasourceProperties = {
-        name: projectName,  // Add project name
-        displayName: name,   // Display name is the dataset name
+        name: projectName, // Add project name
+        displayName: name, // Display name is the dataset name
         initSql,
         extensions: [],
         configurations: {},
@@ -240,18 +252,30 @@ export class ProjectResolver {
         },
         ctx,
       );
-      const project = await ctx.projectService.getProjectById(dataSourceResult.projectId);
+      const project = await ctx.projectService.getProjectById(
+        dataSourceResult.projectId,
+      );
 
       // list all the tables in the data source
-      const tables = await this.listDataSourceTables(_root, { projectId: project.id }, ctx);
+      const tables = await this.listDataSourceTables(
+        _root,
+        { projectId: project.id },
+        ctx,
+      );
       const tableNames = tables.map((table) => table.name);
 
       // save tables as model and modelColumns
       await this.overwriteModelsAndColumns(tableNames, ctx, project);
 
       await ctx.modelService.updatePrimaryKeys(project.id, dataset.tables);
-      await ctx.modelService.batchUpdateModelProperties(project.id, dataset.tables);
-      await ctx.modelService.batchUpdateColumnProperties(project.id, dataset.tables);
+      await ctx.modelService.batchUpdateModelProperties(
+        project.id,
+        dataset.tables,
+      );
+      await ctx.modelService.batchUpdateColumnProperties(
+        project.id,
+        dataset.tables,
+      );
 
       // save relations
       const relations = getRelations(name as SampleDatasetName);
@@ -283,7 +307,11 @@ export class ProjectResolver {
     }
   }
 
-  public async getOnboardingStatus(_root: any, arg: { projectId: number }, ctx: IContext) {
+  public async getOnboardingStatus(
+    _root: any,
+    arg: { projectId: number },
+    ctx: IContext,
+  ) {
     let project: Project | null;
     try {
       project = await ctx.projectService.getProjectById(arg.projectId);
@@ -442,8 +470,15 @@ export class ProjectResolver {
     };
   }
 
-  public async listDataSourceTables(_root: any, arg: { projectId: number }, ctx: IContext) {
-    return await ctx.projectService.getProjectDataSourceTables(null, arg.projectId);
+  public async listDataSourceTables(
+    _root: any,
+    arg: { projectId: number },
+    ctx: IContext,
+  ) {
+    return await ctx.projectService.getProjectDataSourceTables(
+      null,
+      arg.projectId,
+    );
   }
 
   public async saveTables(
@@ -486,7 +521,11 @@ export class ProjectResolver {
     }
   }
 
-  public async autoGenerateRelation(_root: any, arg: { projectId: number }, ctx: IContext) {
+  public async autoGenerateRelation(
+    _root: any,
+    arg: { projectId: number },
+    ctx: IContext,
+  ) {
     const project = await ctx.projectService.getProjectById(arg.projectId);
 
     // get models and columns
@@ -588,7 +627,11 @@ export class ProjectResolver {
     }
   }
 
-  public async getSchemaChange(_root: any, arg: { projectId: number }, ctx: IContext) {
+  public async getSchemaChange(
+    _root: any,
+    arg: { projectId: number },
+    ctx: IContext,
+  ) {
     const project = await ctx.projectService.getProjectById(arg.projectId);
     const lastSchemaChange =
       await ctx.schemaChangeRepository.findLastSchemaChange(project.id);
@@ -702,7 +745,9 @@ export class ProjectResolver {
 
     // only generating for user's data source
     if (project.sampleDataset === null) {
-      await ctx.projectService.generateProjectRecommendationQuestions(projectId);
+      await ctx.projectService.generateProjectRecommendationQuestions(
+        projectId,
+      );
     }
     return deployRes;
   }
@@ -868,7 +913,11 @@ export class ProjectResolver {
     };
   }
 
-  public async getProject(_root: any, arg: { projectId: number }, ctx: IContext) {
+  public async getProject(
+    _root: any,
+    arg: { projectId: number },
+    ctx: IContext,
+  ) {
     const project = await ctx.projectService.getProjectById(arg.projectId);
     return formatProjectInfo(project);
   }
@@ -911,7 +960,11 @@ export class ProjectResolver {
 
   // switchProject removed - project selection is now handled on client side
 
-  public async deleteProject(_root: any, arg: { projectId: number }, ctx: IContext) {
+  public async deleteProject(
+    _root: any,
+    arg: { projectId: number },
+    ctx: IContext,
+  ) {
     const { projectId } = arg;
 
     // Delete all related data

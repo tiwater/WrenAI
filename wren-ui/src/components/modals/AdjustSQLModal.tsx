@@ -147,7 +147,8 @@ export default function AdjustSQLModal(props: Props) {
               type="secondary"
               className="text-sm gray-7 text-left"
             >
-              此处使用的 SQL 遵循 <b>Wren SQL</b>，它基于 ANSI SQL 并针对 Wren AI 进行了优化。{` `}
+              此处使用的 SQL 遵循 <b>Wren SQL</b>，它基于 ANSI SQL 并针对 Wren
+              AI 进行了优化。{` `}
               <Typography.Link
                 type="secondary"
                 href="https://docs.getwren.ai/oss/guide/home/wren_sql"

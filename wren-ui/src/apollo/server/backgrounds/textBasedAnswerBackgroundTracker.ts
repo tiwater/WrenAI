@@ -21,7 +21,8 @@ logger.level = 'debug';
 
 export class TextBasedAnswerBackgroundTracker {
   // tasks is a kv pair of task id and thread response
-  private tasks: Record<number, { response: ThreadResponse; addedAt: number }> = {};
+  private tasks: Record<number, { response: ThreadResponse; addedAt: number }> =
+    {};
   private intervalTime: number;
   private timeout: number = 5 * 60 * 1000; // 5 minutes
   private maxSqlExecutionRetries: number = 3; // Maximum SQL execution retry attempts
@@ -81,17 +82,20 @@ export class TextBasedAnswerBackgroundTracker {
                 logger.warn(
                   `TextBasedAnswerBackgroundTracker: Task ${threadResponse.id} timed out waiting for SQL.`,
                 );
-                await this.threadResponseRepository.updateOne(threadResponse.id, {
-                  answerDetail: {
-                    ...threadResponse.answerDetail,
-                    status: ThreadResponseAnswerStatus.FAILED,
-                    error: {
-                      code: 'TIMEOUT',
-                      message: 'Timeout waiting for SQL generation',
-                      shortMessage: 'Timeout waiting for SQL generation',
+                await this.threadResponseRepository.updateOne(
+                  threadResponse.id,
+                  {
+                    answerDetail: {
+                      ...threadResponse.answerDetail,
+                      status: ThreadResponseAnswerStatus.FAILED,
+                      error: {
+                        code: 'TIMEOUT',
+                        message: 'Timeout waiting for SQL generation',
+                        shortMessage: 'Timeout waiting for SQL generation',
+                      },
                     },
                   },
-                });
+                );
                 delete this.tasks[threadResponse.id];
                 return;
               }
@@ -108,9 +112,9 @@ export class TextBasedAnswerBackgroundTracker {
               // Check if the task has already failed or been interrupted (e.g. by AskingTaskTracker)
               if (
                 latestThreadResponse.answerDetail?.status ===
-                ThreadResponseAnswerStatus.FAILED ||
+                  ThreadResponseAnswerStatus.FAILED ||
                 latestThreadResponse.answerDetail?.status ===
-                ThreadResponseAnswerStatus.INTERRUPTED
+                  ThreadResponseAnswerStatus.INTERRUPTED
               ) {
                 logger.info(
                   `TextBasedAnswerBackgroundTracker: Task ${threadResponse.id} is marked as ${latestThreadResponse.answerDetail?.status}. Stop tracking.`,
@@ -165,62 +169,77 @@ export class TextBasedAnswerBackgroundTracker {
                 )) as PreviewDataResponse;
               } catch (error) {
                 logger.error(`Error when query sql data: ${error}`);
-                
+
                 // Get current retry count (default to 0 if not set)
-                const currentRetryCount = latestThreadResponse.answerDetail?.sqlExecutionRetryCount || 0;
-                
+                const currentRetryCount =
+                  latestThreadResponse.answerDetail?.sqlExecutionRetryCount ||
+                  0;
+
                 // Check if we should retry
                 if (currentRetryCount < this.maxSqlExecutionRetries) {
                   logger.info(
                     `SQL execution failed for response ${threadResponse.id}. ` +
-                    `Retry attempt ${currentRetryCount + 1}/${this.maxSqlExecutionRetries}. ` +
-                    `Error: ${error?.message || JSON.stringify(error)}`,
+                      `Retry attempt ${currentRetryCount + 1}/${this.maxSqlExecutionRetries}. ` +
+                      `Error: ${error?.message || JSON.stringify(error)}`,
                   );
-                  
+
                   // Update retry count and store error for context
-                  await this.threadResponseRepository.updateOne(threadResponse.id, {
-                    answerDetail: {
-                      ...latestThreadResponse.answerDetail,
-                      sqlExecutionRetryCount: currentRetryCount + 1,
-                      lastSqlExecutionError: error?.extensions || error,
-                      status: ThreadResponseAnswerStatus.FETCHING_DATA, // Keep in FETCHING_DATA to retry
+                  await this.threadResponseRepository.updateOne(
+                    threadResponse.id,
+                    {
+                      answerDetail: {
+                        ...latestThreadResponse.answerDetail,
+                        sqlExecutionRetryCount: currentRetryCount + 1,
+                        lastSqlExecutionError: error?.extensions || error,
+                        status: ThreadResponseAnswerStatus.FETCHING_DATA, // Keep in FETCHING_DATA to retry
+                      },
                     },
-                  });
-                  
+                  );
+
                   // Trigger SQL regeneration by creating a new asking task with error context
                   try {
-                    const errorMessage = error?.message || JSON.stringify(error?.extensions || error);
+                    const errorMessage =
+                      error?.message ||
+                      JSON.stringify(error?.extensions || error);
                     const retryQuestion = `${latestThreadResponse.question}\n\n[Previous SQL execution failed with error: ${errorMessage}. Please generate a corrected SQL query.]`;
-                    
-                    const deployment = await this.deployService.getLastDeployment(project.id);
+
+                    const deployment =
+                      await this.deployService.getLastDeployment(project.id);
                     const askResponse = await this.wrenAIAdaptor.ask({
                       query: retryQuestion,
                       deployId: deployment.hash,
                       projectId: project.id,
                       threadId: latestThreadResponse.threadId,
-                      configurations: { language: WrenAILanguage[project.language] || WrenAILanguage.EN },
+                      configurations: {
+                        language:
+                          WrenAILanguage[project.language] || WrenAILanguage.EN,
+                      },
                     });
-                    
+
                     // Create a new asking task record for tracking
-                    const askingTask = await this.askingTaskRepository.createOne({
-                      queryId: askResponse.queryId,
-                      question: retryQuestion,
-                      threadId: latestThreadResponse.threadId,
-                      threadResponseId: threadResponse.id,
-                      detail: { status: 'UNDERSTANDING' } as any,
-                    });
-                    
+                    const askingTask =
+                      await this.askingTaskRepository.createOne({
+                        queryId: askResponse.queryId,
+                        question: retryQuestion,
+                        threadId: latestThreadResponse.threadId,
+                        threadResponseId: threadResponse.id,
+                        detail: { status: 'UNDERSTANDING' } as any,
+                      });
+
                     // Update thread response with new asking task
-                    await this.threadResponseRepository.updateOne(threadResponse.id, {
-                      askingTaskId: askingTask.id,
-                      sql: null, // Clear old SQL to wait for new one
-                    });
-                    
+                    await this.threadResponseRepository.updateOne(
+                      threadResponse.id,
+                      {
+                        askingTaskId: askingTask.id,
+                        sql: null, // Clear old SQL to wait for new one
+                      },
+                    );
+
                     logger.info(
                       `Created retry asking task ${askingTask.id} (queryId: ${askResponse.queryId}) ` +
-                      `for response ${threadResponse.id}`,
+                        `for response ${threadResponse.id}`,
                     );
-                    
+
                     // Remove from tracker - will be re-added when new SQL is ready
                     delete this.tasks[threadResponse.id];
                     return;
@@ -231,20 +250,23 @@ export class TextBasedAnswerBackgroundTracker {
                     // Fall through to mark as FAILED
                   }
                 }
-                
+
                 // Max retries exhausted or retry creation failed - mark as FAILED immediately
                 logger.warn(
                   `SQL execution failed for response ${threadResponse.id} after ${currentRetryCount} retries. ` +
-                  `Marking as FAILED.`,
+                    `Marking as FAILED.`,
                 );
-                await this.threadResponseRepository.updateOne(threadResponse.id, {
-                  answerDetail: {
-                    ...latestThreadResponse.answerDetail,
-                    status: ThreadResponseAnswerStatus.FAILED,
-                    error: error?.extensions || error,
-                    sqlExecutionRetryCount: currentRetryCount,
+                await this.threadResponseRepository.updateOne(
+                  threadResponse.id,
+                  {
+                    answerDetail: {
+                      ...latestThreadResponse.answerDetail,
+                      status: ThreadResponseAnswerStatus.FAILED,
+                      error: error?.extensions || error,
+                      sqlExecutionRetryCount: currentRetryCount,
+                    },
                   },
-                });
+                );
                 delete this.tasks[threadResponse.id];
                 return;
               }

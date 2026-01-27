@@ -12,7 +12,7 @@ interface Props {
 
 export default function ViewBlock({ view, onClick }: Props) {
   // Disable save as view feature for Jinjie
-  
+
   // const isViewSaved = !!view;
 
   // if (isViewSaved) {
@@ -42,5 +42,5 @@ export default function ViewBlock({ view, onClick }: Props) {
   //     Save as View
   //   </Button>
   // );
-  return ("");
+  return '';
 }

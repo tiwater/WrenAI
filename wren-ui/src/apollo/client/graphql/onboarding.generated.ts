@@ -7,17 +7,21 @@ export type OnboardingStatusQueryVariables = Types.Exact<{
   projectId: Types.Scalars['Int'];
 }>;
 
-
-export type OnboardingStatusQuery = { __typename?: 'Query', onboardingStatus: { __typename?: 'OnboardingStatusResponse', status?: Types.OnboardingStatus | null } };
-
+export type OnboardingStatusQuery = {
+  __typename?: 'Query';
+  onboardingStatus: {
+    __typename?: 'OnboardingStatusResponse';
+    status?: Types.OnboardingStatus | null;
+  };
+};
 
 export const OnboardingStatusDocument = gql`
-    query OnboardingStatus($projectId: Int!) {
-  onboardingStatus(projectId: $projectId) {
-    status
+  query OnboardingStatus($projectId: Int!) {
+    onboardingStatus(projectId: $projectId) {
+      status
+    }
   }
-}
-    `;
+`;
 
 /**
  * __useOnboardingStatusQuery__
@@ -35,14 +39,37 @@ export const OnboardingStatusDocument = gql`
  *   },
  * });
  */
-export function useOnboardingStatusQuery(baseOptions: Apollo.QueryHookOptions<OnboardingStatusQuery, OnboardingStatusQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<OnboardingStatusQuery, OnboardingStatusQueryVariables>(OnboardingStatusDocument, options);
-      }
-export function useOnboardingStatusLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<OnboardingStatusQuery, OnboardingStatusQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<OnboardingStatusQuery, OnboardingStatusQueryVariables>(OnboardingStatusDocument, options);
-        }
-export type OnboardingStatusQueryHookResult = ReturnType<typeof useOnboardingStatusQuery>;
-export type OnboardingStatusLazyQueryHookResult = ReturnType<typeof useOnboardingStatusLazyQuery>;
-export type OnboardingStatusQueryResult = Apollo.QueryResult<OnboardingStatusQuery, OnboardingStatusQueryVariables>;
+export function useOnboardingStatusQuery(
+  baseOptions: Apollo.QueryHookOptions<
+    OnboardingStatusQuery,
+    OnboardingStatusQueryVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<OnboardingStatusQuery, OnboardingStatusQueryVariables>(
+    OnboardingStatusDocument,
+    options,
+  );
+}
+export function useOnboardingStatusLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    OnboardingStatusQuery,
+    OnboardingStatusQueryVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<
+    OnboardingStatusQuery,
+    OnboardingStatusQueryVariables
+  >(OnboardingStatusDocument, options);
+}
+export type OnboardingStatusQueryHookResult = ReturnType<
+  typeof useOnboardingStatusQuery
+>;
+export type OnboardingStatusLazyQueryHookResult = ReturnType<
+  typeof useOnboardingStatusLazyQuery
+>;
+export type OnboardingStatusQueryResult = Apollo.QueryResult<
+  OnboardingStatusQuery,
+  OnboardingStatusQueryVariables
+>;

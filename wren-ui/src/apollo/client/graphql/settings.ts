@@ -21,7 +21,10 @@ export const RESET_CURRENT_PROJECT = gql`
 `;
 
 export const UPDATE_CURRENT_PROJECT = gql`
-  mutation UpdateCurrentProject($projectId: Int!, $data: UpdateCurrentProjectInput!) {
+  mutation UpdateCurrentProject(
+    $projectId: Int!
+    $data: UpdateCurrentProjectInput!
+  ) {
     updateCurrentProject(projectId: $projectId, data: $data)
   }
 `;

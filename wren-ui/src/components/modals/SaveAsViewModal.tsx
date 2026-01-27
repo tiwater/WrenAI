@@ -77,7 +77,10 @@ export default function SaveAsViewModal(props: Props) {
           rules={[
             {
               required: true,
-              validator: createViewNameValidator(validateViewMutation, projectId || undefined),
+              validator: createViewNameValidator(
+                validateViewMutation,
+                projectId || undefined,
+              ),
             },
           ]}
         >

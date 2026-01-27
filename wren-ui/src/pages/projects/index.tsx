@@ -1,18 +1,10 @@
 import React from 'react';
-import { 
-  Table, 
-  Button, 
-  Space, 
-  Typography, 
-  Tag,
-  Card,
-  message
-} from 'antd';
-import { 
+import { Table, Button, Space, Typography, Tag, Card, message } from 'antd';
+import {
   DatabaseOutlined,
   CheckCircleOutlined,
   PlusOutlined,
-  LoginOutlined
+  LoginOutlined,
 } from '@ant-design/icons';
 import { useRouter } from 'next/router';
 import SiderLayout from '@/components/layouts/SiderLayout';
@@ -27,11 +19,11 @@ const { Title, Text } = Typography;
 export default function ProjectsPage() {
   const router = useRouter();
   const { selectedProjectId, setSelectedProjectId } = useProject();
-  
+
   const { data, loading } = useListProjectsQuery({
     fetchPolicy: 'cache-and-network',
   });
-  
+
   const projects = data?.listProjects?.projects || [];
 
   const handleSelectProject = (projectId: number) => {
@@ -78,7 +70,9 @@ export default function ProjectsPage() {
           <DatabaseOutlined />
           <Text strong>{text}</Text>
           {record.id === selectedProjectId && (
-            <Tag icon={<CheckCircleOutlined />} color="success">Selected</Tag>
+            <Tag icon={<CheckCircleOutlined />} color="success">
+              Selected
+            </Tag>
           )}
           {record.sampleDataset && (
             <Tag color="blue">Sample: {record.sampleDataset}</Tag>
@@ -90,9 +84,7 @@ export default function ProjectsPage() {
       title: 'Data Source',
       dataIndex: 'type',
       key: 'type',
-      render: (type) => (
-        <Tag color={getDataSourceColor(type)}>{type}</Tag>
-      ),
+      render: (type) => <Tag color={getDataSourceColor(type)}>{type}</Tag>,
     },
     {
       title: 'Display Name',
@@ -103,7 +95,7 @@ export default function ProjectsPage() {
       title: 'Last Accessed',
       dataIndex: 'lastAccessedAt',
       key: 'lastAccessedAt',
-      render: (date) => date ? moment(date).fromNow() : 'Never',
+      render: (date) => (date ? moment(date).fromNow() : 'Never'),
       sorter: (a, b) => {
         const aTime = a.lastAccessedAt ? moment(a.lastAccessedAt).unix() : 0;
         const bTime = b.lastAccessedAt ? moment(b.lastAccessedAt).unix() : 0;
@@ -114,7 +106,7 @@ export default function ProjectsPage() {
       title: 'Created',
       dataIndex: 'createdAt',
       key: 'createdAt',
-      render: (date) => date ? moment(date).format('YYYY-MM-DD') : 'Unknown',
+      render: (date) => (date ? moment(date).format('YYYY-MM-DD') : 'Unknown'),
       sorter: (a, b) => {
         const aTime = a.createdAt ? moment(a.createdAt).unix() : 0;
         const bTime = b.createdAt ? moment(b.createdAt).unix() : 0;

@@ -51,9 +51,9 @@ paths:
                     type: string
                     description: ID of the thread (existing or newly created)
                 example:
-                  id: "1fbc0d64-1c58-45b2-a990-9183bbbcf913"
-                  sql: "SELECT * FROM \"olist_customers_dataset\""
-                  threadId: "9c537507-9cec-46ed-b877-07bfa6322bed"
+                  id: '1fbc0d64-1c58-45b2-a990-9183bbbcf913'
+                  sql: 'SELECT * FROM "olist_customers_dataset"'
+                  threadId: '9c537507-9cec-46ed-b877-07bfa6322bed'
         '400':
           description: Bad request or unable to generate SQL
           content:
@@ -67,10 +67,10 @@ paths:
                         type: string
                         description: ID that can be used with the /stream_explanation endpoint to get a detailed explanation for non-SQL queries
                 example:
-                  id: "75c13d09-6f86-4e79-a00e-a4f85f73f2d7"
-                  code: "NON_SQL_QUERY"
+                  id: '75c13d09-6f86-4e79-a00e-a4f85f73f2d7'
+                  code: 'NON_SQL_QUERY'
                   error: "User asks about Wren AI's features and capabilities, unrelated to database schema."
-                  explanationQueryId: "71b016c5-42bb-4897-82d6-46f9b0bf7d94"
+                  explanationQueryId: '71b016c5-42bb-4897-82d6-46f9b0bf7d94'
   /run_sql:
     post:
       summary: Execute SQL and return results
@@ -119,47 +119,34 @@ paths:
                     type: integer
                     description: The total number of rows returned
                 example:
-                  id: "09d46224-0068-4ca3-bce4-f1fc85093eb6"
-                  records: [
-                    {
-                      "customer_id": "00012a2ce6f8dcda20d059ce98491703",
-                      "customer_unique_id": "248ffe10d632bebe4f7267f1f44844c9",
-                      "customer_zip_code_prefix": "06273",
-                      "customer_city": "osasco",
-                      "customer_state": "SP"
-                    },
-                    {
-                      "customer_id": "000161a058600d5901f007fab4c27140",
-                      "customer_unique_id": "b0015e09bb4b6e47c52844fab5fb6638",
-                      "customer_zip_code_prefix": "35550",
-                      "customer_city": "itapecerica",
-                      "customer_state": "MG"
-                    },
-                    "... additional records truncated for brevity ..."
-                  ]
-                  columns: [
-                    {
-                      "name": "customer_id",
-                      "type": "VARCHAR"
-                    },
-                    {
-                      "name": "customer_unique_id",
-                      "type": "VARCHAR"
-                    },
-                    {
-                      "name": "customer_zip_code_prefix",
-                      "type": "VARCHAR"
-                    },
-                    {
-                      "name": "customer_city",
-                      "type": "VARCHAR"
-                    },
-                    {
-                      "name": "customer_state",
-                      "type": "VARCHAR"
-                    }
-                  ]
-                  threadId: "503a8ca5-8171-43b5-b45b-86de2849467b"
+                  id: '09d46224-0068-4ca3-bce4-f1fc85093eb6'
+                  records:
+                    [
+                      {
+                        'customer_id': '00012a2ce6f8dcda20d059ce98491703',
+                        'customer_unique_id': '248ffe10d632bebe4f7267f1f44844c9',
+                        'customer_zip_code_prefix': '06273',
+                        'customer_city': 'osasco',
+                        'customer_state': 'SP',
+                      },
+                      {
+                        'customer_id': '000161a058600d5901f007fab4c27140',
+                        'customer_unique_id': 'b0015e09bb4b6e47c52844fab5fb6638',
+                        'customer_zip_code_prefix': '35550',
+                        'customer_city': 'itapecerica',
+                        'customer_state': 'MG',
+                      },
+                      '... additional records truncated for brevity ...',
+                    ]
+                  columns:
+                    [
+                      { 'name': 'customer_id', 'type': 'VARCHAR' },
+                      { 'name': 'customer_unique_id', 'type': 'VARCHAR' },
+                      { 'name': 'customer_zip_code_prefix', 'type': 'VARCHAR' },
+                      { 'name': 'customer_city', 'type': 'VARCHAR' },
+                      { 'name': 'customer_state', 'type': 'VARCHAR' },
+                    ]
+                  threadId: '503a8ca5-8171-43b5-b45b-86de2849467b'
                   totalRows: 10
         '400':
           description: Bad request or SQL execution error
@@ -215,73 +202,67 @@ paths:
                     type: string
                     description: ID of the thread (existing or newly created)
                 example:
-                  threadId: "75ab23c8-9124-4560-a125-fbe7e321dcba"
-                  vegaSpec: {
-                    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-                    "config": {
-                      "mark": {
-                        "tooltip": true
-                      },
-                      "font": "Roboto, Arial, Noto Sans, sans-serif",
-                      "padding": {
-                        "top": 30,
-                        "bottom": 20,
-                        "left": 0,
-                        "right": 0
-                      },
-                      "title": {
-                        "color": "#262626",
-                        "fontSize": 14
-                      },
-                      "axis": {
-                        "labelFontSize": 10,
-                        "gridColor": "#d9d9d9",
-                        "titleColor": "#434343",
-                        "labelColor": "#65676c"
-                      },
-                      "axisX": {
-                        "labelAngle": -45
-                      },
-                      "bar": {
-                        "color": "#1570EF"
-                      }
-                    },
-                    "title": "Total Payments by Customer State",
-                    "data": {
-                      "values": [
+                  threadId: '75ab23c8-9124-4560-a125-fbe7e321dcba'
+                  vegaSpec:
+                    {
+                      '$schema': 'https://vega.github.io/schema/vega-lite/v5.json',
+                      'config':
                         {
-                          "customer_state": "PR",
-                          "total_payment_value": 811156.38
+                          'mark': { 'tooltip': true },
+                          'font': 'Roboto, Arial, Noto Sans, sans-serif',
+                          'padding':
+                            { 'top': 30, 'bottom': 20, 'left': 0, 'right': 0 },
+                          'title': { 'color': '#262626', 'fontSize': 14 },
+                          'axis':
+                            {
+                              'labelFontSize': 10,
+                              'gridColor': '#d9d9d9',
+                              'titleColor': '#434343',
+                              'labelColor': '#65676c',
+                            },
+                          'axisX': { 'labelAngle': -45 },
+                          'bar': { 'color': '#1570EF' },
                         },
+                      'title': 'Total Payments by Customer State',
+                      'data':
                         {
-                          "customer_state": "BA",
-                          "total_payment_value": 616645.82
-                        }
-                      ]
-                    },
-                    "mark": {
-                      "type": "bar"
-                    },
-                    "width": "container",
-                    "height": "container",
-                    "encoding": {
-                      "x": {
-                        "field": "customer_state",
-                        "type": "nominal",
-                        "title": "Customer State"
-                      },
-                      "y": {
-                        "field": "total_payment_value",
-                        "type": "quantitative",
-                        "title": "Total Payment Value"
-                      },
-                      "color": {
-                        "field": "customer_state",
-                        "type": "nominal",
-                        "title": "Customer State"
-                      }
+                          'values':
+                            [
+                              {
+                                'customer_state': 'PR',
+                                'total_payment_value': 811156.38,
+                              },
+                              {
+                                'customer_state': 'BA',
+                                'total_payment_value': 616645.82,
+                              },
+                            ],
+                        },
+                      'mark': { 'type': 'bar' },
+                      'width': 'container',
+                      'height': 'container',
+                      'encoding':
+                        {
+                          'x':
+                            {
+                              'field': 'customer_state',
+                              'type': 'nominal',
+                              'title': 'Customer State',
+                            },
+                          'y':
+                            {
+                              'field': 'total_payment_value',
+                              'type': 'quantitative',
+                              'title': 'Total Payment Value',
+                            },
+                          'color':
+                            {
+                              'field': 'customer_state',
+                              'type': 'nominal',
+                              'title': 'Customer State',
+                            },
+                        },
                     }
-                  }
         '400':
           description: Bad request or specification generation error
           content:

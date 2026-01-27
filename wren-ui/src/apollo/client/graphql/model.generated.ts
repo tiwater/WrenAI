@@ -3,34 +3,140 @@ import * as Types from './__types__';
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
 const defaultOptions = {} as const;
-export type CommonColumnFragment = { __typename?: 'DetailedColumn', displayName: string, referenceName: string, sourceColumnName: string, type?: string | null, isCalculated: boolean, notNull: boolean, properties: any };
+export type CommonColumnFragment = {
+  __typename?: 'DetailedColumn';
+  displayName: string;
+  referenceName: string;
+  sourceColumnName: string;
+  type?: string | null;
+  isCalculated: boolean;
+  notNull: boolean;
+  properties: any;
+};
 
-export type CommonFieldFragment = { __typename?: 'FieldInfo', id: number, displayName: string, referenceName: string, sourceColumnName: string, type?: string | null, isCalculated: boolean, notNull: boolean, expression?: string | null, properties?: any | null };
+export type CommonFieldFragment = {
+  __typename?: 'FieldInfo';
+  id: number;
+  displayName: string;
+  referenceName: string;
+  sourceColumnName: string;
+  type?: string | null;
+  isCalculated: boolean;
+  notNull: boolean;
+  expression?: string | null;
+  properties?: any | null;
+};
 
-export type CommonRelationFragment = { __typename?: 'DetailedRelation', fromModelId: number, fromColumnId: number, toModelId: number, toColumnId: number, type: Types.RelationType, name: string };
+export type CommonRelationFragment = {
+  __typename?: 'DetailedRelation';
+  fromModelId: number;
+  fromColumnId: number;
+  toModelId: number;
+  toColumnId: number;
+  type: Types.RelationType;
+  name: string;
+};
 
 export type ListModelsQueryVariables = Types.Exact<{
   projectId: Types.Scalars['Int'];
 }>;
 
-
-export type ListModelsQuery = { __typename?: 'Query', listModels: Array<{ __typename?: 'ModelInfo', id: number, displayName: string, referenceName: string, sourceTableName: string, refSql?: string | null, primaryKey?: string | null, cached: boolean, refreshTime?: string | null, description?: string | null, fields: Array<{ __typename?: 'FieldInfo', id: number, displayName: string, referenceName: string, sourceColumnName: string, type?: string | null, isCalculated: boolean, notNull: boolean, expression?: string | null, properties?: any | null } | null>, calculatedFields: Array<{ __typename?: 'FieldInfo', id: number, displayName: string, referenceName: string, sourceColumnName: string, type?: string | null, isCalculated: boolean, notNull: boolean, expression?: string | null, properties?: any | null } | null> }> };
+export type ListModelsQuery = {
+  __typename?: 'Query';
+  listModels: Array<{
+    __typename?: 'ModelInfo';
+    id: number;
+    displayName: string;
+    referenceName: string;
+    sourceTableName: string;
+    refSql?: string | null;
+    primaryKey?: string | null;
+    cached: boolean;
+    refreshTime?: string | null;
+    description?: string | null;
+    fields: Array<{
+      __typename?: 'FieldInfo';
+      id: number;
+      displayName: string;
+      referenceName: string;
+      sourceColumnName: string;
+      type?: string | null;
+      isCalculated: boolean;
+      notNull: boolean;
+      expression?: string | null;
+      properties?: any | null;
+    } | null>;
+    calculatedFields: Array<{
+      __typename?: 'FieldInfo';
+      id: number;
+      displayName: string;
+      referenceName: string;
+      sourceColumnName: string;
+      type?: string | null;
+      isCalculated: boolean;
+      notNull: boolean;
+      expression?: string | null;
+      properties?: any | null;
+    } | null>;
+  }>;
+};
 
 export type GetModelQueryVariables = Types.Exact<{
   projectId: Types.Scalars['Int'];
   where: Types.ModelWhereInput;
 }>;
 
-
-export type GetModelQuery = { __typename?: 'Query', model: { __typename?: 'DetailedModel', displayName: string, referenceName: string, sourceTableName: string, refSql: string, primaryKey?: string | null, cached: boolean, refreshTime?: string | null, description?: string | null, properties: any, fields?: Array<{ __typename?: 'DetailedColumn', displayName: string, referenceName: string, sourceColumnName: string, type?: string | null, isCalculated: boolean, notNull: boolean, properties: any } | null> | null, calculatedFields?: Array<{ __typename?: 'DetailedColumn', displayName: string, referenceName: string, sourceColumnName: string, type?: string | null, isCalculated: boolean, notNull: boolean, properties: any } | null> | null, relations?: Array<{ __typename?: 'DetailedRelation', fromModelId: number, fromColumnId: number, toModelId: number, toColumnId: number, type: Types.RelationType, name: string } | null> | null } };
+export type GetModelQuery = {
+  __typename?: 'Query';
+  model: {
+    __typename?: 'DetailedModel';
+    displayName: string;
+    referenceName: string;
+    sourceTableName: string;
+    refSql: string;
+    primaryKey?: string | null;
+    cached: boolean;
+    refreshTime?: string | null;
+    description?: string | null;
+    properties: any;
+    fields?: Array<{
+      __typename?: 'DetailedColumn';
+      displayName: string;
+      referenceName: string;
+      sourceColumnName: string;
+      type?: string | null;
+      isCalculated: boolean;
+      notNull: boolean;
+      properties: any;
+    } | null> | null;
+    calculatedFields?: Array<{
+      __typename?: 'DetailedColumn';
+      displayName: string;
+      referenceName: string;
+      sourceColumnName: string;
+      type?: string | null;
+      isCalculated: boolean;
+      notNull: boolean;
+      properties: any;
+    } | null> | null;
+    relations?: Array<{
+      __typename?: 'DetailedRelation';
+      fromModelId: number;
+      fromColumnId: number;
+      toModelId: number;
+      toColumnId: number;
+      type: Types.RelationType;
+      name: string;
+    } | null> | null;
+  };
+};
 
 export type CreateModelMutationVariables = Types.Exact<{
   projectId: Types.Scalars['Int'];
   data: Types.CreateModelInput;
 }>;
 
-
-export type CreateModelMutation = { __typename?: 'Mutation', createModel: any };
+export type CreateModelMutation = { __typename?: 'Mutation'; createModel: any };
 
 export type UpdateModelMutationVariables = Types.Exact<{
   projectId: Types.Scalars['Int'];
@@ -38,80 +144,84 @@ export type UpdateModelMutationVariables = Types.Exact<{
   data: Types.UpdateModelInput;
 }>;
 
-
-export type UpdateModelMutation = { __typename?: 'Mutation', updateModel: any };
+export type UpdateModelMutation = { __typename?: 'Mutation'; updateModel: any };
 
 export type DeleteModelMutationVariables = Types.Exact<{
   projectId: Types.Scalars['Int'];
   where: Types.ModelWhereInput;
 }>;
 
-
-export type DeleteModelMutation = { __typename?: 'Mutation', deleteModel: boolean };
+export type DeleteModelMutation = {
+  __typename?: 'Mutation';
+  deleteModel: boolean;
+};
 
 export type PreviewModelDataMutationVariables = Types.Exact<{
   projectId: Types.Scalars['Int'];
   where: Types.WhereIdInput;
 }>;
 
-
-export type PreviewModelDataMutation = { __typename?: 'Mutation', previewModelData: any };
+export type PreviewModelDataMutation = {
+  __typename?: 'Mutation';
+  previewModelData: any;
+};
 
 export const CommonColumnFragmentDoc = gql`
-    fragment CommonColumn on DetailedColumn {
-  displayName
-  referenceName
-  sourceColumnName
-  type
-  isCalculated
-  notNull
-  properties
-}
-    `;
+  fragment CommonColumn on DetailedColumn {
+    displayName
+    referenceName
+    sourceColumnName
+    type
+    isCalculated
+    notNull
+    properties
+  }
+`;
 export const CommonFieldFragmentDoc = gql`
-    fragment CommonField on FieldInfo {
-  id
-  displayName
-  referenceName
-  sourceColumnName
-  type
-  isCalculated
-  notNull
-  expression
-  properties
-}
-    `;
-export const CommonRelationFragmentDoc = gql`
-    fragment CommonRelation on DetailedRelation {
-  fromModelId
-  fromColumnId
-  toModelId
-  toColumnId
-  type
-  name
-}
-    `;
-export const ListModelsDocument = gql`
-    query ListModels($projectId: Int!) {
-  listModels(projectId: $projectId) {
+  fragment CommonField on FieldInfo {
     id
     displayName
     referenceName
-    sourceTableName
-    refSql
-    primaryKey
-    cached
-    refreshTime
-    description
-    fields {
-      ...CommonField
-    }
-    calculatedFields {
-      ...CommonField
+    sourceColumnName
+    type
+    isCalculated
+    notNull
+    expression
+    properties
+  }
+`;
+export const CommonRelationFragmentDoc = gql`
+  fragment CommonRelation on DetailedRelation {
+    fromModelId
+    fromColumnId
+    toModelId
+    toColumnId
+    type
+    name
+  }
+`;
+export const ListModelsDocument = gql`
+  query ListModels($projectId: Int!) {
+    listModels(projectId: $projectId) {
+      id
+      displayName
+      referenceName
+      sourceTableName
+      refSql
+      primaryKey
+      cached
+      refreshTime
+      description
+      fields {
+        ...CommonField
+      }
+      calculatedFields {
+        ...CommonField
+      }
     }
   }
-}
-    ${CommonFieldFragmentDoc}`;
+  ${CommonFieldFragmentDoc}
+`;
 
 /**
  * __useListModelsQuery__
@@ -129,42 +239,64 @@ export const ListModelsDocument = gql`
  *   },
  * });
  */
-export function useListModelsQuery(baseOptions: Apollo.QueryHookOptions<ListModelsQuery, ListModelsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<ListModelsQuery, ListModelsQueryVariables>(ListModelsDocument, options);
-      }
-export function useListModelsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<ListModelsQuery, ListModelsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<ListModelsQuery, ListModelsQueryVariables>(ListModelsDocument, options);
-        }
-export type ListModelsQueryHookResult = ReturnType<typeof useListModelsQuery>;
-export type ListModelsLazyQueryHookResult = ReturnType<typeof useListModelsLazyQuery>;
-export type ListModelsQueryResult = Apollo.QueryResult<ListModelsQuery, ListModelsQueryVariables>;
-export const GetModelDocument = gql`
-    query GetModel($projectId: Int!, $where: ModelWhereInput!) {
-  model(projectId: $projectId, where: $where) {
-    displayName
-    referenceName
-    sourceTableName
-    refSql
-    primaryKey
-    cached
-    refreshTime
-    description
-    fields {
-      ...CommonColumn
-    }
-    calculatedFields {
-      ...CommonColumn
-    }
-    relations {
-      ...CommonRelation
-    }
-    properties
-  }
+export function useListModelsQuery(
+  baseOptions: Apollo.QueryHookOptions<
+    ListModelsQuery,
+    ListModelsQueryVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<ListModelsQuery, ListModelsQueryVariables>(
+    ListModelsDocument,
+    options,
+  );
 }
-    ${CommonColumnFragmentDoc}
-${CommonRelationFragmentDoc}`;
+export function useListModelsLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    ListModelsQuery,
+    ListModelsQueryVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<ListModelsQuery, ListModelsQueryVariables>(
+    ListModelsDocument,
+    options,
+  );
+}
+export type ListModelsQueryHookResult = ReturnType<typeof useListModelsQuery>;
+export type ListModelsLazyQueryHookResult = ReturnType<
+  typeof useListModelsLazyQuery
+>;
+export type ListModelsQueryResult = Apollo.QueryResult<
+  ListModelsQuery,
+  ListModelsQueryVariables
+>;
+export const GetModelDocument = gql`
+  query GetModel($projectId: Int!, $where: ModelWhereInput!) {
+    model(projectId: $projectId, where: $where) {
+      displayName
+      referenceName
+      sourceTableName
+      refSql
+      primaryKey
+      cached
+      refreshTime
+      description
+      fields {
+        ...CommonColumn
+      }
+      calculatedFields {
+        ...CommonColumn
+      }
+      relations {
+        ...CommonRelation
+      }
+      properties
+    }
+  }
+  ${CommonColumnFragmentDoc}
+  ${CommonRelationFragmentDoc}
+`;
 
 /**
  * __useGetModelQuery__
@@ -183,23 +315,44 @@ ${CommonRelationFragmentDoc}`;
  *   },
  * });
  */
-export function useGetModelQuery(baseOptions: Apollo.QueryHookOptions<GetModelQuery, GetModelQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<GetModelQuery, GetModelQueryVariables>(GetModelDocument, options);
-      }
-export function useGetModelLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<GetModelQuery, GetModelQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<GetModelQuery, GetModelQueryVariables>(GetModelDocument, options);
-        }
-export type GetModelQueryHookResult = ReturnType<typeof useGetModelQuery>;
-export type GetModelLazyQueryHookResult = ReturnType<typeof useGetModelLazyQuery>;
-export type GetModelQueryResult = Apollo.QueryResult<GetModelQuery, GetModelQueryVariables>;
-export const CreateModelDocument = gql`
-    mutation CreateModel($projectId: Int!, $data: CreateModelInput!) {
-  createModel(projectId: $projectId, data: $data)
+export function useGetModelQuery(
+  baseOptions: Apollo.QueryHookOptions<GetModelQuery, GetModelQueryVariables>,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<GetModelQuery, GetModelQueryVariables>(
+    GetModelDocument,
+    options,
+  );
 }
-    `;
-export type CreateModelMutationFn = Apollo.MutationFunction<CreateModelMutation, CreateModelMutationVariables>;
+export function useGetModelLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    GetModelQuery,
+    GetModelQueryVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<GetModelQuery, GetModelQueryVariables>(
+    GetModelDocument,
+    options,
+  );
+}
+export type GetModelQueryHookResult = ReturnType<typeof useGetModelQuery>;
+export type GetModelLazyQueryHookResult = ReturnType<
+  typeof useGetModelLazyQuery
+>;
+export type GetModelQueryResult = Apollo.QueryResult<
+  GetModelQuery,
+  GetModelQueryVariables
+>;
+export const CreateModelDocument = gql`
+  mutation CreateModel($projectId: Int!, $data: CreateModelInput!) {
+    createModel(projectId: $projectId, data: $data)
+  }
+`;
+export type CreateModelMutationFn = Apollo.MutationFunction<
+  CreateModelMutation,
+  CreateModelMutationVariables
+>;
 
 /**
  * __useCreateModelMutation__
@@ -219,19 +372,40 @@ export type CreateModelMutationFn = Apollo.MutationFunction<CreateModelMutation,
  *   },
  * });
  */
-export function useCreateModelMutation(baseOptions?: Apollo.MutationHookOptions<CreateModelMutation, CreateModelMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateModelMutation, CreateModelMutationVariables>(CreateModelDocument, options);
-      }
-export type CreateModelMutationHookResult = ReturnType<typeof useCreateModelMutation>;
-export type CreateModelMutationResult = Apollo.MutationResult<CreateModelMutation>;
-export type CreateModelMutationOptions = Apollo.BaseMutationOptions<CreateModelMutation, CreateModelMutationVariables>;
-export const UpdateModelDocument = gql`
-    mutation UpdateModel($projectId: Int!, $where: ModelWhereInput!, $data: UpdateModelInput!) {
-  updateModel(projectId: $projectId, where: $where, data: $data)
+export function useCreateModelMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    CreateModelMutation,
+    CreateModelMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<CreateModelMutation, CreateModelMutationVariables>(
+    CreateModelDocument,
+    options,
+  );
 }
-    `;
-export type UpdateModelMutationFn = Apollo.MutationFunction<UpdateModelMutation, UpdateModelMutationVariables>;
+export type CreateModelMutationHookResult = ReturnType<
+  typeof useCreateModelMutation
+>;
+export type CreateModelMutationResult =
+  Apollo.MutationResult<CreateModelMutation>;
+export type CreateModelMutationOptions = Apollo.BaseMutationOptions<
+  CreateModelMutation,
+  CreateModelMutationVariables
+>;
+export const UpdateModelDocument = gql`
+  mutation UpdateModel(
+    $projectId: Int!
+    $where: ModelWhereInput!
+    $data: UpdateModelInput!
+  ) {
+    updateModel(projectId: $projectId, where: $where, data: $data)
+  }
+`;
+export type UpdateModelMutationFn = Apollo.MutationFunction<
+  UpdateModelMutation,
+  UpdateModelMutationVariables
+>;
 
 /**
  * __useUpdateModelMutation__
@@ -252,19 +426,36 @@ export type UpdateModelMutationFn = Apollo.MutationFunction<UpdateModelMutation,
  *   },
  * });
  */
-export function useUpdateModelMutation(baseOptions?: Apollo.MutationHookOptions<UpdateModelMutation, UpdateModelMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UpdateModelMutation, UpdateModelMutationVariables>(UpdateModelDocument, options);
-      }
-export type UpdateModelMutationHookResult = ReturnType<typeof useUpdateModelMutation>;
-export type UpdateModelMutationResult = Apollo.MutationResult<UpdateModelMutation>;
-export type UpdateModelMutationOptions = Apollo.BaseMutationOptions<UpdateModelMutation, UpdateModelMutationVariables>;
-export const DeleteModelDocument = gql`
-    mutation DeleteModel($projectId: Int!, $where: ModelWhereInput!) {
-  deleteModel(projectId: $projectId, where: $where)
+export function useUpdateModelMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UpdateModelMutation,
+    UpdateModelMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<UpdateModelMutation, UpdateModelMutationVariables>(
+    UpdateModelDocument,
+    options,
+  );
 }
-    `;
-export type DeleteModelMutationFn = Apollo.MutationFunction<DeleteModelMutation, DeleteModelMutationVariables>;
+export type UpdateModelMutationHookResult = ReturnType<
+  typeof useUpdateModelMutation
+>;
+export type UpdateModelMutationResult =
+  Apollo.MutationResult<UpdateModelMutation>;
+export type UpdateModelMutationOptions = Apollo.BaseMutationOptions<
+  UpdateModelMutation,
+  UpdateModelMutationVariables
+>;
+export const DeleteModelDocument = gql`
+  mutation DeleteModel($projectId: Int!, $where: ModelWhereInput!) {
+    deleteModel(projectId: $projectId, where: $where)
+  }
+`;
+export type DeleteModelMutationFn = Apollo.MutationFunction<
+  DeleteModelMutation,
+  DeleteModelMutationVariables
+>;
 
 /**
  * __useDeleteModelMutation__
@@ -284,19 +475,36 @@ export type DeleteModelMutationFn = Apollo.MutationFunction<DeleteModelMutation,
  *   },
  * });
  */
-export function useDeleteModelMutation(baseOptions?: Apollo.MutationHookOptions<DeleteModelMutation, DeleteModelMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<DeleteModelMutation, DeleteModelMutationVariables>(DeleteModelDocument, options);
-      }
-export type DeleteModelMutationHookResult = ReturnType<typeof useDeleteModelMutation>;
-export type DeleteModelMutationResult = Apollo.MutationResult<DeleteModelMutation>;
-export type DeleteModelMutationOptions = Apollo.BaseMutationOptions<DeleteModelMutation, DeleteModelMutationVariables>;
-export const PreviewModelDataDocument = gql`
-    mutation PreviewModelData($projectId: Int!, $where: WhereIdInput!) {
-  previewModelData(projectId: $projectId, where: $where)
+export function useDeleteModelMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    DeleteModelMutation,
+    DeleteModelMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<DeleteModelMutation, DeleteModelMutationVariables>(
+    DeleteModelDocument,
+    options,
+  );
 }
-    `;
-export type PreviewModelDataMutationFn = Apollo.MutationFunction<PreviewModelDataMutation, PreviewModelDataMutationVariables>;
+export type DeleteModelMutationHookResult = ReturnType<
+  typeof useDeleteModelMutation
+>;
+export type DeleteModelMutationResult =
+  Apollo.MutationResult<DeleteModelMutation>;
+export type DeleteModelMutationOptions = Apollo.BaseMutationOptions<
+  DeleteModelMutation,
+  DeleteModelMutationVariables
+>;
+export const PreviewModelDataDocument = gql`
+  mutation PreviewModelData($projectId: Int!, $where: WhereIdInput!) {
+    previewModelData(projectId: $projectId, where: $where)
+  }
+`;
+export type PreviewModelDataMutationFn = Apollo.MutationFunction<
+  PreviewModelDataMutation,
+  PreviewModelDataMutationVariables
+>;
 
 /**
  * __usePreviewModelDataMutation__
@@ -316,10 +524,24 @@ export type PreviewModelDataMutationFn = Apollo.MutationFunction<PreviewModelDat
  *   },
  * });
  */
-export function usePreviewModelDataMutation(baseOptions?: Apollo.MutationHookOptions<PreviewModelDataMutation, PreviewModelDataMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<PreviewModelDataMutation, PreviewModelDataMutationVariables>(PreviewModelDataDocument, options);
-      }
-export type PreviewModelDataMutationHookResult = ReturnType<typeof usePreviewModelDataMutation>;
-export type PreviewModelDataMutationResult = Apollo.MutationResult<PreviewModelDataMutation>;
-export type PreviewModelDataMutationOptions = Apollo.BaseMutationOptions<PreviewModelDataMutation, PreviewModelDataMutationVariables>;
+export function usePreviewModelDataMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    PreviewModelDataMutation,
+    PreviewModelDataMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    PreviewModelDataMutation,
+    PreviewModelDataMutationVariables
+  >(PreviewModelDataDocument, options);
+}
+export type PreviewModelDataMutationHookResult = ReturnType<
+  typeof usePreviewModelDataMutation
+>;
+export type PreviewModelDataMutationResult =
+  Apollo.MutationResult<PreviewModelDataMutation>;
+export type PreviewModelDataMutationOptions = Apollo.BaseMutationOptions<
+  PreviewModelDataMutation,
+  PreviewModelDataMutationVariables
+>;

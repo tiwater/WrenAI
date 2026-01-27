@@ -209,7 +209,9 @@ export default function HomeThread() {
 
   const onGenerateThreadResponseAnswer = async (responseId: number) => {
     if (!projectId) return;
-    await generateThreadResponseAnswer({ variables: { projectId, responseId } });
+    await generateThreadResponseAnswer({
+      variables: { projectId, responseId },
+    });
     fetchThreadResponse({ variables: { projectId, responseId } });
   };
 
@@ -251,8 +253,10 @@ export default function HomeThread() {
         // If asking task has already failed/stopped, make sure we still fetch
         // the latest threadResponse once so UI can show FAILED status/error.
         if (
-          unfinishedAskingResponse.askingTask?.status === AskingTaskStatus.FAILED ||
-          unfinishedAskingResponse.askingTask?.status === AskingTaskStatus.STOPPED
+          unfinishedAskingResponse.askingTask?.status ===
+            AskingTaskStatus.FAILED ||
+          unfinishedAskingResponse.askingTask?.status ===
+            AskingTaskStatus.STOPPED
         ) {
           fetchThreadResponse({
             variables: { projectId, responseId: unfinishedAskingResponse.id },
@@ -294,7 +298,9 @@ export default function HomeThread() {
   // stop all requests when change thread
   useEffect(() => {
     if (threadId !== null && projectId) {
-      fetchThreadRecommendationQuestions({ variables: { projectId, threadId } });
+      fetchThreadRecommendationQuestions({
+        variables: { projectId, threadId },
+      });
       setShowRecommendedQuestions(true);
     }
     return () => {

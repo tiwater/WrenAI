@@ -78,7 +78,9 @@ export interface IProjectService {
     persistCredentialDir: string,
   ) => string;
   deleteProject: (projectId: number) => Promise<void>;
-  getProjectRecommendationQuestions: (projectId: number) => Promise<ProjectRecommendationQuestionsResult>;
+  getProjectRecommendationQuestions: (
+    projectId: number,
+  ) => Promise<ProjectRecommendationQuestionsResult>;
 
   // recommend questions
   generateProjectRecommendationQuestions: (projectId: number) => Promise<void>;
@@ -128,11 +130,13 @@ export class ProjectService implements IProjectService {
     if (!project && !projectId) {
       throw new Error('Either project or projectId must be provided');
     }
-    const usedProject = project || await this.getProjectById(projectId!);
+    const usedProject = project || (await this.getProjectById(projectId!));
     return await this.metadataService.getVersion(usedProject);
   }
 
-  public async generateProjectRecommendationQuestions(projectId: number): Promise<void> {
+  public async generateProjectRecommendationQuestions(
+    projectId: number,
+  ): Promise<void> {
     const project = await this.getProjectById(projectId);
     if (!project) {
       throw new Error(`Project not found`);
@@ -183,7 +187,6 @@ export class ProjectService implements IProjectService {
     return result;
   }
 
-
   public async getProjectById(projectId: number) {
     return await this.projectRepository.getProjectById(projectId);
   }
@@ -220,7 +223,7 @@ export class ProjectService implements IProjectService {
     if (!project && !projectId) {
       throw new Error('Either project or projectId must be provided');
     }
-    const usedProject = project || await this.getProjectById(projectId!);
+    const usedProject = project || (await this.getProjectById(projectId!));
     return await this.metadataService.listTables(usedProject);
   }
 
@@ -231,7 +234,7 @@ export class ProjectService implements IProjectService {
     if (!project && !projectId) {
       throw new Error('Either project or projectId must be provided');
     }
-    const usedProject = project || await this.getProjectById(projectId!);
+    const usedProject = project || (await this.getProjectById(projectId!));
     return await this.metadataService.listConstraints(usedProject);
   }
 

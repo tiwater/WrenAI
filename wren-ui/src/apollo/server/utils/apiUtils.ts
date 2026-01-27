@@ -20,7 +20,9 @@ export const MAX_WAIT_TIME = 1000 * 60 * 3; // 3 minutes
  * Get projectId from request headers or query params
  * Priority: header > query > body > default (first project)
  */
-export const getProjectIdFromRequest = async (req: NextApiRequest): Promise<number> => {
+export const getProjectIdFromRequest = async (
+  req: NextApiRequest,
+): Promise<number> => {
   // Try to get from header first
   const headerProjectId = req.headers['x-project-id'] as string;
   if (headerProjectId) {

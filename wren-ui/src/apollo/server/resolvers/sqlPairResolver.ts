@@ -55,7 +55,11 @@ export class SqlPairResolver {
     ctx: IContext,
   ): Promise<SqlPair> {
     await this.validateSql(arg.data.sql, arg.projectId, ctx);
-    return ctx.sqlPairService.editSqlPair(arg.projectId, arg.where.id, arg.data);
+    return ctx.sqlPairService.editSqlPair(
+      arg.projectId,
+      arg.where.id,
+      arg.data,
+    );
   }
 
   @TrackTelemetry(TelemetryEvent.KNOWLEDGE_DELETE_SQL_PAIR)
@@ -82,7 +86,9 @@ export class SqlPairResolver {
     },
     ctx: IContext,
   ) {
-    const project = await ctx.projectRepository.findOneBy({ id: arg.projectId });
+    const project = await ctx.projectRepository.findOneBy({
+      id: arg.projectId,
+    });
     if (!project) {
       throw new Error('Project not found');
     }
@@ -102,7 +108,9 @@ export class SqlPairResolver {
     },
     ctx: IContext,
   ): Promise<WrenSQL> {
-    const project = await ctx.projectRepository.findOneBy({ id: arg.projectId });
+    const project = await ctx.projectRepository.findOneBy({
+      id: arg.projectId,
+    });
     if (!project) {
       throw new Error('Project not found');
     }

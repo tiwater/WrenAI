@@ -739,8 +739,14 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
   }
 
   private transformChartAdjustmentInput(input: ChartAdjustmentInput) {
-    const { query, sql, adjustmentOption, chartSchema, configurations, projectId } =
-      input;
+    const {
+      query,
+      sql,
+      adjustmentOption,
+      chartSchema,
+      configurations,
+      projectId,
+    } = input;
     return {
       query,
       sql,
@@ -886,13 +892,13 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
 
   private transformStatusAndError(body: any): {
     status:
-    | AskResultStatus
-    | TextBasedAnswerStatus
-    | ChartStatus
-    | SqlPairStatus
-    | QuestionsStatus
-    | InstructionStatus
-    | AskFeedbackStatus;
+      | AskResultStatus
+      | TextBasedAnswerStatus
+      | ChartStatus
+      | SqlPairStatus
+      | QuestionsStatus
+      | InstructionStatus
+      | AskFeedbackStatus;
     error?: {
       code: Errors.GeneralErrorCodes;
       message: string;
@@ -914,22 +920,22 @@ export class WrenAIAdaptor implements IWrenAIAdaptor {
 
     const error = code
       ? Errors.create(
-        code,
-        isShowAIServiceErrorMessage
-          ? {
-            customMessage: body?.error?.message,
-          }
-          : undefined,
-      )
+          code,
+          isShowAIServiceErrorMessage
+            ? {
+                customMessage: body?.error?.message,
+              }
+            : undefined,
+        )
       : null;
 
     // format custom error into WrenAIError that is used in graphql
     const formattedError = error
       ? {
-        code: error.extensions.code as Errors.GeneralErrorCodes,
-        message: error.message,
-        shortMessage: error.extensions.shortMessage as string,
-      }
+          code: error.extensions.code as Errors.GeneralErrorCodes,
+          message: error.message,
+          shortMessage: error.extensions.shortMessage as string,
+        }
       : null;
 
     return {

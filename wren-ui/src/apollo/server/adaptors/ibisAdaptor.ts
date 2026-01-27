@@ -442,7 +442,9 @@ export class IbisAdaptor implements IIbisAdaptor {
         return res.data.map((c) => ({
           ...c,
           constraintTable: stripDefaultPostgresSchemaPrefix(c.constraintTable),
-          constraintedTable: stripDefaultPostgresSchemaPrefix(c.constraintedTable),
+          constraintedTable: stripDefaultPostgresSchemaPrefix(
+            c.constraintedTable,
+          ),
         }));
       }
 

@@ -37,7 +37,10 @@ export function FixSQLModal(props: Props) {
   const validateSql = async () => {
     const sql = form.getFieldValue('sql');
     await previewSqlMutation({
-      variables: { projectId: projectId!, data: { sql, limit: 1, dryRun: true } },
+      variables: {
+        projectId: projectId!,
+        data: { sql, limit: 1, dryRun: true },
+      },
     });
   };
 
@@ -49,7 +52,10 @@ export function FixSQLModal(props: Props) {
           previewSqlMutation,
           setPreviewLoading,
         )({
-          variables: { projectId: projectId!, data: { sql: values.sql, limit: 50 } },
+          variables: {
+            projectId: projectId!,
+            data: { sql: values.sql, limit: 50 },
+          },
         });
       })
       .catch(console.error);

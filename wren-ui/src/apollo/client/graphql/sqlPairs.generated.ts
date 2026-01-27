@@ -3,22 +3,50 @@ import * as Types from './__types__';
 import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
 const defaultOptions = {} as const;
-export type SqlPairFragment = { __typename?: 'SqlPair', id: number, projectId: number, sql: string, question: string, createdAt?: string | null, updatedAt?: string | null };
+export type SqlPairFragment = {
+  __typename?: 'SqlPair';
+  id: number;
+  projectId: number;
+  sql: string;
+  question: string;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+};
 
 export type SqlPairsQueryVariables = Types.Exact<{
   projectId: Types.Scalars['Int'];
 }>;
 
-
-export type SqlPairsQuery = { __typename?: 'Query', sqlPairs: Array<{ __typename?: 'SqlPair', id: number, projectId: number, sql: string, question: string, createdAt?: string | null, updatedAt?: string | null } | null> };
+export type SqlPairsQuery = {
+  __typename?: 'Query';
+  sqlPairs: Array<{
+    __typename?: 'SqlPair';
+    id: number;
+    projectId: number;
+    sql: string;
+    question: string;
+    createdAt?: string | null;
+    updatedAt?: string | null;
+  } | null>;
+};
 
 export type CreateSqlPairMutationVariables = Types.Exact<{
   projectId: Types.Scalars['Int'];
   data: Types.CreateSqlPairInput;
 }>;
 
-
-export type CreateSqlPairMutation = { __typename?: 'Mutation', createSqlPair: { __typename?: 'SqlPair', id: number, projectId: number, sql: string, question: string, createdAt?: string | null, updatedAt?: string | null } };
+export type CreateSqlPairMutation = {
+  __typename?: 'Mutation';
+  createSqlPair: {
+    __typename?: 'SqlPair';
+    id: number;
+    projectId: number;
+    sql: string;
+    question: string;
+    createdAt?: string | null;
+    updatedAt?: string | null;
+  };
+};
 
 export type UpdateSqlPairMutationVariables = Types.Exact<{
   projectId: Types.Scalars['Int'];
@@ -26,34 +54,47 @@ export type UpdateSqlPairMutationVariables = Types.Exact<{
   data: Types.UpdateSqlPairInput;
 }>;
 
-
-export type UpdateSqlPairMutation = { __typename?: 'Mutation', updateSqlPair: { __typename?: 'SqlPair', id: number, projectId: number, sql: string, question: string, createdAt?: string | null, updatedAt?: string | null } };
+export type UpdateSqlPairMutation = {
+  __typename?: 'Mutation';
+  updateSqlPair: {
+    __typename?: 'SqlPair';
+    id: number;
+    projectId: number;
+    sql: string;
+    question: string;
+    createdAt?: string | null;
+    updatedAt?: string | null;
+  };
+};
 
 export type DeleteSqlPairMutationVariables = Types.Exact<{
   projectId: Types.Scalars['Int'];
   where: Types.SqlPairWhereUniqueInput;
 }>;
 
-
-export type DeleteSqlPairMutation = { __typename?: 'Mutation', deleteSqlPair: boolean };
+export type DeleteSqlPairMutation = {
+  __typename?: 'Mutation';
+  deleteSqlPair: boolean;
+};
 
 export const SqlPairFragmentDoc = gql`
-    fragment SqlPair on SqlPair {
-  id
-  projectId
-  sql
-  question
-  createdAt
-  updatedAt
-}
-    `;
-export const SqlPairsDocument = gql`
-    query SqlPairs($projectId: Int!) {
-  sqlPairs(projectId: $projectId) {
-    ...SqlPair
+  fragment SqlPair on SqlPair {
+    id
+    projectId
+    sql
+    question
+    createdAt
+    updatedAt
   }
-}
-    ${SqlPairFragmentDoc}`;
+`;
+export const SqlPairsDocument = gql`
+  query SqlPairs($projectId: Int!) {
+    sqlPairs(projectId: $projectId) {
+      ...SqlPair
+    }
+  }
+  ${SqlPairFragmentDoc}
+`;
 
 /**
  * __useSqlPairsQuery__
@@ -71,25 +112,47 @@ export const SqlPairsDocument = gql`
  *   },
  * });
  */
-export function useSqlPairsQuery(baseOptions: Apollo.QueryHookOptions<SqlPairsQuery, SqlPairsQueryVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useQuery<SqlPairsQuery, SqlPairsQueryVariables>(SqlPairsDocument, options);
-      }
-export function useSqlPairsLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<SqlPairsQuery, SqlPairsQueryVariables>) {
-          const options = {...defaultOptions, ...baseOptions}
-          return Apollo.useLazyQuery<SqlPairsQuery, SqlPairsQueryVariables>(SqlPairsDocument, options);
-        }
-export type SqlPairsQueryHookResult = ReturnType<typeof useSqlPairsQuery>;
-export type SqlPairsLazyQueryHookResult = ReturnType<typeof useSqlPairsLazyQuery>;
-export type SqlPairsQueryResult = Apollo.QueryResult<SqlPairsQuery, SqlPairsQueryVariables>;
-export const CreateSqlPairDocument = gql`
-    mutation CreateSqlPair($projectId: Int!, $data: CreateSqlPairInput!) {
-  createSqlPair(projectId: $projectId, data: $data) {
-    ...SqlPair
-  }
+export function useSqlPairsQuery(
+  baseOptions: Apollo.QueryHookOptions<SqlPairsQuery, SqlPairsQueryVariables>,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useQuery<SqlPairsQuery, SqlPairsQueryVariables>(
+    SqlPairsDocument,
+    options,
+  );
 }
-    ${SqlPairFragmentDoc}`;
-export type CreateSqlPairMutationFn = Apollo.MutationFunction<CreateSqlPairMutation, CreateSqlPairMutationVariables>;
+export function useSqlPairsLazyQuery(
+  baseOptions?: Apollo.LazyQueryHookOptions<
+    SqlPairsQuery,
+    SqlPairsQueryVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useLazyQuery<SqlPairsQuery, SqlPairsQueryVariables>(
+    SqlPairsDocument,
+    options,
+  );
+}
+export type SqlPairsQueryHookResult = ReturnType<typeof useSqlPairsQuery>;
+export type SqlPairsLazyQueryHookResult = ReturnType<
+  typeof useSqlPairsLazyQuery
+>;
+export type SqlPairsQueryResult = Apollo.QueryResult<
+  SqlPairsQuery,
+  SqlPairsQueryVariables
+>;
+export const CreateSqlPairDocument = gql`
+  mutation CreateSqlPair($projectId: Int!, $data: CreateSqlPairInput!) {
+    createSqlPair(projectId: $projectId, data: $data) {
+      ...SqlPair
+    }
+  }
+  ${SqlPairFragmentDoc}
+`;
+export type CreateSqlPairMutationFn = Apollo.MutationFunction<
+  CreateSqlPairMutation,
+  CreateSqlPairMutationVariables
+>;
 
 /**
  * __useCreateSqlPairMutation__
@@ -109,21 +172,43 @@ export type CreateSqlPairMutationFn = Apollo.MutationFunction<CreateSqlPairMutat
  *   },
  * });
  */
-export function useCreateSqlPairMutation(baseOptions?: Apollo.MutationHookOptions<CreateSqlPairMutation, CreateSqlPairMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateSqlPairMutation, CreateSqlPairMutationVariables>(CreateSqlPairDocument, options);
-      }
-export type CreateSqlPairMutationHookResult = ReturnType<typeof useCreateSqlPairMutation>;
-export type CreateSqlPairMutationResult = Apollo.MutationResult<CreateSqlPairMutation>;
-export type CreateSqlPairMutationOptions = Apollo.BaseMutationOptions<CreateSqlPairMutation, CreateSqlPairMutationVariables>;
-export const UpdateSqlPairDocument = gql`
-    mutation UpdateSqlPair($projectId: Int!, $where: SqlPairWhereUniqueInput!, $data: UpdateSqlPairInput!) {
-  updateSqlPair(projectId: $projectId, where: $where, data: $data) {
-    ...SqlPair
-  }
+export function useCreateSqlPairMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    CreateSqlPairMutation,
+    CreateSqlPairMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    CreateSqlPairMutation,
+    CreateSqlPairMutationVariables
+  >(CreateSqlPairDocument, options);
 }
-    ${SqlPairFragmentDoc}`;
-export type UpdateSqlPairMutationFn = Apollo.MutationFunction<UpdateSqlPairMutation, UpdateSqlPairMutationVariables>;
+export type CreateSqlPairMutationHookResult = ReturnType<
+  typeof useCreateSqlPairMutation
+>;
+export type CreateSqlPairMutationResult =
+  Apollo.MutationResult<CreateSqlPairMutation>;
+export type CreateSqlPairMutationOptions = Apollo.BaseMutationOptions<
+  CreateSqlPairMutation,
+  CreateSqlPairMutationVariables
+>;
+export const UpdateSqlPairDocument = gql`
+  mutation UpdateSqlPair(
+    $projectId: Int!
+    $where: SqlPairWhereUniqueInput!
+    $data: UpdateSqlPairInput!
+  ) {
+    updateSqlPair(projectId: $projectId, where: $where, data: $data) {
+      ...SqlPair
+    }
+  }
+  ${SqlPairFragmentDoc}
+`;
+export type UpdateSqlPairMutationFn = Apollo.MutationFunction<
+  UpdateSqlPairMutation,
+  UpdateSqlPairMutationVariables
+>;
 
 /**
  * __useUpdateSqlPairMutation__
@@ -144,19 +229,36 @@ export type UpdateSqlPairMutationFn = Apollo.MutationFunction<UpdateSqlPairMutat
  *   },
  * });
  */
-export function useUpdateSqlPairMutation(baseOptions?: Apollo.MutationHookOptions<UpdateSqlPairMutation, UpdateSqlPairMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UpdateSqlPairMutation, UpdateSqlPairMutationVariables>(UpdateSqlPairDocument, options);
-      }
-export type UpdateSqlPairMutationHookResult = ReturnType<typeof useUpdateSqlPairMutation>;
-export type UpdateSqlPairMutationResult = Apollo.MutationResult<UpdateSqlPairMutation>;
-export type UpdateSqlPairMutationOptions = Apollo.BaseMutationOptions<UpdateSqlPairMutation, UpdateSqlPairMutationVariables>;
-export const DeleteSqlPairDocument = gql`
-    mutation DeleteSqlPair($projectId: Int!, $where: SqlPairWhereUniqueInput!) {
-  deleteSqlPair(projectId: $projectId, where: $where)
+export function useUpdateSqlPairMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UpdateSqlPairMutation,
+    UpdateSqlPairMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    UpdateSqlPairMutation,
+    UpdateSqlPairMutationVariables
+  >(UpdateSqlPairDocument, options);
 }
-    `;
-export type DeleteSqlPairMutationFn = Apollo.MutationFunction<DeleteSqlPairMutation, DeleteSqlPairMutationVariables>;
+export type UpdateSqlPairMutationHookResult = ReturnType<
+  typeof useUpdateSqlPairMutation
+>;
+export type UpdateSqlPairMutationResult =
+  Apollo.MutationResult<UpdateSqlPairMutation>;
+export type UpdateSqlPairMutationOptions = Apollo.BaseMutationOptions<
+  UpdateSqlPairMutation,
+  UpdateSqlPairMutationVariables
+>;
+export const DeleteSqlPairDocument = gql`
+  mutation DeleteSqlPair($projectId: Int!, $where: SqlPairWhereUniqueInput!) {
+    deleteSqlPair(projectId: $projectId, where: $where)
+  }
+`;
+export type DeleteSqlPairMutationFn = Apollo.MutationFunction<
+  DeleteSqlPairMutation,
+  DeleteSqlPairMutationVariables
+>;
 
 /**
  * __useDeleteSqlPairMutation__
@@ -176,10 +278,24 @@ export type DeleteSqlPairMutationFn = Apollo.MutationFunction<DeleteSqlPairMutat
  *   },
  * });
  */
-export function useDeleteSqlPairMutation(baseOptions?: Apollo.MutationHookOptions<DeleteSqlPairMutation, DeleteSqlPairMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<DeleteSqlPairMutation, DeleteSqlPairMutationVariables>(DeleteSqlPairDocument, options);
-      }
-export type DeleteSqlPairMutationHookResult = ReturnType<typeof useDeleteSqlPairMutation>;
-export type DeleteSqlPairMutationResult = Apollo.MutationResult<DeleteSqlPairMutation>;
-export type DeleteSqlPairMutationOptions = Apollo.BaseMutationOptions<DeleteSqlPairMutation, DeleteSqlPairMutationVariables>;
+export function useDeleteSqlPairMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    DeleteSqlPairMutation,
+    DeleteSqlPairMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    DeleteSqlPairMutation,
+    DeleteSqlPairMutationVariables
+  >(DeleteSqlPairDocument, options);
+}
+export type DeleteSqlPairMutationHookResult = ReturnType<
+  typeof useDeleteSqlPairMutation
+>;
+export type DeleteSqlPairMutationResult =
+  Apollo.MutationResult<DeleteSqlPairMutation>;
+export type DeleteSqlPairMutationOptions = Apollo.BaseMutationOptions<
+  DeleteSqlPairMutation,
+  DeleteSqlPairMutationVariables
+>;

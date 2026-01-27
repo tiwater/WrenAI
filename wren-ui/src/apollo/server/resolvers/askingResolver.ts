@@ -132,7 +132,9 @@ export class AskingResolver {
     args: { projectId: number },
     ctx: IContext,
   ): Promise<boolean> {
-    await ctx.projectService.generateProjectRecommendationQuestions(args.projectId);
+    await ctx.projectService.generateProjectRecommendationQuestions(
+      args.projectId,
+    );
     return true;
   }
 
@@ -143,7 +145,10 @@ export class AskingResolver {
   ): Promise<boolean> {
     const { threadId, projectId } = args;
     const askingService = ctx.askingService;
-    await askingService.generateThreadRecommendationQuestions(projectId, threadId);
+    await askingService.generateThreadRecommendationQuestions(
+      projectId,
+      threadId,
+    );
     return true;
   }
 
@@ -162,7 +167,9 @@ export class AskingResolver {
     args: { projectId: number },
     ctx: IContext,
   ): Promise<SuggestedQuestionResponse> {
-    const project = await ctx.projectRepository.findOneBy({ id: args.projectId });
+    const project = await ctx.projectRepository.findOneBy({
+      id: args.projectId,
+    });
     if (!project) {
       throw new Error('Project not found');
     }
@@ -180,7 +187,9 @@ export class AskingResolver {
     ctx: IContext,
   ): Promise<Task> {
     const { question, threadId } = args.data;
-    const project = await ctx.projectRepository.findOneBy({ id: args.projectId });
+    const project = await ctx.projectRepository.findOneBy({
+      id: args.projectId,
+    });
     if (!project) {
       throw new Error('Project not found');
     }
@@ -285,7 +294,10 @@ export class AskingResolver {
 
     const eventName = TelemetryEvent.HOME_CREATE_THREAD;
     try {
-      const thread = await askingService.createThread(threadInput, args.projectId);
+      const thread = await askingService.createThread(
+        threadInput,
+        args.projectId,
+      );
       ctx.telemetry.sendEvent(eventName, {});
       return thread;
     } catch (err: any) {
@@ -342,7 +354,11 @@ export class AskingResolver {
 
   public async updateThread(
     _root: any,
-    args: { projectId: number; where: { id: number }; data: { summary: string } },
+    args: {
+      projectId: number;
+      where: { id: number };
+      data: { summary: string };
+    },
     ctx: IContext,
   ): Promise<Thread> {
     const { where, data } = args;
@@ -424,7 +440,9 @@ export class AskingResolver {
         trackedAskingResult: askingTask,
         sql: data.sql,
       };
-      logger.info(`[DEBUG] createThreadResponse: Using SQL from data: ${data.sql}`);
+      logger.info(
+        `[DEBUG] createThreadResponse: Using SQL from data: ${data.sql}`,
+      );
     } else {
       // when we use recommendation questions, there's no task to track
       threadResponseInput = data;
@@ -466,7 +484,9 @@ export class AskingResolver {
   ): Promise<Task> {
     const { responseId } = args;
     const askingService = ctx.askingService;
-    const project = await ctx.projectRepository.findOneBy({ id: args.projectId });
+    const project = await ctx.projectRepository.findOneBy({
+      id: args.projectId,
+    });
     if (!project) {
       throw new Error('Project not found');
     }
@@ -588,7 +608,9 @@ export class AskingResolver {
     args: { projectId: number; responseId: number },
     ctx: IContext,
   ): Promise<ThreadResponse> {
-    const project = await ctx.projectRepository.findOneBy({ id: args.projectId });
+    const project = await ctx.projectRepository.findOneBy({
+      id: args.projectId,
+    });
     if (!project) {
       throw new Error('Project not found');
     }
@@ -606,7 +628,9 @@ export class AskingResolver {
     args: { projectId: number; responseId: number },
     ctx: IContext,
   ): Promise<ThreadResponse> {
-    const project = await ctx.projectRepository.findOneBy({ id: args.projectId });
+    const project = await ctx.projectRepository.findOneBy({
+      id: args.projectId,
+    });
     if (!project) {
       throw new Error('Project not found');
     }
@@ -622,31 +646,48 @@ export class AskingResolver {
     args: { projectId: number; responseId: number },
     ctx: IContext,
   ): Promise<ThreadResponse> {
-    const project = await ctx.projectRepository.findOneBy({ id: args.projectId });
+    const project = await ctx.projectRepository.findOneBy({
+      id: args.projectId,
+    });
     if (!project) {
       throw new Error('Project not found');
     }
     const { responseId } = args;
     const askingService = ctx.askingService;
-    return askingService.generateThreadResponseChart(args.projectId, responseId, {
-      language: WrenAILanguage[project.language] || WrenAILanguage.EN,
-    });
+    return askingService.generateThreadResponseChart(
+      args.projectId,
+      responseId,
+      {
+        language: WrenAILanguage[project.language] || WrenAILanguage.EN,
+      },
+    );
   }
 
   public async adjustThreadResponseChart(
     _root: any,
-    args: { projectId: number; responseId: number; data: ChartAdjustmentOption },
+    args: {
+      projectId: number;
+      responseId: number;
+      data: ChartAdjustmentOption;
+    },
     ctx: IContext,
   ): Promise<ThreadResponse> {
-    const project = await ctx.projectRepository.findOneBy({ id: args.projectId });
+    const project = await ctx.projectRepository.findOneBy({
+      id: args.projectId,
+    });
     if (!project) {
       throw new Error('Project not found');
     }
     const { responseId, data } = args;
     const askingService = ctx.askingService;
-    return askingService.adjustThreadResponseChart(args.projectId, responseId, data, {
-      language: WrenAILanguage[project.language] || WrenAILanguage.EN,
-    });
+    return askingService.adjustThreadResponseChart(
+      args.projectId,
+      responseId,
+      data,
+      {
+        language: WrenAILanguage[project.language] || WrenAILanguage.EN,
+      },
+    );
   }
 
   public async getResponse(
@@ -663,18 +704,28 @@ export class AskingResolver {
 
   public async previewData(
     _root: any,
-    args: { projectId: number; where: { responseId: number; stepIndex?: number; limit?: number } },
+    args: {
+      projectId: number;
+      where: { responseId: number; stepIndex?: number; limit?: number };
+    },
     ctx: IContext,
   ): Promise<any> {
     const { responseId, limit } = args.where;
     const askingService = ctx.askingService;
-    const data = await askingService.previewData(args.projectId, responseId, limit);
+    const data = await askingService.previewData(
+      args.projectId,
+      responseId,
+      limit,
+    );
     return data;
   }
 
   public async previewBreakdownData(
     _root: any,
-    args: { projectId: number; where: { responseId: number; stepIndex?: number; limit?: number } },
+    args: {
+      projectId: number;
+      where: { responseId: number; stepIndex?: number; limit?: number };
+    },
     ctx: IContext,
   ): Promise<any> {
     const { responseId, stepIndex, limit } = args.where;

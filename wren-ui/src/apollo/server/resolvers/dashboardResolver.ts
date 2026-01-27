@@ -44,7 +44,9 @@ export class DashboardResolver {
       nextScheduledAt: string | null;
     }
   > {
-    const dashboard = await ctx.dashboardService.getDashboardByProjectId(args.projectId);
+    const dashboard = await ctx.dashboardService.getDashboardByProjectId(
+      args.projectId,
+    );
     if (!dashboard) {
       throw new Error('Dashboard not found.');
     }
@@ -65,7 +67,9 @@ export class DashboardResolver {
     args: { projectId: number },
     ctx: IContext,
   ): Promise<DashboardItem[]> {
-    const dashboard = await ctx.dashboardService.getDashboardByProjectId(args.projectId);
+    const dashboard = await ctx.dashboardService.getDashboardByProjectId(
+      args.projectId,
+    );
     if (!dashboard) {
       throw new Error('Dashboard not found.');
     }
@@ -74,11 +78,16 @@ export class DashboardResolver {
 
   public async createDashboardItem(
     _root: any,
-    args: { projectId: number; data: { itemType: DashboardItemType; responseId: number } },
+    args: {
+      projectId: number;
+      data: { itemType: DashboardItemType; responseId: number };
+    },
     ctx: IContext,
   ): Promise<DashboardItem> {
     const { responseId, itemType } = args.data;
-    const dashboard = await ctx.dashboardService.getDashboardByProjectId(args.projectId);
+    const dashboard = await ctx.dashboardService.getDashboardByProjectId(
+      args.projectId,
+    );
     const response = await ctx.askingService.getResponse(responseId);
 
     if (!response) {
@@ -94,7 +103,9 @@ export class DashboardResolver {
     }
 
     // query with cache enabled
-    const project = await ctx.projectRepository.findOneBy({ id: args.projectId });
+    const project = await ctx.projectRepository.findOneBy({
+      id: args.projectId,
+    });
     if (!project) {
       throw new Error('Project not found');
     }
@@ -118,7 +129,11 @@ export class DashboardResolver {
 
   public async updateDashboardItem(
     _root: any,
-    args: { projectId: number; where: { id: number }; data: { displayName: string } },
+    args: {
+      projectId: number;
+      where: { id: number };
+      data: { displayName: string };
+    },
     ctx: IContext,
   ): Promise<DashboardItem> {
     const { id } = args.where;
@@ -157,14 +172,20 @@ export class DashboardResolver {
 
   public async previewItemSQL(
     _root: any,
-    args: { projectId: number; data: { itemId: number; limit?: number; refresh?: boolean } },
+    args: {
+      projectId: number;
+      data: { itemId: number; limit?: number; refresh?: boolean };
+    },
     ctx: IContext,
   ): Promise<PreviewItemResponse> {
     const { itemId, limit, refresh } = args.data;
     try {
       const item = await ctx.dashboardService.getDashboardItem(itemId);
-      const { cacheEnabled } = await ctx.dashboardService.getDashboardByProjectId(args.projectId);
-      const project = await ctx.projectRepository.findOneBy({ id: args.projectId });
+      const { cacheEnabled } =
+        await ctx.dashboardService.getDashboardByProjectId(args.projectId);
+      const project = await ctx.projectRepository.findOneBy({
+        id: args.projectId,
+      });
       if (!project) {
         throw new Error('Project not found');
       }
@@ -204,7 +225,9 @@ export class DashboardResolver {
     ctx: IContext,
   ): Promise<Dashboard> {
     try {
-      const dashboard = await ctx.dashboardService.getDashboardByProjectId(args.projectId);
+      const dashboard = await ctx.dashboardService.getDashboardByProjectId(
+        args.projectId,
+      );
       if (!dashboard) {
         throw new Error('Dashboard not found.');
       }

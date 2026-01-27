@@ -100,7 +100,13 @@ export default function EmbedThread() {
     if (queryProjectId && projectId !== queryProjectId) {
       setSelectedProjectId(queryProjectId);
     }
-  }, [router.isReady, hydrated, queryProjectId, projectId, setSelectedProjectId]);
+  }, [
+    router.isReady,
+    hydrated,
+    queryProjectId,
+    projectId,
+    setSelectedProjectId,
+  ]);
 
   const askPrompt = useAskPrompt(threadId);
   const adjustAnswer = useAdjustAnswer(threadId);
@@ -179,9 +185,10 @@ export default function EmbedThread() {
     pollInterval: 1000,
   });
 
-  const [generateThreadResponseAnswer] = useGenerateThreadResponseAnswerMutation({
-    onError: (error) => console.error(error),
-  });
+  const [generateThreadResponseAnswer] =
+    useGenerateThreadResponseAnswerMutation({
+      onError: (error) => console.error(error),
+    });
 
   const [generateThreadResponseChart] = useGenerateThreadResponseChartMutation({
     onError: (error) => console.error(error),
@@ -225,7 +232,9 @@ export default function EmbedThread() {
 
   const onGenerateThreadResponseAnswer = async (responseId: number) => {
     if (!projectId) return;
-    await generateThreadResponseAnswer({ variables: { projectId, responseId } });
+    await generateThreadResponseAnswer({
+      variables: { projectId, responseId },
+    });
     fetchThreadResponse({ variables: { projectId, responseId } });
   };
 
@@ -240,13 +249,17 @@ export default function EmbedThread() {
     data: AdjustThreadResponseChartInput,
   ) => {
     if (!projectId) return;
-    await adjustThreadResponseChart({ variables: { projectId, responseId, data } });
+    await adjustThreadResponseChart({
+      variables: { projectId, responseId, data },
+    });
     fetchThreadResponse({ variables: { projectId, responseId } });
   };
 
   const onGenerateThreadRecommendedQuestions = async () => {
     if (!projectId || threadId === null) return;
-    await generateThreadRecommendationQuestions({ variables: { projectId, threadId } });
+    await generateThreadRecommendationQuestions({
+      variables: { projectId, threadId },
+    });
     fetchThreadRecommendationQuestions({ variables: { projectId, threadId } });
   };
 
@@ -262,8 +275,10 @@ export default function EmbedThread() {
         // If asking task has already failed/stopped, make sure we still fetch
         // the latest threadResponse once so UI can show FAILED status/error.
         if (
-          unfinishedAskingResponse.askingTask?.status === AskingTaskStatus.FAILED ||
-          unfinishedAskingResponse.askingTask?.status === AskingTaskStatus.STOPPED
+          unfinishedAskingResponse.askingTask?.status ===
+            AskingTaskStatus.FAILED ||
+          unfinishedAskingResponse.askingTask?.status ===
+            AskingTaskStatus.STOPPED
         ) {
           fetchThreadResponse({
             variables: { projectId, responseId: unfinishedAskingResponse.id },
@@ -279,7 +294,10 @@ export default function EmbedThread() {
         (response) => !getThreadResponseIsFinished(response),
       );
 
-      if (canFetchThreadResponse(unfinishedThreadResponse?.askingTask) && unfinishedThreadResponse) {
+      if (
+        canFetchThreadResponse(unfinishedThreadResponse?.askingTask) &&
+        unfinishedThreadResponse
+      ) {
         if (!projectId) return;
         fetchThreadResponse({
           variables: { projectId, responseId: unfinishedThreadResponse.id },
@@ -299,7 +317,9 @@ export default function EmbedThread() {
 
   useEffect(() => {
     if (threadId !== null && projectId) {
-      fetchThreadRecommendationQuestions({ variables: { projectId, threadId } });
+      fetchThreadRecommendationQuestions({
+        variables: { projectId, threadId },
+      });
       setShowRecommendedQuestions(true);
     }
     return () => {
@@ -330,8 +350,8 @@ export default function EmbedThread() {
 
   const recommendedQuestions = useMemo(
     () =>
-      threadRecommendationQuestionsResult.data?.getThreadRecommendationQuestions ||
-      null,
+      threadRecommendationQuestionsResult.data
+        ?.getThreadRecommendationQuestions || null,
     [threadRecommendationQuestionsResult.data],
   );
 
@@ -388,7 +408,11 @@ export default function EmbedThread() {
       </PromptThreadProvider>
 
       <div className="py-12" />
-      <Prompt ref={$prompt} {...askPrompt} onCreateResponse={onCreateResponse} />
+      <Prompt
+        ref={$prompt}
+        {...askPrompt}
+        onCreateResponse={onCreateResponse}
+      />
       <div ref={bottomRef} />
 
       <SaveAsViewModal
@@ -418,7 +442,10 @@ export default function EmbedThread() {
         onClose={adjustReasoningStepsModal.closeModal}
         loading={adjustAnswer.loading}
         onSubmit={async (values) => {
-          await adjustAnswer.onAdjustReasoningSteps(values.responseId, values.data);
+          await adjustAnswer.onAdjustReasoningSteps(
+            values.responseId,
+            values.data,
+          );
         }}
       />
 

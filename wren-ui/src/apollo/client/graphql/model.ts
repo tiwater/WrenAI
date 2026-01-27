@@ -94,7 +94,11 @@ export const CREATE_MODEL = gql`
 `;
 
 export const UPDATE_MODEL = gql`
-  mutation UpdateModel($projectId: Int!, $where: ModelWhereInput!, $data: UpdateModelInput!) {
+  mutation UpdateModel(
+    $projectId: Int!
+    $where: ModelWhereInput!
+    $data: UpdateModelInput!
+  ) {
     updateModel(projectId: $projectId, where: $where, data: $data)
   }
 `;

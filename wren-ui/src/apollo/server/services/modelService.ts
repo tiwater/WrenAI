@@ -40,7 +40,10 @@ export interface ValidateCalculatedFieldResponse {
 }
 
 export interface IModelService {
-  updatePrimaryKeys(projectId: number, tables: SampleDatasetTable[]): Promise<void>;
+  updatePrimaryKeys(
+    projectId: number,
+    tables: SampleDatasetTable[],
+  ): Promise<void>;
   batchUpdateModelProperties(
     projectId: number,
     tables: SampleDatasetTable[],
@@ -50,7 +53,10 @@ export interface IModelService {
     tables: SampleDatasetTable[],
   ): Promise<void>;
   // saveRelations was used in the onboarding process, we assume there is not existing relation in the project
-  saveRelations(projectId: number, relations: RelationData[]): Promise<Relation[]>;
+  saveRelations(
+    projectId: number,
+    relations: RelationData[],
+  ): Promise<Relation[]>;
   createRelation(projectId: number, relation: RelationData): Promise<Relation>;
   updateRelation(relation: UpdateRelationData, id: number): Promise<Relation>;
   deleteRelation(id: number): Promise<void>;
@@ -143,11 +149,16 @@ export class ModelService implements IModelService {
 
     // check this calculated field is valid for engine to query
     const { valid: canQuery, message: errorMessage } =
-      await this.checkCalculatedFieldCanQuery(model.projectId, modelId, model.referenceName, {
-        referenceName,
-        expression,
-        lineage,
-      } as CheckCalculatedFieldCanQueryData);
+      await this.checkCalculatedFieldCanQuery(
+        model.projectId,
+        modelId,
+        model.referenceName,
+        {
+          referenceName,
+          expression,
+          lineage,
+        } as CheckCalculatedFieldCanQueryData,
+      );
     logger.debug(`${logTitle} : checkCalculatedFieldCanQuery: ${canQuery}`);
     if (!canQuery) {
       const parsedErrorMessage = safeParseJson(errorMessage);
@@ -210,11 +221,16 @@ export class ModelService implements IModelService {
 
     // check this calculated field is valid for engine to query
     const { valid: canQuery, message: errorMessage } =
-      await this.checkCalculatedFieldCanQuery(model.projectId, model.id, model.referenceName, {
-        referenceName,
-        expression,
-        lineage,
-      } as CheckCalculatedFieldCanQueryData);
+      await this.checkCalculatedFieldCanQuery(
+        model.projectId,
+        model.id,
+        model.referenceName,
+        {
+          referenceName,
+          expression,
+          lineage,
+        } as CheckCalculatedFieldCanQueryData,
+      );
     logger.debug(`${logTitle}: checkCalculatedFieldCanQuery: ${canQuery}`);
     if (!canQuery) {
       const error = JSON.parse(errorMessage);
@@ -240,7 +256,10 @@ export class ModelService implements IModelService {
     return updatedColumn;
   }
 
-  public async updatePrimaryKeys(projectId: number, tables: SampleDatasetTable[]) {
+  public async updatePrimaryKeys(
+    projectId: number,
+    tables: SampleDatasetTable[],
+  ) {
     logger.debug('start update primary keys');
     const models = await this.modelRepository.findAllBy({
       projectId,
@@ -258,7 +277,10 @@ export class ModelService implements IModelService {
     }
   }
 
-  public async batchUpdateModelProperties(projectId: number, tables: SampleDatasetTable[]) {
+  public async batchUpdateModelProperties(
+    projectId: number,
+    tables: SampleDatasetTable[],
+  ) {
     logger.debug('start batch update model description');
     const models = await this.modelRepository.findAllBy({
       projectId,
@@ -282,7 +304,10 @@ export class ModelService implements IModelService {
     ]);
   }
 
-  public async batchUpdateColumnProperties(projectId: number, tables: SampleDatasetTable[]) {
+  public async batchUpdateColumnProperties(
+    projectId: number,
+    tables: SampleDatasetTable[],
+  ) {
     logger.debug('start batch update column description');
     const models = await this.modelRepository.findAllBy({
       projectId,
@@ -387,7 +412,10 @@ export class ModelService implements IModelService {
     return savedRelations;
   }
 
-  public async createRelation(projectId: number, relation: RelationData): Promise<Relation> {
+  public async createRelation(
+    projectId: number,
+    relation: RelationData,
+  ): Promise<Relation> {
     if (!relation) {
       throw new Error('Invalid relation input');
     }

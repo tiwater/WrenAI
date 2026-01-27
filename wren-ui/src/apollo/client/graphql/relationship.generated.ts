@@ -8,8 +8,10 @@ export type CreateRelationshipMutationVariables = Types.Exact<{
   data: Types.RelationInput;
 }>;
 
-
-export type CreateRelationshipMutation = { __typename?: 'Mutation', createRelation: any };
+export type CreateRelationshipMutation = {
+  __typename?: 'Mutation';
+  createRelation: any;
+};
 
 export type UpdateRelationshipMutationVariables = Types.Exact<{
   projectId: Types.Scalars['Int'];
@@ -17,24 +19,30 @@ export type UpdateRelationshipMutationVariables = Types.Exact<{
   data: Types.UpdateRelationInput;
 }>;
 
-
-export type UpdateRelationshipMutation = { __typename?: 'Mutation', updateRelation: any };
+export type UpdateRelationshipMutation = {
+  __typename?: 'Mutation';
+  updateRelation: any;
+};
 
 export type DeleteRelationshipMutationVariables = Types.Exact<{
   projectId: Types.Scalars['Int'];
   where: Types.WhereIdInput;
 }>;
 
-
-export type DeleteRelationshipMutation = { __typename?: 'Mutation', deleteRelation: boolean };
-
+export type DeleteRelationshipMutation = {
+  __typename?: 'Mutation';
+  deleteRelation: boolean;
+};
 
 export const CreateRelationshipDocument = gql`
-    mutation CreateRelationship($projectId: Int!, $data: RelationInput!) {
-  createRelation(projectId: $projectId, data: $data)
-}
-    `;
-export type CreateRelationshipMutationFn = Apollo.MutationFunction<CreateRelationshipMutation, CreateRelationshipMutationVariables>;
+  mutation CreateRelationship($projectId: Int!, $data: RelationInput!) {
+    createRelation(projectId: $projectId, data: $data)
+  }
+`;
+export type CreateRelationshipMutationFn = Apollo.MutationFunction<
+  CreateRelationshipMutation,
+  CreateRelationshipMutationVariables
+>;
 
 /**
  * __useCreateRelationshipMutation__
@@ -54,19 +62,40 @@ export type CreateRelationshipMutationFn = Apollo.MutationFunction<CreateRelatio
  *   },
  * });
  */
-export function useCreateRelationshipMutation(baseOptions?: Apollo.MutationHookOptions<CreateRelationshipMutation, CreateRelationshipMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<CreateRelationshipMutation, CreateRelationshipMutationVariables>(CreateRelationshipDocument, options);
-      }
-export type CreateRelationshipMutationHookResult = ReturnType<typeof useCreateRelationshipMutation>;
-export type CreateRelationshipMutationResult = Apollo.MutationResult<CreateRelationshipMutation>;
-export type CreateRelationshipMutationOptions = Apollo.BaseMutationOptions<CreateRelationshipMutation, CreateRelationshipMutationVariables>;
-export const UpdateRelationshipDocument = gql`
-    mutation UpdateRelationship($projectId: Int!, $where: WhereIdInput!, $data: UpdateRelationInput!) {
-  updateRelation(projectId: $projectId, where: $where, data: $data)
+export function useCreateRelationshipMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    CreateRelationshipMutation,
+    CreateRelationshipMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    CreateRelationshipMutation,
+    CreateRelationshipMutationVariables
+  >(CreateRelationshipDocument, options);
 }
-    `;
-export type UpdateRelationshipMutationFn = Apollo.MutationFunction<UpdateRelationshipMutation, UpdateRelationshipMutationVariables>;
+export type CreateRelationshipMutationHookResult = ReturnType<
+  typeof useCreateRelationshipMutation
+>;
+export type CreateRelationshipMutationResult =
+  Apollo.MutationResult<CreateRelationshipMutation>;
+export type CreateRelationshipMutationOptions = Apollo.BaseMutationOptions<
+  CreateRelationshipMutation,
+  CreateRelationshipMutationVariables
+>;
+export const UpdateRelationshipDocument = gql`
+  mutation UpdateRelationship(
+    $projectId: Int!
+    $where: WhereIdInput!
+    $data: UpdateRelationInput!
+  ) {
+    updateRelation(projectId: $projectId, where: $where, data: $data)
+  }
+`;
+export type UpdateRelationshipMutationFn = Apollo.MutationFunction<
+  UpdateRelationshipMutation,
+  UpdateRelationshipMutationVariables
+>;
 
 /**
  * __useUpdateRelationshipMutation__
@@ -87,19 +116,36 @@ export type UpdateRelationshipMutationFn = Apollo.MutationFunction<UpdateRelatio
  *   },
  * });
  */
-export function useUpdateRelationshipMutation(baseOptions?: Apollo.MutationHookOptions<UpdateRelationshipMutation, UpdateRelationshipMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<UpdateRelationshipMutation, UpdateRelationshipMutationVariables>(UpdateRelationshipDocument, options);
-      }
-export type UpdateRelationshipMutationHookResult = ReturnType<typeof useUpdateRelationshipMutation>;
-export type UpdateRelationshipMutationResult = Apollo.MutationResult<UpdateRelationshipMutation>;
-export type UpdateRelationshipMutationOptions = Apollo.BaseMutationOptions<UpdateRelationshipMutation, UpdateRelationshipMutationVariables>;
-export const DeleteRelationshipDocument = gql`
-    mutation DeleteRelationship($projectId: Int!, $where: WhereIdInput!) {
-  deleteRelation(projectId: $projectId, where: $where)
+export function useUpdateRelationshipMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    UpdateRelationshipMutation,
+    UpdateRelationshipMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    UpdateRelationshipMutation,
+    UpdateRelationshipMutationVariables
+  >(UpdateRelationshipDocument, options);
 }
-    `;
-export type DeleteRelationshipMutationFn = Apollo.MutationFunction<DeleteRelationshipMutation, DeleteRelationshipMutationVariables>;
+export type UpdateRelationshipMutationHookResult = ReturnType<
+  typeof useUpdateRelationshipMutation
+>;
+export type UpdateRelationshipMutationResult =
+  Apollo.MutationResult<UpdateRelationshipMutation>;
+export type UpdateRelationshipMutationOptions = Apollo.BaseMutationOptions<
+  UpdateRelationshipMutation,
+  UpdateRelationshipMutationVariables
+>;
+export const DeleteRelationshipDocument = gql`
+  mutation DeleteRelationship($projectId: Int!, $where: WhereIdInput!) {
+    deleteRelation(projectId: $projectId, where: $where)
+  }
+`;
+export type DeleteRelationshipMutationFn = Apollo.MutationFunction<
+  DeleteRelationshipMutation,
+  DeleteRelationshipMutationVariables
+>;
 
 /**
  * __useDeleteRelationshipMutation__
@@ -119,10 +165,24 @@ export type DeleteRelationshipMutationFn = Apollo.MutationFunction<DeleteRelatio
  *   },
  * });
  */
-export function useDeleteRelationshipMutation(baseOptions?: Apollo.MutationHookOptions<DeleteRelationshipMutation, DeleteRelationshipMutationVariables>) {
-        const options = {...defaultOptions, ...baseOptions}
-        return Apollo.useMutation<DeleteRelationshipMutation, DeleteRelationshipMutationVariables>(DeleteRelationshipDocument, options);
-      }
-export type DeleteRelationshipMutationHookResult = ReturnType<typeof useDeleteRelationshipMutation>;
-export type DeleteRelationshipMutationResult = Apollo.MutationResult<DeleteRelationshipMutation>;
-export type DeleteRelationshipMutationOptions = Apollo.BaseMutationOptions<DeleteRelationshipMutation, DeleteRelationshipMutationVariables>;
+export function useDeleteRelationshipMutation(
+  baseOptions?: Apollo.MutationHookOptions<
+    DeleteRelationshipMutation,
+    DeleteRelationshipMutationVariables
+  >,
+) {
+  const options = { ...defaultOptions, ...baseOptions };
+  return Apollo.useMutation<
+    DeleteRelationshipMutation,
+    DeleteRelationshipMutationVariables
+  >(DeleteRelationshipDocument, options);
+}
+export type DeleteRelationshipMutationHookResult = ReturnType<
+  typeof useDeleteRelationshipMutation
+>;
+export type DeleteRelationshipMutationResult =
+  Apollo.MutationResult<DeleteRelationshipMutation>;
+export type DeleteRelationshipMutationOptions = Apollo.BaseMutationOptions<
+  DeleteRelationshipMutation,
+  DeleteRelationshipMutationVariables
+>;

@@ -102,7 +102,11 @@ export class ModelResolver {
 
   public async updateRelation(
     _root: any,
-    args: { projectId: number; data: UpdateRelationData; where: { id: number } },
+    args: {
+      projectId: number;
+      data: UpdateRelationData;
+      where: { id: number };
+    },
     ctx: IContext,
   ) {
     const { data, where } = args;
@@ -153,7 +157,11 @@ export class ModelResolver {
     }
   }
 
-  public async validateCalculatedField(_root: any, args: { projectId: number; data: any }, ctx: IContext) {
+  public async validateCalculatedField(
+    _root: any,
+    args: { projectId: number; data: any },
+    ctx: IContext,
+  ) {
     const { name, modelId, columnId } = args.data;
     return await ctx.modelService.validateCalculatedFieldNaming(
       name,
@@ -164,7 +172,11 @@ export class ModelResolver {
 
   public async updateCalculatedField(
     _root: any,
-    _args: { projectId: number; data: UpdateCalculatedFieldData; where: { id: number } },
+    _args: {
+      projectId: number;
+      data: UpdateCalculatedFieldData;
+      where: { id: number };
+    },
     ctx: IContext,
   ) {
     const { data, where } = _args;
@@ -188,7 +200,11 @@ export class ModelResolver {
     }
   }
 
-  public async deleteCalculatedField(_root: any, args: { projectId: number; where: { id: number } }, ctx: IContext) {
+  public async deleteCalculatedField(
+    _root: any,
+    args: { projectId: number; where: { id: number } },
+    ctx: IContext,
+  ) {
     const columnId = args.where.id;
     const projectId = args.projectId;
     // check column exist and is calculated field
@@ -204,7 +220,11 @@ export class ModelResolver {
     return true;
   }
 
-  public async checkModelSync(_root: any, args: { projectId: number }, ctx: IContext) {
+  public async checkModelSync(
+    _root: any,
+    args: { projectId: number },
+    ctx: IContext,
+  ) {
     const projectId = args.projectId;
     const { manifest } = await ctx.mdlService.makeCurrentModelMDL(projectId);
     const currentHash = ctx.deployService.createMDLHash(manifest, projectId);
@@ -239,12 +259,18 @@ export class ModelResolver {
 
     // only generating for user's data source
     if (project.sampleDataset === null) {
-      await ctx.projectService.generateProjectRecommendationQuestions(projectId);
+      await ctx.projectService.generateProjectRecommendationQuestions(
+        projectId,
+      );
     }
     return deployRes;
   }
 
-  public async getMDL(_root: any, args: { projectId: number; hash: string }, ctx: IContext) {
+  public async getMDL(
+    _root: any,
+    args: { projectId: number; hash: string },
+    ctx: IContext,
+  ) {
     const mdl = await ctx.deployService.getMDLByHash(args.hash);
     return {
       hash: args.hash,
@@ -252,7 +278,11 @@ export class ModelResolver {
     };
   }
 
-  public async listModels(_root: any, args: { projectId: number }, ctx: IContext) {
+  public async listModels(
+    _root: any,
+    args: { projectId: number },
+    ctx: IContext,
+  ) {
     const projectId = args.projectId;
     const models = await ctx.modelRepository.findAllBy({ projectId });
     const modelIds = models.map((m) => m.id);
@@ -287,7 +317,11 @@ export class ModelResolver {
     return result;
   }
 
-  public async getModel(_root: any, args: { projectId: number; where: { id: number } }, ctx: IContext) {
+  public async getModel(
+    _root: any,
+    args: { projectId: number; where: { id: number } },
+    ctx: IContext,
+  ) {
     const modelId = args.where.id;
     const model = await ctx.modelRepository.findOneBy({ id: modelId });
     if (!model) {
@@ -442,7 +476,13 @@ export class ModelResolver {
     const { fields, primaryKey } = args.data;
     const projectId = args.projectId;
     try {
-      const model = await this.handleUpdateModel(ctx, projectId, args, fields, primaryKey);
+      const model = await this.handleUpdateModel(
+        ctx,
+        projectId,
+        args,
+        fields,
+        primaryKey,
+      );
       ctx.telemetry.sendEvent(TelemetryEvent.MODELING_UPDATE_MODEL, {
         data: args.data,
       });
@@ -562,7 +602,11 @@ export class ModelResolver {
   }
 
   // delete model
-  public async deleteModel(_root: any, args: { projectId: number; where: { id: number } }, ctx: IContext) {
+  public async deleteModel(
+    _root: any,
+    args: { projectId: number; where: { id: number } },
+    ctx: IContext,
+  ) {
     const modelId = args.where.id;
     const model = await ctx.modelRepository.findOneBy({ id: modelId });
     if (!model) {
@@ -577,7 +621,11 @@ export class ModelResolver {
   // update model metadata
   public async updateModelMetadata(
     _root: any,
-    args: { projectId: number; where: { id: number }; data: UpdateModelMetadataInput },
+    args: {
+      projectId: number;
+      where: { id: number };
+      data: UpdateModelMetadataInput;
+    },
     ctx: IContext,
   ): Promise<boolean> {
     const modelId = args.where.id;
@@ -784,7 +832,11 @@ export class ModelResolver {
   }
 
   // list views
-  public async listViews(_root: any, args: { projectId: number }, ctx: IContext) {
+  public async listViews(
+    _root: any,
+    args: { projectId: number },
+    ctx: IContext,
+  ) {
     const projectId = args.projectId;
     const views = await ctx.viewRepository.findAllBy({ projectId });
     return views.map((view) => ({
@@ -795,7 +847,11 @@ export class ModelResolver {
     }));
   }
 
-  public async getView(_root: any, args: { projectId: number; where: { id: number } }, ctx: IContext) {
+  public async getView(
+    _root: any,
+    args: { projectId: number; where: { id: number } },
+    ctx: IContext,
+  ) {
     const viewId = args.where.id;
     const view = await ctx.viewRepository.findOneBy({ id: viewId });
     if (!view) {
@@ -808,14 +864,20 @@ export class ModelResolver {
   }
 
   // validate a view name
-  public async validateView(_root: any, args: { projectId: number; data: any }, ctx: IContext) {
+  public async validateView(
+    _root: any,
+    args: { projectId: number; data: any },
+    ctx: IContext,
+  ) {
     const { name } = args.data;
     const { valid, message } = validateDisplayName(name);
     if (!valid) {
       return { valid, message };
     }
     const referenceName = replaceAllowableSyntax(name);
-    const views = await ctx.viewRepository.findAllBy({ projectId: args.projectId });
+    const views = await ctx.viewRepository.findAllBy({
+      projectId: args.projectId,
+    });
     if (views.find((v) => v.name === referenceName)) {
       return {
         valid: false,
@@ -825,7 +887,11 @@ export class ModelResolver {
     return { valid: true };
   }
   // create view from sql of a response
-  public async createView(_root: any, args: { projectId: number; data: any }, ctx: IContext) {
+  public async createView(
+    _root: any,
+    args: { projectId: number; data: any },
+    ctx: IContext,
+  ) {
     const { name: displayName, responseId, rephrasedQuestion } = args.data;
     const projectId = args.projectId;
 
@@ -833,7 +899,9 @@ export class ModelResolver {
     if (!project) {
       throw new Error('Project not found');
     }
-    const lastDeployment = await ctx.deployService.getLastDeployment(project.id);
+    const lastDeployment = await ctx.deployService.getLastDeployment(
+      project.id,
+    );
     const manifest = lastDeployment?.manifest;
 
     const response = await ctx.askingService.getResponse(responseId);
@@ -864,7 +932,10 @@ export class ModelResolver {
       properties: JSON.stringify(properties),
     });
 
-    ctx.telemetry.sendEvent(TelemetryEvent.MODELING_CREATE_CF, { name, responseId }); // Fallback to CREATE_CF if CREATE_VIEW is missing
+    ctx.telemetry.sendEvent(TelemetryEvent.MODELING_CREATE_CF, {
+      name,
+      responseId,
+    }); // Fallback to CREATE_CF if CREATE_VIEW is missing
 
     // async deploy
     this.deploy(null, { projectId, force: true }, ctx);
@@ -873,7 +944,11 @@ export class ModelResolver {
   }
 
   // delete view
-  public async deleteView(_root: any, args: { projectId: number; where: { id: number } }, ctx: IContext) {
+  public async deleteView(
+    _root: any,
+    args: { projectId: number; where: { id: number } },
+    ctx: IContext,
+  ) {
     const viewId = args.where.id;
     const projectId = args.projectId;
     const view = await ctx.viewRepository.findOneBy({ id: viewId });
@@ -888,7 +963,11 @@ export class ModelResolver {
     return true;
   }
 
-  public async previewModelData(_root: any, args: { projectId: number; where: { id: number } }, ctx: IContext) {
+  public async previewModelData(
+    _root: any,
+    args: { projectId: number; where: { id: number } },
+    ctx: IContext,
+  ) {
     const modelId = args.where.id;
     const projectId = args.projectId;
     const model = await ctx.modelRepository.findOneBy({ id: modelId });
@@ -914,7 +993,11 @@ export class ModelResolver {
     return data;
   }
 
-  public async previewViewData(_root: any, args: { projectId: number; where: any }, ctx: IContext) {
+  public async previewViewData(
+    _root: any,
+    args: { projectId: number; where: any },
+    ctx: IContext,
+  ) {
     const { id: viewId, limit } = args.where;
     const projectId = args.projectId;
     const view = await ctx.viewRepository.findOneBy({ id: viewId });
@@ -945,7 +1028,9 @@ export class ModelResolver {
   ) {
     const { sql, limit, dryRun } = args.data;
     const pid = args.projectId || args.data.projectId;
-    const project = await ctx.projectService.getProjectById(typeof pid === 'string' ? parseInt(pid) : pid);
+    const project = await ctx.projectService.getProjectById(
+      typeof pid === 'string' ? parseInt(pid) : pid,
+    );
     const { manifest } = await ctx.deployService.getLastDeployment(project.id);
     return await ctx.queryService.preview(sql, {
       project,

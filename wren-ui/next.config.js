@@ -15,12 +15,12 @@ const nextConfig = withLess({
   staticPageGenerationTimeout: 1000,
   transpilePackages: [
     '@ant-design/icons-svg',
-    '@ant-design/icons', 
+    '@ant-design/icons',
     'rc-util',
     'rc-pagination',
     'rc-picker',
     'rc-tree',
-    'rc-table'
+    'rc-table',
   ],
   compiler: {
     // Enables the styled-components SWC transform
@@ -50,22 +50,21 @@ const nextConfig = withLess({
     ];
   },
 
-	async headers() {
-		const frameAncestors =
-			process.env.WREN_UI_EMBED_FRAME_ANCESTORS || '*';
+  async headers() {
+    const frameAncestors = process.env.WREN_UI_EMBED_FRAME_ANCESTORS || '*';
 
-		return [
-			{
-				source: '/embed/:path*',
-				headers: [
-					{
-						key: 'Content-Security-Policy',
-						value: `frame-ancestors ${frameAncestors};`,
-					},
-				],
-			},
-		];
-	},
+    return [
+      {
+        source: '/embed/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: `frame-ancestors ${frameAncestors};`,
+          },
+        ],
+      },
+    ];
+  },
 });
 
 module.exports = withBundleAnalyzer(nextConfig);

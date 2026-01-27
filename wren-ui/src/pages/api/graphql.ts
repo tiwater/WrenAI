@@ -106,7 +106,9 @@ const bootstrapServer = async () => {
               const operationName = requestContext.request.operationName;
               const variables = requestContext.request.variables;
               const query = requestContext.request.query;
-              const queryHead = query ? query.split('\n').slice(0, 20).join('\n') : '';
+              const queryHead = query
+                ? query.split('\n').slice(0, 20).join('\n')
+                : '';
 
               logger.error(
                 `Missing required $projectId. operationName=${operationName || 'UNKNOWN'} variables=${JSON.stringify(

@@ -203,8 +203,8 @@ export class ProjectRepository
   }
 
   public async updateLastAccessed(projectId: number) {
-    const updated = await this.updateOne(projectId, { 
-      lastAccessedAt: new Date()
+    const updated = await this.updateOne(projectId, {
+      lastAccessedAt: new Date(),
     });
     return updated;
   }
@@ -215,8 +215,8 @@ export class ProjectRepository
       .select('*')
       .from('project')
       .orderByRaw('last_accessed_at DESC NULLS LAST, id DESC');
-    
-    return projects.map(data => this.transformFromDBData(data));
+
+    return projects.map((data) => this.transformFromDBData(data));
   }
 
   public async getProjectById(projectId: number) {

@@ -29,7 +29,10 @@ export const DASHBOARD_ITEMS = gql`
 `;
 
 export const CREATE_DASHBOARD_ITEM = gql`
-  mutation CreateDashboardItem($projectId: Int!, $data: CreateDashboardItemInput!) {
+  mutation CreateDashboardItem(
+    $projectId: Int!
+    $data: CreateDashboardItemInput!
+  ) {
     createDashboardItem(projectId: $projectId, data: $data) {
       ...CommonDashboardItem
     }
@@ -51,7 +54,10 @@ export const UPDATE_DASHBOARD_ITEM = gql`
 `;
 
 export const UPDATE_DASHBOARD_ITEM_LAYOUTS = gql`
-  mutation UpdateDashboardItemLayouts($projectId: Int!, $data: UpdateDashboardItemLayoutsInput!) {
+  mutation UpdateDashboardItemLayouts(
+    $projectId: Int!
+    $data: UpdateDashboardItemLayoutsInput!
+  ) {
     updateDashboardItemLayouts(projectId: $projectId, data: $data) {
       ...CommonDashboardItem
     }
@@ -60,7 +66,10 @@ export const UPDATE_DASHBOARD_ITEM_LAYOUTS = gql`
 `;
 
 export const DELETE_DASHBOARD_ITEM = gql`
-  mutation DeleteDashboardItem($projectId: Int!, $where: DashboardItemWhereInput!) {
+  mutation DeleteDashboardItem(
+    $projectId: Int!
+    $where: DashboardItemWhereInput!
+  ) {
     deleteDashboardItem(projectId: $projectId, where: $where)
   }
 `;
@@ -78,7 +87,10 @@ export const PREVIEW_ITEM_SQL = gql`
 `;
 
 export const SET_DASHBOARD_SCHEDULE = gql`
-  mutation SetDashboardSchedule($projectId: Int!, $data: SetDashboardScheduleInput!) {
+  mutation SetDashboardSchedule(
+    $projectId: Int!
+    $data: SetDashboardScheduleInput!
+  ) {
     setDashboardSchedule(projectId: $projectId, data: $data) {
       id
       projectId

@@ -61,7 +61,9 @@ export default function ViewSQLTabContent(props: AnswerResultProps) {
   const onPreviewData = async () => {
     if (!projectId) return;
     try {
-      await previewData({ variables: { projectId, where: { responseId: id } } });
+      await previewData({
+        variables: { projectId, where: { responseId: id } },
+      });
     } catch (e: any) {
       message.error(e?.message || '查询失败');
     }

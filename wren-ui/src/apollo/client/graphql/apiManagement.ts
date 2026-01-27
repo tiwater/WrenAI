@@ -6,7 +6,11 @@ export const API_HISTORY = gql`
     $filter: ApiHistoryFilterInput
     $pagination: ApiHistoryPaginationInput!
   ) {
-    apiHistory(projectId: $projectId, filter: $filter, pagination: $pagination) {
+    apiHistory(
+      projectId: $projectId
+      filter: $filter
+      pagination: $pagination
+    ) {
       items {
         id
         projectId

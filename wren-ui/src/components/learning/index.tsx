@@ -221,7 +221,9 @@ export default function SidebarSection(_props: Props) {
 
   const saveLanguage = async (value: ProjectLanguage) => {
     if (!projectId) return;
-    await updateCurrentProject({ variables: { projectId, data: { language: value } } });
+    await updateCurrentProject({
+      variables: { projectId, data: { language: value } },
+    });
   };
 
   const stories = useMemo(() => {

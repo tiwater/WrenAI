@@ -39,14 +39,20 @@ export default function useHomeSidebar() {
   const onRename = async (id: string, newName: string) => {
     if (!projectId) return;
     await updateThread({
-      variables: { projectId: projectId!, where: { id: Number(id) }, data: { summary: newName } },
+      variables: {
+        projectId: projectId!,
+        where: { id: Number(id) },
+        data: { summary: newName },
+      },
     });
     refetch();
   };
 
   const onDelete = async (id) => {
     if (!projectId) return;
-    await deleteThread({ variables: { projectId: projectId!, where: { id: Number(id) } } });
+    await deleteThread({
+      variables: { projectId: projectId!, where: { id: Number(id) } },
+    });
     refetch();
   };
 

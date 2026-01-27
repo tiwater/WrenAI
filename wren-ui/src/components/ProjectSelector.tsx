@@ -24,7 +24,7 @@ export const ProjectSelector: React.FC = () => {
   useEffect(() => {
     if (data?.listProjects) {
       setProjects(data.listProjects);
-      
+
       // If no project is selected and we have projects, select the first one
       if (!selectedProjectId && data.listProjects.length > 0) {
         setSelectedProjectId(data.listProjects[0].id);

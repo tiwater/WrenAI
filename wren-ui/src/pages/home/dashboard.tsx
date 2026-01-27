@@ -147,7 +147,9 @@ export default function Dashboard() {
               onClose={cacheSettingsDrawer.closeDrawer}
               onSubmit={async (values) => {
                 if (!projectId) return;
-                await setDashboardSchedule({ variables: { projectId, data: values } });
+                await setDashboardSchedule({
+                  variables: { projectId, data: values },
+                });
               }}
             />
           )}

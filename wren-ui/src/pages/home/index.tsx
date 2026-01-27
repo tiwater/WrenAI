@@ -138,15 +138,15 @@ export default function Home() {
       const response = await createThread({
         variables: {
           projectId,
-          data: payload
-        }
+          data: payload,
+        },
       });
       const threadId = response.data.createThread.id;
       await preloadThread({
         variables: {
           projectId,
-          threadId
-        }
+          threadId,
+        },
       });
       router.push(Path.Home + `/${threadId}`);
     } catch (error) {

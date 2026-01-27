@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Select, Button, Space, Modal, Form, Input, message, Tag } from 'antd';
-import { PlusOutlined, DatabaseOutlined, CheckCircleOutlined } from '@ant-design/icons';
+import {
+  PlusOutlined,
+  DatabaseOutlined,
+  CheckCircleOutlined,
+} from '@ant-design/icons';
 import { useRouter } from 'next/router';
 import {
   useListProjectsQuery,
-  useCreateProjectMutation
+  useCreateProjectMutation,
 } from '@/apollo/client/graphql/projects.generated';
 import { Path } from '@/utils/enum';
 import { DataSourceName } from '@/apollo/client/graphql/__types__';
@@ -53,7 +57,8 @@ export default function ProjectSelector({ className }: ProjectSelectorProps) {
 
     Modal.confirm({
       title: 'Switch Project',
-      content: 'Are you sure you want to switch to this project? Any unsaved changes will be lost.',
+      content:
+        'Are you sure you want to switch to this project? Any unsaved changes will be lost.',
       onOk: () => {
         setSelectedProjectId(projectId);
         // Update last accessed time for the new project
@@ -77,7 +82,7 @@ export default function ProjectSelector({ className }: ProjectSelectorProps) {
   };
 
   const projects = data?.listProjects?.projects || [];
-  const activeProject = projects.find(p => p.id === selectedProjectId);
+  const activeProject = projects.find((p) => p.id === selectedProjectId);
 
   const getDataSourceIcon = (type: DataSourceName) => {
     // You can add more specific icons for different data sources
@@ -101,10 +106,14 @@ export default function ProjectSelector({ className }: ProjectSelectorProps) {
                 {getDataSourceIcon(project.type)}
                 <span>{project.name}</span>
                 {project.id === selectedProjectId && (
-                  <CheckCircleOutlined style={{ color: '#52c41a', marginLeft: 4 }} />
+                  <CheckCircleOutlined
+                    style={{ color: '#52c41a', marginLeft: 4 }}
+                  />
                 )}
                 {project.sampleDataset && (
-                  <Tag color="blue" style={{ marginLeft: 8 }}>Sample</Tag>
+                  <Tag color="blue" style={{ marginLeft: 8 }}>
+                    Sample
+                  </Tag>
                 )}
               </Space>
             </Option>
@@ -135,7 +144,10 @@ export default function ProjectSelector({ className }: ProjectSelectorProps) {
             label="Project Name"
             rules={[
               { required: true, message: 'Please enter a project name' },
-              { max: 50, message: 'Project name must be less than 50 characters' },
+              {
+                max: 50,
+                message: 'Project name must be less than 50 characters',
+              },
             ]}
           >
             <Input placeholder="Enter project name" />

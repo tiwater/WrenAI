@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
 
 interface ProjectContextType {
   selectedProjectId: number | null;
@@ -11,7 +17,9 @@ const ProjectContext = createContext<ProjectContextType | undefined>(undefined);
 const PROJECT_STORAGE_KEY = 'wrenai_selected_project';
 
 export function ProjectProvider({ children }: { children: ReactNode }) {
-  const [selectedProjectId, setSelectedProjectIdState] = useState<number | null>(null);
+  const [selectedProjectId, setSelectedProjectIdState] = useState<
+    number | null
+  >(null);
   const [hydrated, setHydrated] = useState(false);
 
   // Load selected project from localStorage on mount
@@ -53,7 +61,9 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <ProjectContext.Provider value={{ selectedProjectId, setSelectedProjectId, hydrated }}>
+    <ProjectContext.Provider
+      value={{ selectedProjectId, setSelectedProjectId, hydrated }}
+    >
       {children}
     </ProjectContext.Provider>
   );
@@ -83,7 +93,8 @@ export function useSelectedProject() {
   }
 
   // Check if we are in a state where missing selectedProjectId is expected
-  const isSetupFlow = typeof window !== 'undefined' &&
+  const isSetupFlow =
+    typeof window !== 'undefined' &&
     (window.location.pathname.startsWith('/setup') ||
       window.location.pathname.startsWith('/embed') ||
       sessionStorage.getItem('creatingNewProject') === 'true' ||
