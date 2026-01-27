@@ -9,7 +9,7 @@ networks:
 
 services:
   bootstrap:
-    image: ghcr.io/canner/wren-bootstrap:${WREN_BOOTSTRAP_VERSION}
+    image: ghcr.io/tiwater/wren-bootstrap:${WREN_BOOTSTRAP_VERSION}
     restart: on-failure
     platform: ${PLATFORM}
     environment:
@@ -19,7 +19,7 @@ services:
     command: /bin/sh /app/init.sh
 
   wren-engine:
-    image: ghcr.io/canner/wren-engine:${WREN_ENGINE_VERSION}
+    image: ghcr.io/tiwater/wren-engine:${WREN_ENGINE_VERSION}
     restart: on-failure
     platform: ${PLATFORM}
     expose:
@@ -34,7 +34,7 @@ services:
       - bootstrap
 
   ibis-server:
-    image: ghcr.io/canner/wren-engine-ibis:${IBIS_SERVER_VERSION}
+    image: ghcr.io/tiwater/wren-engine-ibis:${IBIS_SERVER_VERSION}
     restart: on-failure
     platform: ${PLATFORM}
     expose:
@@ -47,7 +47,7 @@ services:
       - wren
 
   wren-ai-service:
-    image: ghcr.io/canner/wren-ai-service:${WREN_AI_SERVICE_VERSION}
+    image: ghcr.io/tiwater/wren-ai-service:${WREN_AI_SERVICE_VERSION}
     restart: on-failure
     platform: ${PLATFORM}
     expose:
@@ -81,7 +81,7 @@ services:
       - wren
 
   wren-ui:
-    image: ghcr.io/canner/wren-ui:${WREN_UI_VERSION}
+    image: ghcr.io/tiwater/wren-ui:${WREN_UI_VERSION}
     restart: on-failure
     platform: ${PLATFORM}
     environment:
