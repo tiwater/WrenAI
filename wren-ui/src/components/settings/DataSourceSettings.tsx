@@ -12,6 +12,7 @@ import {
   transformPropertiesToForm,
 } from '@/hooks/useSetupConnectionDataSource';
 import { parseGraphQLError } from '@/utils/errorHandler';
+import { useProject } from '@/contexts/ProjectContext';
 import {
   useStartSampleDatasetMutation,
   useUpdateDataSourceMutation,
@@ -35,6 +36,7 @@ const SampleDatasetPanel = (props: Props) => {
   const router = useRouter();
   const { sampleDataset, closeModal } = props;
   const templates = getTemplates();
+  const { selectedProjectId } = useProject();
   const [startSampleDataset] = useStartSampleDatasetMutation({
     onError: (error) => console.error(error),
     onCompleted: () => {
@@ -53,7 +55,9 @@ const SampleDatasetPanel = (props: Props) => {
         okButtonProps: { danger: true },
         okText: 'Change',
         onOk: async () => {
-          await startSampleDataset({ variables: { data: { name } } });
+          await startSampleDataset({
+            variables: { projectId: selectedProjectId, data: { name } },
+          });
         },
       });
     }
@@ -79,6 +83,7 @@ const SampleDatasetPanel = (props: Props) => {
 
 const DataSourcePanel = (props: Props) => {
   const { type, properties, refetchSettings } = props;
+  const { selectedProjectId } = useProject();
 
   const current = getDataSource(type as unknown as DATA_SOURCES);
   const [form] = Form.useForm();
@@ -105,6 +110,7 @@ const DataSourcePanel = (props: Props) => {
       .then((values) => {
         updateDataSource({
           variables: {
+            projectId: selectedProjectId,
             data: { properties: transformFormToProperties(values, type) },
           },
         });

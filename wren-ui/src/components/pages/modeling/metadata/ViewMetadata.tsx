@@ -5,6 +5,7 @@ import { COLUMN } from '@/components/table/BaseTable';
 import FieldTable from '@/components/table/FieldTable';
 import { DiagramView } from '@/utils/data';
 import { usePreviewViewDataMutation } from '@/apollo/client/graphql/view.generated';
+import { useProject } from '@/contexts/ProjectContext';
 
 export type Props = DiagramView;
 
@@ -17,12 +18,16 @@ export default function ViewMetadata(props: Props) {
     viewId,
   } = props || {};
 
+  const { selectedProjectId } = useProject();
+
   const [previewViewData, previewViewDataResult] = usePreviewViewDataMutation({
     onError: (error) => console.error(error),
   });
 
   const onPreviewData = () => {
-    previewViewData({ variables: { where: { id: viewId } } });
+    previewViewData({
+      variables: { projectId: selectedProjectId, where: { id: viewId } },
+    });
   };
 
   // View only can input Name (alias), so it should show alias as Name in metadata.

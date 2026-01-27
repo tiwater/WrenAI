@@ -38,7 +38,7 @@ export default function ProjectSelector({ className }: ProjectSelectorProps) {
     }
   }, [data, selectedProjectId, setSelectedProjectId]);
 
-  const [createProject] = useCreateProjectMutation({
+  const [_createProject] = useCreateProjectMutation({
     onCompleted: () => {
       message.success('Project created successfully');
       setIsModalVisible(false);
@@ -82,9 +82,8 @@ export default function ProjectSelector({ className }: ProjectSelectorProps) {
   };
 
   const projects = data?.listProjects?.projects || [];
-  const activeProject = projects.find((p) => p.id === selectedProjectId);
 
-  const getDataSourceIcon = (type: DataSourceName) => {
+  const getDataSourceIcon = (_type: DataSourceName) => {
     // You can add more specific icons for different data sources
     return <DatabaseOutlined />;
   };
@@ -130,7 +129,7 @@ export default function ProjectSelector({ className }: ProjectSelectorProps) {
 
       <Modal
         title="Create New Project"
-        open={isModalVisible}
+        visible={isModalVisible}
         onOk={handleCreateProject}
         onCancel={() => {
           setIsModalVisible(false);

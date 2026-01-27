@@ -6,7 +6,6 @@ import {
   respondWithSimple,
   handleApiError,
   validateSql,
-,
   getProjectIdFromRequest,
 } from '@/apollo/server/utils/apiUtils';
 import { getLogger } from '@server/utils';
@@ -108,7 +107,9 @@ export default async function handler(
   let project;
 
   try {
-    project = await projectService.getProjectById(await getProjectIdFromRequest(req));
+    project = await projectService.getProjectById(
+      await getProjectIdFromRequest(req),
+    );
 
     // Handle GET method - list SQL pairs
     if (req.method === 'GET') {

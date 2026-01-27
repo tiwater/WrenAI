@@ -7,6 +7,7 @@ import RelationTable from '@/components/table/RelationTable';
 import PreviewData from '@/components/dataPreview/PreviewData';
 import { DiagramModel } from '@/utils/data';
 import { usePreviewModelDataMutation } from '@/apollo/client/graphql/model.generated';
+import { useProject } from '@/contexts/ProjectContext';
 
 export type Props = DiagramModel;
 
@@ -20,6 +21,8 @@ export default function ModelMetadata(props: Props) {
     relationFields = [],
     description,
   } = props || {};
+
+  const { selectedProjectId } = useProject();
 
   const [previewModelData, previewModelDataResult] =
     usePreviewModelDataMutation({
@@ -38,7 +41,9 @@ export default function ModelMetadata(props: Props) {
   }, [fieldsMap, previewModelDataResult.data]);
 
   const onPreviewData = () => {
-    previewModelData({ variables: { where: { id: modelId } } });
+    previewModelData({
+      variables: { projectId: selectedProjectId, where: { id: modelId } },
+    });
   };
 
   return (

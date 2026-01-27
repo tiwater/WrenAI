@@ -7,7 +7,6 @@ import {
   ApiError,
   respondWith,
   handleApiError,
-,
   getProjectIdFromRequest,
 } from '@/apollo/server/utils/apiUtils';
 import {
@@ -66,7 +65,9 @@ export default async function handler(
   let project;
 
   try {
-    project = await projectService.getProjectById(await getProjectIdFromRequest(req));
+    project = await projectService.getProjectById(
+      await getProjectIdFromRequest(req),
+    );
 
     // Only allow POST method
     if (req.method !== 'POST') {

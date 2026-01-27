@@ -10,7 +10,7 @@ import {
 } from '@/contexts/ProjectContext';
 
 export default function useSetupConnectionSampleDataset() {
-  const projectId = useOptionalSelectedProject();
+  const _projectId = useOptionalSelectedProject();
   const { setSelectedProjectId } = useProject();
   const router = useRouter();
 

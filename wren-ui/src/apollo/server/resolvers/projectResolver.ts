@@ -71,7 +71,7 @@ const toDateString = (
     if (!isNaN(parsedDate.getTime())) {
       return parsedDate.toISOString();
     }
-  } catch (e) {
+  } catch (_e) {
     // Ignore parse errors
   }
   return null;

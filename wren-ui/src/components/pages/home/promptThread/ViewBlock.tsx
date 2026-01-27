@@ -1,8 +1,3 @@
-import Link from 'next/link';
-import { Button } from 'antd';
-import FileDoneOutlined from '@ant-design/icons/FileDoneOutlined';
-import SaveOutlined from '@ant-design/icons/SaveOutlined';
-import { Path } from '@/utils/enum';
 import { ViewInfo } from '@/apollo/client/graphql/__types__';
 
 interface Props {
@@ -10,7 +5,7 @@ interface Props {
   onClick: () => void;
 }
 
-export default function ViewBlock({ view, onClick }: Props) {
+export default function ViewBlock(_props: Props) {
   // Disable save as view feature for Jinjie
 
   // const isViewSaved = !!view;
@@ -42,5 +37,5 @@ export default function ViewBlock({ view, onClick }: Props) {
   //     Save as View
   //   </Button>
   // );
-  return '';
+  return null;
 }

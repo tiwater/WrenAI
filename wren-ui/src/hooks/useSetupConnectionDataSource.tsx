@@ -14,7 +14,7 @@ import {
 const PASSWORD_PLACEHOLDER = '************';
 
 export default function useSetupConnectionDataSource() {
-  const projectId = useOptionalSelectedProject();
+  const _projectId = useOptionalSelectedProject();
   const { setSelectedProjectId } = useProject();
   const router = useRouter();
   const [selected, setSelected] = useState<DataSourceName>();
@@ -48,7 +48,10 @@ export default function useSetupConnectionDataSource() {
     async (properties?: Record<string, any>) => {
       // Get project name from sessionStorage if creating a new project
       const projectName = sessionStorage.getItem('newProjectName');
-      const finalProperties = transformFormToProperties(properties, selected);
+      const finalProperties = transformFormToProperties(
+        properties,
+        selected,
+      ) as any;
 
       // Add project name to properties if available
       if (projectName) {

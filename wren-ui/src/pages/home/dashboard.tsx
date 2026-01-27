@@ -17,6 +17,7 @@ import {
   useDeleteDashboardItemMutation,
   useUpdateDashboardItemLayoutsMutation,
   useSetDashboardScheduleMutation,
+  DashboardDocument,
 } from '@/apollo/client/graphql/dashboard.generated';
 import { useGetSettingsQuery } from '@/apollo/client/graphql/settings.generated';
 import {
@@ -68,7 +69,7 @@ export default function Dashboard() {
   );
 
   const [setDashboardSchedule] = useSetDashboardScheduleMutation({
-    refetchQueries: [{ query: 'Dashboard', variables: { projectId } }],
+    refetchQueries: [{ query: DashboardDocument, variables: { projectId } }],
     onCompleted: () => {
       message.success('Successfully updated dashboard schedule.');
     },

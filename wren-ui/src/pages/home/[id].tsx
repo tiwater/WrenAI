@@ -47,8 +47,6 @@ import {
   CreateThreadResponseInput,
   ThreadResponse,
   CreateSqlPairInput,
-  AskStep,
-  DetailedThread,
   AskingTaskStatus,
 } from '@/apollo/client/graphql/__types__';
 import {

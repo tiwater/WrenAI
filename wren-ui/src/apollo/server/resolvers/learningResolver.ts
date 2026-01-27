@@ -17,7 +17,7 @@ export class LearningResolver {
 
   public async getLearningRecord(
     _root: any,
-    args: { projectId: number },
+    _args: { projectId: number },
     ctx: IContext,
   ): Promise<any> {
     const result = await ctx.learningRepository.findAll();

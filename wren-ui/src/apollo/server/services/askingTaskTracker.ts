@@ -22,6 +22,7 @@ interface TrackedTask {
   queryId: string;
   taskId?: number;
   lastPolled: number;
+  createdAt: number;
   question?: string;
   result?: AskResult;
   isFinalized: boolean;
@@ -61,6 +62,7 @@ export class AskingTaskTracker implements IAskingTaskTracker {
   private trackedTasksById: Map<number, TrackedTask> = new Map();
   private pollingInterval: number;
   private memoryRetentionTime: number;
+  private timeout: number;
   private pollingIntervalId: NodeJS.Timeout;
   private runningJobs = new Set<string>();
   private threadResponseRepository: IThreadResponseRepository;
@@ -73,6 +75,7 @@ export class AskingTaskTracker implements IAskingTaskTracker {
     viewRepository,
     pollingInterval = 1000, // 1 second
     memoryRetentionTime = 5 * 60 * 1000, // 5 minutes
+    timeout = 10 * 60 * 1000, // 10 minutes
   }: {
     wrenAIAdaptor: IWrenAIAdaptor;
     askingTaskRepository: IAskingTaskRepository;
@@ -80,6 +83,7 @@ export class AskingTaskTracker implements IAskingTaskTracker {
     viewRepository: IViewRepository;
     pollingInterval?: number;
     memoryRetentionTime?: number;
+    timeout?: number;
   }) {
     this.wrenAIAdaptor = wrenAIAdaptor;
     this.askingTaskRepository = askingTaskRepository;
@@ -87,6 +91,7 @@ export class AskingTaskTracker implements IAskingTaskTracker {
     this.viewRepository = viewRepository;
     this.pollingInterval = pollingInterval;
     this.memoryRetentionTime = memoryRetentionTime;
+    this.timeout = timeout;
     this.startPolling();
   }
 
@@ -112,7 +117,9 @@ export class AskingTaskTracker implements IAskingTaskTracker {
       const task = {
         queryId,
         lastPolled: Date.now(),
+        createdAt: Date.now(),
         question: input.query,
+        threadResponseId: input.threadResponseId,
         isFinalized: false,
         rerunFromCancelled: input.rerunFromCancelled,
       } as TrackedTask;

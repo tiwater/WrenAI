@@ -6,7 +6,6 @@ import {
   ApiError,
   respondWithSimple,
   handleApiError,
-,
   getProjectIdFromRequest,
 } from '@/apollo/server/utils/apiUtils';
 import { getLogger } from '@server/utils';
@@ -24,7 +23,9 @@ export default async function handler(
   let project;
 
   try {
-    project = await projectService.getProjectById(await getProjectIdFromRequest(req));
+    project = await projectService.getProjectById(
+      await getProjectIdFromRequest(req),
+    );
 
     // Only allow GET method
     if (req.method !== 'GET') {

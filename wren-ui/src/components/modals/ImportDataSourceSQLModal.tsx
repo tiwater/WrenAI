@@ -9,6 +9,7 @@ import SQLEditor from '@/components/editor/SQLEditor';
 import ErrorCollapse from '@/components/ErrorCollapse';
 import { useModelSubstituteMutation } from '@/apollo/client/graphql/sql.generated';
 import { DataSource, DataSourceName } from '@/apollo/client/graphql/__types__';
+import { useProject } from '@/contexts/ProjectContext';
 
 type Props = ModalAction<{ dataSource: DATA_SOURCES }>;
 
@@ -37,6 +38,7 @@ export const isSupportSubstitute = (dataSource: DataSource) => {
 export default function ImportDataSourceSQLModal(props: Props) {
   const { visible, defaultValue, onSubmit, onClose } = props;
   const name = getDataSourceName(defaultValue?.dataSource) || 'data source';
+  const { selectedProjectId } = useProject();
 
   // Handle errors via try/catch blocks rather than onError callback
   const [substituteDialectSQL, modelSubstitudeResult] =
@@ -65,7 +67,10 @@ export default function ImportDataSourceSQLModal(props: Props) {
       .validateFields()
       .then(async (values) => {
         const response = await substituteDialectSQL({
-          variables: { data: { sql: values.dialectSql } },
+          variables: {
+            projectId: selectedProjectId,
+            data: { sql: values.dialectSql },
+          },
         });
         await onSubmit(response.data?.modelSubstitute);
         onClose();

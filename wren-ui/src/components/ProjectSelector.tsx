@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Select, Space, Typography, Spin } from 'antd';
-import { useQuery } from '@apollo/client';
-import { LIST_PROJECTS } from '@/apollo/client/graphql';
-import { useProjectContext } from '@/contexts/ProjectContext';
+import { useListProjectsQuery } from '@/apollo/client/graphql/projects.generated';
+import { useProject } from '@/contexts/ProjectContext';
 
 const { Text } = Typography;
 const { Option } = Select;
@@ -14,20 +13,20 @@ interface Project {
 }
 
 export const ProjectSelector: React.FC = () => {
-  const { selectedProjectId, setSelectedProjectId } = useProjectContext();
+  const { selectedProjectId, setSelectedProjectId } = useProject();
   const [projects, setProjects] = useState<Project[]>([]);
 
-  const { loading, data, error } = useQuery(LIST_PROJECTS, {
+  const { loading, data, error } = useListProjectsQuery({
     fetchPolicy: 'cache-and-network',
   });
 
   useEffect(() => {
-    if (data?.listProjects) {
-      setProjects(data.listProjects);
+    if (data?.listProjects?.projects) {
+      setProjects(data.listProjects.projects);
 
       // If no project is selected and we have projects, select the first one
-      if (!selectedProjectId && data.listProjects.length > 0) {
-        setSelectedProjectId(data.listProjects[0].id);
+      if (!selectedProjectId && data.listProjects.projects.length > 0) {
+        setSelectedProjectId(data.listProjects.projects[0].id);
       }
     }
   }, [data, selectedProjectId, setSelectedProjectId]);
