@@ -1,14 +1,16 @@
 import React from 'react';
-import { Table, Button, Space, Typography, Tag, Card, message } from 'antd';
+import { Table, Button, Space, Typography, Tag, Card, message, Modal } from 'antd';
 import {
   DatabaseOutlined,
   CheckCircleOutlined,
   PlusOutlined,
   LoginOutlined,
+  DeleteOutlined,
+  ExclamationCircleOutlined,
 } from '@ant-design/icons';
 import { useRouter } from 'next/router';
 import SiderLayout from '@/components/layouts/SiderLayout';
-import { useListProjectsQuery } from '@/apollo/client/graphql/projects.generated';
+import { useListProjectsQuery, useDeleteProjectMutation } from '@/apollo/client/graphql/projects.generated';
 import { DataSourceName } from '@/apollo/client/graphql/__types__';
 import { Path } from '@/utils/enum';
 import { useProject } from '@/contexts/ProjectContext';
@@ -20,8 +22,18 @@ export default function ProjectsPage() {
   const router = useRouter();
   const { selectedProjectId, setSelectedProjectId } = useProject();
 
-  const { data, loading } = useListProjectsQuery({
+  const { data, loading, refetch } = useListProjectsQuery({
     fetchPolicy: 'cache-and-network',
+  });
+
+  const [deleteProject] = useDeleteProjectMutation({
+    onCompleted: async () => {
+      message.success('Project deleted successfully');
+      await refetch();
+    },
+    onError: (error) => {
+      message.error(`Failed to delete project: ${error.message}`);
+    },
   });
 
   const projects = data?.listProjects?.projects || [];
@@ -40,6 +52,52 @@ export default function ProjectsPage() {
       sessionStorage.setItem('creatingNewProject', 'true');
       router.push(Path.OnboardingConnection);
     }
+  };
+
+  const handleDeleteProject = (projectId: number, projectName: string) => {
+    Modal.confirm({
+      title: 'Are you sure you want to delete this project?',
+      icon: <ExclamationCircleOutlined />,
+      content: (
+        <div>
+          <p>
+            This will permanently delete project <strong>{projectName}</strong> and all its data, including:
+          </p>
+          <ul>
+            <li>Models and relationships</li>
+            <li>Views and calculated fields</li>
+            <li>Thread history and queries</li>
+            <li>All settings and configurations</li>
+          </ul>
+          <p>This action cannot be undone.</p>
+        </div>
+      ),
+      okText: 'Delete',
+      okButtonProps: { danger: true },
+      cancelText: 'Cancel',
+      width: 520,
+      onOk: async () => {
+        const isCurrentProject = projectId === selectedProjectId;
+        
+        await deleteProject({ variables: { projectId } });
+        
+        // After deletion, handle project selection
+        if (isCurrentProject) {
+          const remainingProjects = projects.filter(p => p.id !== projectId);
+          
+          if (remainingProjects.length > 0) {
+            // Select the first remaining project
+            const nextProject = remainingProjects[0];
+            setSelectedProjectId(nextProject.id);
+            message.info(`Switched to project: ${nextProject.name}`);
+          } else {
+            // No projects left, redirect to onboarding
+            setSelectedProjectId(null);
+            router.push(Path.OnboardingConnection);
+          }
+        }
+      },
+    });
   };
 
   const getDataSourceColor = (type: DataSourceName) => {
@@ -116,7 +174,7 @@ export default function ProjectsPage() {
     {
       title: 'Actions',
       key: 'actions',
-      width: 150,
+      width: 200,
       render: (_, record) => (
         <Space size="small">
           {record.id !== selectedProjectId && (
@@ -138,6 +196,14 @@ export default function ProjectsPage() {
               Go to Home
             </Button>
           )}
+          <Button
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => handleDeleteProject(record.id, record.name)}
+            size="small"
+          >
+            Delete
+          </Button>
         </Space>
       ),
     },
