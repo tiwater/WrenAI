@@ -45,8 +45,7 @@ const PromptStyle = styled.div<{ $isEmbed?: boolean }>`
   width: 680px;
   max-width: calc(100vw - 24px);
   left: 50%;
-  margin-left: ${(props) =>
-    props.$isEmbed ? '0' : 'calc(-340px + 133px)'};
+  margin-left: ${(props) => (props.$isEmbed ? '0' : 'calc(-340px + 133px)')};
   transform: ${(props) => (props.$isEmbed ? 'translateX(-50%)' : 'none')};
   bottom: 18px;
   z-index: 999;
