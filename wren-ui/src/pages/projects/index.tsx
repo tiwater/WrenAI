@@ -1,5 +1,14 @@
 import React from 'react';
-import { Table, Button, Space, Typography, Tag, Card, message, Modal } from 'antd';
+import {
+  Table,
+  Button,
+  Space,
+  Typography,
+  Tag,
+  Card,
+  message,
+  Modal,
+} from 'antd';
 import {
   DatabaseOutlined,
   CheckCircleOutlined,
@@ -10,7 +19,10 @@ import {
 } from '@ant-design/icons';
 import { useRouter } from 'next/router';
 import SiderLayout from '@/components/layouts/SiderLayout';
-import { useListProjectsQuery, useDeleteProjectMutation } from '@/apollo/client/graphql/projects.generated';
+import {
+  useListProjectsQuery,
+  useDeleteProjectMutation,
+} from '@/apollo/client/graphql/projects.generated';
 import { DataSourceName } from '@/apollo/client/graphql/__types__';
 import { Path } from '@/utils/enum';
 import { useProject } from '@/contexts/ProjectContext';
@@ -61,7 +73,8 @@ export default function ProjectsPage() {
       content: (
         <div>
           <p>
-            This will permanently delete project <strong>{projectName}</strong> and all its data, including:
+            This will permanently delete project <strong>{projectName}</strong>{' '}
+            and all its data, including:
           </p>
           <ul>
             <li>Models and relationships</li>
@@ -78,13 +91,13 @@ export default function ProjectsPage() {
       width: 520,
       onOk: async () => {
         const isCurrentProject = projectId === selectedProjectId;
-        
+
         await deleteProject({ variables: { projectId } });
-        
+
         // After deletion, handle project selection
         if (isCurrentProject) {
-          const remainingProjects = projects.filter(p => p.id !== projectId);
-          
+          const remainingProjects = projects.filter((p) => p.id !== projectId);
+
           if (remainingProjects.length > 0) {
             // Select the first remaining project
             const nextProject = remainingProjects[0];

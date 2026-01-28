@@ -1,7 +1,5 @@
 import { Button, Select, Row, Col, Form, message } from 'antd';
-import {
-  useUpdateCurrentProjectMutation,
-} from '@/apollo/client/graphql/settings.generated';
+import { useUpdateCurrentProjectMutation } from '@/apollo/client/graphql/settings.generated';
 import { getLanguageText } from '@/utils/language';
 import { ProjectLanguage } from '@/apollo/client/graphql/__types__';
 import { useOptionalSelectedProject } from '@/contexts/ProjectContext';
