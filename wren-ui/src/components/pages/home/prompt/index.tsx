@@ -32,6 +32,7 @@ interface Props {
   inputProps: {
     placeholder: string;
   };
+  isEmbed?: boolean;
 }
 
 interface Attributes {
@@ -39,16 +40,26 @@ interface Attributes {
   close: () => void;
 }
 
-const PromptStyle = styled.div`
+const PromptStyle = styled.div<{ $isEmbed?: boolean }>`
   position: fixed;
   width: 680px;
+  max-width: calc(100vw - 24px);
   left: 50%;
-  margin-left: calc(-340px + 133px);
+  margin-left: ${(props) =>
+    props.$isEmbed ? '0' : 'calc(-340px + 133px)'};
+  transform: ${(props) => (props.$isEmbed ? 'translateX(-50%)' : 'none')};
   bottom: 18px;
   z-index: 999;
   box-shadow:
     rgba(0, 0, 0, 0.1) 0px 10px 15px -3px,
     rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
+
+  @media (max-width: 768px) {
+    width: calc(100vw - 24px);
+    left: 50%;
+    margin-left: 0;
+    transform: translateX(-50%);
+  }
 `;
 
 export default forwardRef<Attributes, Props>(function Prompt(props, ref) {
@@ -61,6 +72,7 @@ export default forwardRef<Attributes, Props>(function Prompt(props, ref) {
     onStopStreaming,
     onStopRecommend,
     inputProps,
+    isEmbed,
   } = props;
   const askProcessState = useAskProcessState();
 
@@ -155,7 +167,10 @@ export default forwardRef<Attributes, Props>(function Prompt(props, ref) {
   );
 
   return (
-    <PromptStyle className="d-flex align-end bg-gray-2 p-3 border border-gray-3 rounded">
+    <PromptStyle
+      $isEmbed={isEmbed}
+      className="d-flex align-end bg-gray-2 p-3 border border-gray-3 rounded"
+    >
       <PromptInput
         question={question}
         isProcessing={isProcessing}

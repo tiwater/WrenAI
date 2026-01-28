@@ -402,18 +402,21 @@ export default function EmbedThread() {
   };
 
   return (
-    <div className="app">
+    <div className="h-full">
       <PromptThreadProvider value={providerValue}>
         <PromptThread />
       </PromptThreadProvider>
 
       <div className="py-12" />
+
+      <div ref={bottomRef} />
+
       <Prompt
         ref={$prompt}
         {...askPrompt}
+        isEmbed
         onCreateResponse={onCreateResponse}
       />
-      <div ref={bottomRef} />
 
       <SaveAsViewModal
         {...saveAsViewModal.state}
