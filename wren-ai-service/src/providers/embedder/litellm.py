@@ -98,28 +98,46 @@ class AsyncDocumentEmbedder:
         self, texts_to_embed: List[str], batch_size: int
     ) -> Tuple[List[List[float]], Dict[str, Any]]:
         async def embed_single_batch(batch: List[str]) -> Any:
-            return await aembedding(
-                model=self._model,
-                input=batch,
-                api_key=self._api_key,
-                api_base=self._api_base_url,
-                timeout=self._timeout,
-                **self._kwargs,
+            logger.debug(
+                f"Calling embedding API: model={self._model}, "
+                f"api_base={self._api_base_url}, batch_size={len(batch)}, "
+                f"has_api_key={self._api_key is not None}"
             )
+            try:
+                result = await aembedding(
+                    model=self._model,
+                    input=batch,
+                    api_key=self._api_key,
+                    api_base=self._api_base_url,
+                    timeout=self._timeout,
+                    **self._kwargs,
+                )
+                if result.data and len(result.data) > 0:
+                    embedding_dim = len(result.data[0].get("embedding", []))
+                    logger.debug(f"Embedding API returned {len(result.data)} embeddings, dimension={embedding_dim}")
+                return result
+            except Exception as e:
+                logger.error(
+                    f"Embedding API call failed: {type(e).__name__}: {e}, "
+                    f"model={self._model}, api_base={self._api_base_url}"
+                )
+                raise
 
         batches = [
             texts_to_embed[i : i + batch_size]
             for i in range(0, len(texts_to_embed), batch_size)
         ]
 
-        responses = await asyncio.gather(
-            *[embed_single_batch(batch) for batch in batches]
-        )
-
+        logger.debug(f"Processing {len(texts_to_embed)} texts in {len(batches)} batches (sequential)")
+        
+        # Process batches sequentially to avoid overwhelming private embedding APIs
+        # that may not handle concurrent requests well
         all_embeddings = []
         meta: Dict[str, Any] = {}
 
-        for response in responses:
+        for i, batch in enumerate(batches):
+            logger.debug(f"Processing batch {i+1}/{len(batches)}...")
+            response = await embed_single_batch(batch)
             embeddings = [el["embedding"] for el in response.data]
             all_embeddings.extend(embeddings)
 
@@ -170,10 +188,15 @@ class LitellmEmbedderProvider(EmbedderProvider):
         api_key_name: Optional[
             str
         ] = None,  # e.g. EMBEDDER_OPENAI_API_KEY, EMBEDDER_ANTHROPIC_API_KEY, etc.
+        api_key_env: Optional[str] = None,
         api_base: Optional[str] = None,
         timeout: float = 120.0,
         **kwargs,
     ):
+        # Backward-compatible config field name.
+        if not api_key_name and api_key_env:
+            api_key_name = api_key_env
+
         self._api_key = os.getenv(api_key_name) if api_key_name else None
         self._api_base = remove_trailing_slash(api_base) if api_base else None
         self._embedding_model = model

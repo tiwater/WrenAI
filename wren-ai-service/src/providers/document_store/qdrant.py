@@ -398,21 +398,30 @@ class QdrantProvider(DocumentStoreProvider):
         timeout: Optional[int] = (
             int(os.getenv("QDRANT_TIMEOUT")) if os.getenv("QDRANT_TIMEOUT") else 120
         ),
-        embedding_model_dim: int = (
-            int(os.getenv("EMBEDDING_MODEL_DIMENSION"))
-            if os.getenv("EMBEDDING_MODEL_DIMENSION")
-            else 0
-        ),
-        recreate_index: bool = (
-            bool(os.getenv("SHOULD_FORCE_DEPLOY"))
-            if os.getenv("SHOULD_FORCE_DEPLOY")
-            else False
-        ),
+        embedding_model_dim: int = 0,
+        recreate_index: bool = False,
         **_,
     ):
         self._location = location
         self._api_key = Secret.from_token(api_key) if api_key else None
         self._timeout = timeout
+        # Prefer explicit config values, fallback to env vars for backward compatibility.
+        if not embedding_model_dim:
+            embedding_model_dim = (
+                int(os.getenv("EMBEDDING_MODEL_DIMENSION"))
+                if os.getenv("EMBEDDING_MODEL_DIMENSION")
+                else 0
+            )
+        if not recreate_index and os.getenv("SHOULD_FORCE_DEPLOY") is not None:
+            # Historically SHOULD_FORCE_DEPLOY was used to control recreate_index.
+            recreate_index = bool(os.getenv("SHOULD_FORCE_DEPLOY"))
+
+        if not embedding_model_dim:
+            raise ValueError(
+                "Qdrant embedding dimension is not set. Provide `embedding_model_dim` in config.yaml "
+                "or set EMBEDDING_MODEL_DIMENSION."
+            )
+
         self._embedding_model_dim = embedding_model_dim
         self._reset_document_store(recreate_index)
 

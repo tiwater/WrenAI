@@ -315,7 +315,14 @@ async def chunk(
 
 @observe(capture_input=False, capture_output=False)
 async def embedding(chunk: Dict[str, Any], embedder: Any) -> Dict[str, Any]:
-    return await embedder.run(documents=chunk["documents"])
+    try:
+        logger.debug(f"Starting embedding for {len(chunk['documents'])} documents...")
+        result = await embedder.run(documents=chunk["documents"])
+        logger.debug(f"Embedding completed successfully for {len(result.get('documents', []))} documents")
+        return result
+    except Exception as e:
+        logger.error(f"Embedding failed with error: {type(e).__name__}: {e}")
+        raise
 
 
 @observe(capture_input=False, capture_output=False)
