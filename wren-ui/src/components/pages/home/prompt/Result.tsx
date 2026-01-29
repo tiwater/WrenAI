@@ -255,6 +255,7 @@ const getGeneralAnswerStateComponent = (state: PROCESS_STATE) => {
   return (
     {
       [PROCESS_STATE.FINISHED]: GeneralAnswer,
+      [PROCESS_STATE.FAILED]: Failed,
     }[state] || null
   );
 };
@@ -263,6 +264,7 @@ const getMisleadingQueryStateComponent = (state: PROCESS_STATE) => {
   return (
     {
       [PROCESS_STATE.FINISHED]: MisleadingQuery,
+      [PROCESS_STATE.FAILED]: Failed,
     }[state] || null
   );
 };
