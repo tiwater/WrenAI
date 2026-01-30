@@ -52,6 +52,7 @@ async def force_deploy():
             )
             return
 
+        # Check if deployment is needed (not forcing, let wren-ui decide based on hash)
         async with session.post(
             graphql_endpoint,
             json={
@@ -60,12 +61,18 @@ async def force_deploy():
                     "deploy(projectId: $projectId, force: $force) "
                     "}"
                 ),
-                "variables": {"force": True, "projectId": project_id},
+                "variables": {"force": False, "projectId": project_id},  # Changed to False
             },
-            timeout=aiohttp.ClientTimeout(total=60),  # 60 seconds
+            timeout=aiohttp.ClientTimeout(total=600),  # 5 minutes for slow embedding APIs
         ) as response:
             res = await response.json()
-            print(f"Forcing deployment: {res}")
+            deploy_result = res.get("data", {}).get("deploy", {})
+            status = deploy_result.get("status") if isinstance(deploy_result, dict) else None
+            
+            if status == "SUCCESS":
+                print(f"Deployment check: already up-to-date (no redeployment needed)")
+            else:
+                print(f"Deployment result: {res}")
 
 
 if os.getenv("ENGINE", "wren_ui") == "wren_ui":
