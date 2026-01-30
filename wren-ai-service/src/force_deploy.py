@@ -57,7 +57,7 @@ async def force_deploy():
             json={
                 "query": (
                     "mutation Deploy($projectId: Int!, $force: Boolean!) { "
-                    "deploy(projectId: $projectId, force: $force) { status error } "
+                    "deploy(projectId: $projectId, force: $force) "
                     "}"
                 ),
                 "variables": {"force": True, "projectId": project_id},
