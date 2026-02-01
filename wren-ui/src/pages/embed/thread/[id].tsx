@@ -392,7 +392,14 @@ export default function EmbedThread() {
         });
       }
     }
-  }, [askingTask?.status, askingTask?.type, askingTask?.queryId, projectId, responses, fetchThreadResponse]);
+  }, [
+    askingTask?.status,
+    askingTask?.type,
+    askingTask?.queryId,
+    projectId,
+    responses,
+    fetchThreadResponse,
+  ]);
 
   const recommendedQuestions = useMemo(
     () =>
