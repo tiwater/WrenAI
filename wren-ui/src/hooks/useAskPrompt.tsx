@@ -263,6 +263,21 @@ export default function useAskPrompt(threadId?: number) {
         checkFetchAskingStreamTask(askingTask);
       }
     }
+
+    // CRITICAL: Also update cache for GENERAL/MISLEADING_QUERY tasks when they finish.
+    // This ensures the frontend cache reflects the latest askingTask status,
+    // which is necessary for handleUnfinishedTasks to correctly trigger
+    // fetchThreadResponse and display error states.
+    if (isFinished && isNeedRecommendedQuestions(askingTask)) {
+      if (threadId && projectId) {
+        handleUpdateThreadCache(
+          threadId,
+          askingTask,
+          projectId,
+          askingTaskResult.client,
+        );
+      }
+    }
   }, [askingTask?.status, threadId, checkFetchAskingStreamTask, projectId]);
 
   useEffect(() => {

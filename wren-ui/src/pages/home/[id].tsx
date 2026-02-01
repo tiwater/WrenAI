@@ -48,6 +48,7 @@ import {
   ThreadResponse,
   CreateSqlPairInput,
   AskingTaskStatus,
+  AskingTaskType,
 } from '@/apollo/client/graphql/__types__';
 import {
   SqlPairsDocument,
@@ -266,6 +267,24 @@ export default function HomeThread() {
         return;
       }
 
+      // CRITICAL: When askingTask is FINISHED but type is GENERAL/MISLEADING_QUERY,
+      // the backend marks threadResponse.answerDetail.status as FAILED.
+      // We need to fetch the latest threadResponse to get the updated answerDetail.
+      const generalOrMisleadingResponse = (responses || []).find(
+        (response) =>
+          response?.askingTask?.status === AskingTaskStatus.FINISHED &&
+          (response?.askingTask?.type === AskingTaskType.GENERAL ||
+            response?.askingTask?.type === AskingTaskType.MISLEADING_QUERY) &&
+          !getThreadResponseIsFinished(response),
+      );
+      if (generalOrMisleadingResponse) {
+        if (!projectId) return;
+        fetchThreadResponse({
+          variables: { projectId, responseId: generalOrMisleadingResponse.id },
+        });
+        return;
+      }
+
       // unfinished thread response
       const unfinishedThreadResponse = (responses || []).find(
         (response) => !getThreadResponseIsFinished(response),
@@ -322,6 +341,33 @@ export default function HomeThread() {
       setShowRecommendedQuestions(true);
     }
   }, [isPollingResponseFinished]);
+
+  // CRITICAL: When askingTask becomes FINISHED with type GENERAL/MISLEADING_QUERY,
+  // the backend marks threadResponse.answerDetail.status as FAILED.
+  // We need to directly trigger fetchThreadResponse to get the updated status.
+  // This is necessary because responses from useThreadQuery doesn't poll,
+  // so handleUnfinishedTasks won't be re-triggered automatically.
+  const askingTask = askPrompt.data.askingTask;
+  useEffect(() => {
+    if (!askingTask || !projectId) return;
+
+    const isFinished = getIsFinished(askingTask.status);
+    const isGeneralOrMisleading =
+      askingTask.type === AskingTaskType.GENERAL ||
+      askingTask.type === AskingTaskType.MISLEADING_QUERY;
+
+    if (isFinished && isGeneralOrMisleading) {
+      // Find the response that matches this askingTask
+      const matchingResponse = responses.find(
+        (r) => r.askingTask?.queryId === askingTask.queryId,
+      );
+      if (matchingResponse && !getThreadResponseIsFinished(matchingResponse)) {
+        fetchThreadResponse({
+          variables: { projectId, responseId: matchingResponse.id },
+        });
+      }
+    }
+  }, [askingTask?.status, askingTask?.type, askingTask?.queryId, projectId, responses, fetchThreadResponse]);
 
   const recommendedQuestions = useMemo(
     () =>

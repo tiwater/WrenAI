@@ -356,7 +356,7 @@ export default function AnswerResult(props: Props) {
               >
                 <div className="d-flex align-center">
                   <RobotSVG className="mr-2" />
-                  保存 SQL 信息
+                  保存参考 SQL
                 </div>
               </Button>
             </Tooltip>
