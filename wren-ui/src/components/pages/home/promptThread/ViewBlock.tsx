@@ -1,3 +1,8 @@
+import Link from 'next/link';
+import { Button } from 'antd';
+import FileDoneOutlined from '@ant-design/icons/FileDoneOutlined';
+import SaveOutlined from '@ant-design/icons/SaveOutlined';
+import { Path } from '@/utils/enum';
 import { ViewInfo } from '@/apollo/client/graphql/__types__';
 
 interface Props {
@@ -5,37 +10,34 @@ interface Props {
   onClick: () => void;
 }
 
-export default function ViewBlock(_props: Props) {
-  // Disable save as view feature for Jinjie
+export default function ViewBlock({ view, onClick }: Props) {
+  const isViewSaved = !!view;
 
-  // const isViewSaved = !!view;
+  if (isViewSaved) {
+    return (
+      <div className="gray-6 text-medium">
+        <FileDoneOutlined className="mr-2" />
+        由存档视图生成{' '}
+        <Link
+          className="gray-7"
+          href={`${Path.Modeling}?viewId=${view.id}&openMetadata=true`}
+          target="_blank"
+          rel="noreferrer noopener"
+        >
+          {view.displayName}
+        </Link>
+      </div>
+    );
+  }
 
-  // if (isViewSaved) {
-  //   return (
-  //     <div className="gray-6 text-medium">
-  //       <FileDoneOutlined className="mr-2" />
-  //       Generated from saved view{' '}
-  //       <Link
-  //         className="gray-7"
-  //         href={`${Path.Modeling}?viewId=${view.id}&openMetadata=true`}
-  //         target="_blank"
-  //         rel="noreferrer noopener"
-  //       >
-  //         {view.displayName}
-  //       </Link>
-  //     </div>
-  //   );
-  // }
-
-  // return (
-  //   <Button
-  //     type="link"
-  //     size="small"
-  //     icon={<SaveOutlined />}
-  //     onClick={onClick}
-  //   >
-  //     Save as View
-  //   </Button>
-  // );
-  return null;
+  return (
+    <Button
+      type="link"
+      size="small"
+      icon={<SaveOutlined />}
+      onClick={onClick}
+    >
+      保存结果视图
+    </Button>
+  );
 }
