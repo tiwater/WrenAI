@@ -245,7 +245,10 @@ export class QueryService implements IQueryService {
           'Ibis dry-run failed, falling back to native PostgreSQL EXPLAIN validation',
         );
 
-        const ibisConnInfo = toIbisConnectionInfo(dataSource, connectionInfo) as any;
+        const ibisConnInfo = toIbisConnectionInfo(
+          dataSource,
+          connectionInfo,
+        ) as any;
         const connectionUrl = ibisConnInfo?.connectionUrl;
 
         if (!connectionUrl) {
@@ -330,7 +333,10 @@ export class QueryService implements IQueryService {
           'Ibis query failed, falling back to native PostgreSQL execution',
         );
 
-        const ibisConnInfo = toIbisConnectionInfo(dataSource, connectionInfo) as any;
+        const ibisConnInfo = toIbisConnectionInfo(
+          dataSource,
+          connectionInfo,
+        ) as any;
         const connectionUrl = ibisConnInfo?.connectionUrl;
 
         if (!connectionUrl) {
@@ -356,7 +362,10 @@ export class QueryService implements IQueryService {
             : {}),
         });
 
-        const safeLimit = Math.max(0, Math.floor(limit ?? DEFAULT_PREVIEW_LIMIT));
+        const safeLimit = Math.max(
+          0,
+          Math.floor(limit ?? DEFAULT_PREVIEW_LIMIT),
+        );
         const wrappedSql = `SELECT * FROM (${trimmedSql}) AS _wren_subquery LIMIT ${safeLimit}`;
 
         try {
@@ -364,10 +373,13 @@ export class QueryService implements IQueryService {
           const result = await pgClient.query(wrappedSql);
 
           const columns = result.fields.map((f) => f.name);
-          const dtypes = result.fields.reduce((acc, f) => {
-            acc[f.name] = this.pgOidToDType(f.dataTypeID);
-            return acc;
-          }, {} as Record<string, string>);
+          const dtypes = result.fields.reduce(
+            (acc, f) => {
+              acc[f.name] = this.pgOidToDType(f.dataTypeID);
+              return acc;
+            },
+            {} as Record<string, string>,
+          );
           const data = result.rows.map((row) => columns.map((c) => row[c]));
 
           const response: PreviewDataResponse = {
