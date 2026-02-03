@@ -281,6 +281,13 @@ export default function useAskPrompt(threadId?: number) {
   }, [askingTask?.status, threadId, checkFetchAskingStreamTask, projectId]);
 
   useEffect(() => {
+    return () => {
+      askingTaskResult.stopPolling();
+      instantRecommendedQuestionsResult.stopPolling();
+    };
+  }, []);
+
+  useEffect(() => {
     // handle instant recommended questions
     if (isNeedRecommendedQuestions(askingTask)) {
       startRecommendedQuestions();
@@ -300,12 +307,14 @@ export default function useAskPrompt(threadId?: number) {
   }, [askingTaskType, createAskingTaskResult.data]);
 
   const onStop = async (queryId?: string) => {
+    askingTaskResult.stopPolling();
+    instantRecommendedQuestionsResult.stopPolling();
+    askingStreamTaskResult.reset();
     const taskId = queryId || createAskingTaskResult.data?.createAskingTask.id;
     if (taskId) {
       await cancelAskingTask({ variables: { taskId } }).catch((error) =>
         console.error(error),
       );
-      // waiting for polling fetching stop
       await nextTick(1000);
     }
   };
@@ -347,6 +356,7 @@ export default function useAskPrompt(threadId?: number) {
       await fetchAskingTask({
         variables: { taskId: response.data.createAskingTask.id },
       });
+      askingTaskResult.startPolling?.(1000);
     } catch (error) {
       console.error(error);
     }
@@ -356,6 +366,7 @@ export default function useAskPrompt(threadId?: number) {
     await fetchAskingTask({
       variables: { taskId: queryId },
     });
+    askingTaskResult.startPolling?.(1000);
   };
 
   const onStopPolling = () => askingTaskResult.stopPolling();

@@ -145,6 +145,7 @@ export default forwardRef<Attributes, Props>(function Prompt(props, ref) {
     onStop && (await onStop());
     setShowResult(false);
     askProcessState.resetState();
+    setQuestion('');
   };
 
   const submitAsk = async (value: string) => {

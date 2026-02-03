@@ -156,14 +156,16 @@ const Understanding = makeProcessing('Understanding question');
 
 const IntentionFinished = (props: Props) => {
   const { data, onIntentSQLAnswer } = props;
-  const { type } = data;
+  const { type, originalQuestion } = data;
+  const lastTriggeredQuestionRef = useRef<string>('');
 
   useEffect(() => {
-    // create an empty response first if this is a text to sql task
-    if (type === AskingTaskType.TEXT_TO_SQL) {
-      onIntentSQLAnswer && onIntentSQLAnswer();
-    }
-  }, [type]);
+    if (type !== AskingTaskType.TEXT_TO_SQL) return;
+    if (!originalQuestion) return;
+    if (lastTriggeredQuestionRef.current === originalQuestion) return;
+    lastTriggeredQuestionRef.current = originalQuestion;
+    onIntentSQLAnswer && onIntentSQLAnswer();
+  }, [type, originalQuestion]);
 
   // To keep the UI result keep showing as understanding
   return <Understanding {...props} />;
