@@ -290,11 +290,14 @@ export default function HomeThread() {
         (response) => !getThreadResponseIsFinished(response),
       );
 
-      if (
-        canFetchThreadResponse(unfinishedThreadResponse?.askingTask) &&
-        unfinishedThreadResponse
-      ) {
-        if (!projectId) return;
+      if (!unfinishedThreadResponse) return;
+      if (!projectId) return;
+
+      const canPoll =
+        !unfinishedThreadResponse.askingTask ||
+        canFetchThreadResponse(unfinishedThreadResponse.askingTask);
+
+      if (canPoll) {
         fetchThreadResponse({
           variables: { projectId, responseId: unfinishedThreadResponse.id },
         });
