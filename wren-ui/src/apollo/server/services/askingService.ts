@@ -507,6 +507,12 @@ export class AskingService implements IAskingService {
     this.askingTaskRepository = askingTaskRepository;
     this.mdlService = mdlService;
     this.askingTaskTracker = askingTaskTracker;
+
+    // Inject TextBasedAnswerBackgroundTracker into AskingTaskTracker
+    // This allows AskingTaskTracker to trigger answer generation after rerun tasks complete
+    this.askingTaskTracker.setTextBasedAnswerBackgroundTracker(
+      this.textBasedAnswerBackgroundTracker,
+    );
   }
 
   public async getThreadRecommendationQuestions(
@@ -645,6 +651,21 @@ export class AskingService implements IAskingService {
 
     if (!threadResponse) {
       throw new Error(`Thread response ${threadResponseId} not found`);
+    }
+
+    // Clear the INTERRUPTED status from answerDetail when rerunning
+    // This ensures the "Cancelled by user" tag is removed and the task can be regenerated
+    if (
+      threadResponse.answerDetail?.status ===
+      ThreadResponseAnswerStatus.INTERRUPTED
+    ) {
+      await this.threadResponseRepository.updateOne(threadResponseId, {
+        answerDetail: {
+          ...threadResponse.answerDetail,
+          status: ThreadResponseAnswerStatus.NOT_STARTED,
+          error: null,
+        },
+      });
     }
 
     // get the original question and ask again
@@ -857,12 +878,12 @@ export class AskingService implements IAskingService {
       `[DEBUG] generateThreadResponseAnswer: Fetched response ${threadResponse.id} with SQL: ${threadResponse.sql}`,
     );
 
-    // CRITICAL: If the task has already been finalized (FAILED, INTERRUPTED, or FINISHED),
+    // CRITICAL: If the task has already been finalized (FAILED or FINISHED),
     // do NOT reset its status or add it to the background tracker again.
+    // However, INTERRUPTED status should allow regeneration since the user explicitly requested it.
     const currentStatus = threadResponse.answerDetail?.status;
     if (
       currentStatus === ThreadResponseAnswerStatus.FAILED ||
-      currentStatus === ThreadResponseAnswerStatus.INTERRUPTED ||
       currentStatus === ThreadResponseAnswerStatus.FINISHED
     ) {
       logger.info(
@@ -870,6 +891,14 @@ export class AskingService implements IAskingService {
           `Not resetting status. ${currentStatus === ThreadResponseAnswerStatus.FAILED ? `Error: ${JSON.stringify(threadResponse.answerDetail?.error)}` : ''}`,
       );
       return threadResponse;
+    }
+
+    // Allow regeneration for INTERRUPTED status (user cancelled and wants to retry)
+    if (currentStatus === ThreadResponseAnswerStatus.INTERRUPTED) {
+      logger.info(
+        `[DEBUG] generateThreadResponseAnswer: Response ${threadResponse.id} was INTERRUPTED. ` +
+          `Allowing regeneration.`,
+      );
     }
 
     try {

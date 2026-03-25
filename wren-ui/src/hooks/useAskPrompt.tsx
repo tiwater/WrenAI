@@ -101,6 +101,8 @@ const handleUpdateThreadCache = (
           thread: {
             ...existingData.thread,
             responses: existingData.thread.responses.map((response) => {
+              // Match by queryId - after rerun, the response.askingTask.queryId
+              // should have been updated by handleUpdateRerunAskingTaskCache
               if (response.askingTask?.queryId === askingTask?.queryId) {
                 return {
                   ...response,
@@ -249,33 +251,22 @@ export default function useAskPrompt(threadId?: number) {
     const isFinished = getIsFinished(askingTask?.status);
     if (isFinished) askingTaskResult.stopPolling();
 
-    // handle update cache for preparing component
-    if (isNeedPreparing(askingTask)) {
-      if (threadId) {
-        if (projectId) {
-          handleUpdateThreadCache(
-            threadId,
-            askingTask,
-            projectId,
-            askingTaskResult.client,
-          );
-        }
-        checkFetchAskingStreamTask(askingTask);
-      }
-    }
+    // Always update cache when askingTask status changes
+    // This ensures the UI reflects the latest state, especially for:
+    // 1. Rerun from cancelled tasks (status changes from STOPPED to UNDERSTANDING)
+    // 2. Normal task progress (UNDERSTANDING -> SEARCHING -> PLANNING -> etc.)
+    // 3. Task completion (FINISHED, FAILED, STOPPED)
+    if (askingTask && threadId && projectId) {
+      handleUpdateThreadCache(
+        threadId,
+        askingTask,
+        projectId,
+        askingTaskResult.client,
+      );
 
-    // CRITICAL: Also update cache for GENERAL/MISLEADING_QUERY tasks when they finish.
-    // This ensures the frontend cache reflects the latest askingTask status,
-    // which is necessary for handleUnfinishedTasks to correctly trigger
-    // fetchThreadResponse and display error states.
-    if (isFinished && isNeedRecommendedQuestions(askingTask)) {
-      if (threadId && projectId) {
-        handleUpdateThreadCache(
-          threadId,
-          askingTask,
-          projectId,
-          askingTaskResult.client,
-        );
+      // Fetch asking stream task for TEXT_TO_SQL tasks
+      if (isNeedPreparing(askingTask)) {
+        checkFetchAskingStreamTask(askingTask);
       }
     }
   }, [askingTask?.status, threadId, checkFetchAskingStreamTask, projectId]);
@@ -315,7 +306,18 @@ export default function useAskPrompt(threadId?: number) {
       await cancelAskingTask({ variables: { taskId } }).catch((error) =>
         console.error(error),
       );
-      await nextTick(1000);
+      // Fetch the latest task status after cancellation to update the UI
+      // This ensures the askingTask.status is updated to STOPPED
+      const { data } = await fetchAskingTask({ variables: { taskId } });
+      // Update the thread cache so PreparationStatus shows the correct STOPPED state
+      if (data?.askingTask && threadId && projectId) {
+        handleUpdateThreadCache(
+          threadId,
+          data.askingTask,
+          projectId,
+          askingTaskResult.client,
+        );
+      }
     }
   };
 
@@ -339,6 +341,8 @@ export default function useAskPrompt(threadId?: number) {
         projectId,
         askingTaskResult.client,
       );
+      // Start polling to track the new task's progress
+      askingTaskResult.startPolling?.(1000);
     } catch (error) {
       console.error(error);
     }

@@ -14,6 +14,7 @@ import {
 import { IWrenAIAdaptor } from '../adaptors';
 import * as Errors from '@server/utils/error';
 import { ThreadResponseAnswerStatus } from './askingService';
+import { TextBasedAnswerBackgroundTracker } from '../backgrounds/textBasedAnswerBackgroundTracker';
 
 const logger = getLogger('AskingTaskTracker');
 logger.level = 'debug';
@@ -53,6 +54,9 @@ export interface IAskingTaskTracker {
     threadId: number,
     threadResponseId: number,
   ): Promise<void>;
+  setTextBasedAnswerBackgroundTracker(
+    tracker: TextBasedAnswerBackgroundTracker,
+  ): void;
 }
 
 export class AskingTaskTracker implements IAskingTaskTracker {
@@ -67,6 +71,8 @@ export class AskingTaskTracker implements IAskingTaskTracker {
   private runningJobs = new Set<string>();
   private threadResponseRepository: IThreadResponseRepository;
   private viewRepository: IViewRepository;
+  private textBasedAnswerBackgroundTracker: TextBasedAnswerBackgroundTracker | null =
+    null;
 
   constructor({
     wrenAIAdaptor,
@@ -93,6 +99,14 @@ export class AskingTaskTracker implements IAskingTaskTracker {
     this.memoryRetentionTime = memoryRetentionTime;
     this.timeout = timeout;
     this.startPolling();
+  }
+
+  // Setter to inject TextBasedAnswerBackgroundTracker after construction
+  // This avoids circular dependency issues
+  public setTextBasedAnswerBackgroundTracker(
+    tracker: TextBasedAnswerBackgroundTracker,
+  ): void {
+    this.textBasedAnswerBackgroundTracker = tracker;
   }
 
   public async createAskingTask(
@@ -125,35 +139,15 @@ export class AskingTaskTracker implements IAskingTaskTracker {
       } as TrackedTask;
       this.trackedTasks.set(queryId, task);
 
-      // Persist a DB record immediately so follow-up requests (e.g. createThreadResponse)
-      // can resolve the asking task by queryId even before the first poll updates the DB.
-      // This avoids a race where createThreadResponse throws "Asking task ... not found".
-      const existingTaskRecord =
-        await this.askingTaskRepository.findByQueryId(queryId);
-      if (!existingTaskRecord) {
-        const createdTask = await this.askingTaskRepository.createOne({
-          queryId,
-          question: input.query,
-          detail: {
-            status: AskResultStatus.UNDERSTANDING,
-          } as any,
-        });
-        task.taskId = createdTask.id;
-        this.trackedTasksById.set(createdTask.id, task);
-      } else {
-        task.taskId = existingTaskRecord.id;
-        this.trackedTasksById.set(existingTaskRecord.id, task);
-      }
-
-      // if rerun from cancelled, we update the query id to the previous task
+      // if rerun from cancelled, we update the existing task record instead of creating a new one
       if (
         input.rerunFromCancelled &&
         input.previousTaskId &&
         input.threadResponseId
       ) {
         // set the thread response id in memory to bind the task to the thread response
-        // we don't have to update to database here because the thread response id is already set in database
         task.threadResponseId = input.threadResponseId;
+        task.taskId = input.previousTaskId;
 
         // update the task id in memory
         this.trackedTasksById.set(input.previousTaskId, task);
@@ -165,10 +159,37 @@ export class AskingTaskTracker implements IAskingTaskTracker {
         // update the result in memory
         task.result = result;
 
-        // update the query id in database
+        // update the query id and reset the detail status in database
         await this.askingTaskRepository.updateOne(input.previousTaskId, {
           queryId,
+          detail: {
+            status: AskResultStatus.UNDERSTANDING,
+          } as any,
         });
+
+        logger.info(
+          `[DEBUG] createAskingTask: Rerun from cancelled, updated task ${input.previousTaskId} with new queryId ${queryId}`,
+        );
+      } else {
+        // Persist a DB record immediately so follow-up requests (e.g. createThreadResponse)
+        // can resolve the asking task by queryId even before the first poll updates the DB.
+        // This avoids a race where createThreadResponse throws "Asking task ... not found".
+        const existingTaskRecord =
+          await this.askingTaskRepository.findByQueryId(queryId);
+        if (!existingTaskRecord) {
+          const createdTask = await this.askingTaskRepository.createOne({
+            queryId,
+            question: input.query,
+            detail: {
+              status: AskResultStatus.UNDERSTANDING,
+            } as any,
+          });
+          task.taskId = createdTask.id;
+          this.trackedTasksById.set(createdTask.id, task);
+        } else {
+          task.taskId = existingTaskRecord.id;
+          this.trackedTasksById.set(existingTaskRecord.id, task);
+        }
       }
 
       logger.info(`Created asking task with queryId: ${queryId}`);
@@ -241,6 +262,40 @@ export class AskingTaskTracker implements IAskingTaskTracker {
       } else {
         logger.warn(
           `[DEBUG] cancelAskingTask: ThreadResponse ${task.threadResponseId} not found`,
+        );
+      }
+    }
+
+    // Update the askingTask.detail.status to STOPPED so the frontend can show the correct state
+    if (task?.taskId) {
+      const askingTask = await this.askingTaskRepository.findOneBy({
+        id: task.taskId,
+      });
+      if (askingTask) {
+        const updatedDetail = {
+          ...askingTask.detail,
+          status: AskResultStatus.STOPPED,
+        };
+        await this.askingTaskRepository.updateOne(task.taskId, {
+          detail: updatedDetail,
+        });
+        logger.info(
+          `[DEBUG] cancelAskingTask: Updated askingTask ${task.taskId} status to STOPPED`,
+        );
+      }
+    } else {
+      // If taskId is not available, try to find by queryId
+      const askingTask = await this.askingTaskRepository.findByQueryId(queryId);
+      if (askingTask) {
+        const updatedDetail = {
+          ...askingTask.detail,
+          status: AskResultStatus.STOPPED,
+        };
+        await this.askingTaskRepository.updateOne(askingTask.id, {
+          detail: updatedDetail,
+        });
+        logger.info(
+          `[DEBUG] cancelAskingTask: Updated askingTask ${askingTask.id} (by queryId) status to STOPPED`,
         );
       }
     }
@@ -585,9 +640,32 @@ export class AskingTaskTracker implements IAskingTaskTracker {
       logger.info(
         `[DEBUG] updateThreadResponseWhenTaskFinalized: Updating with SQL: ${response.sql}`,
       );
-      await this.threadResponseRepository.updateOne(task.threadResponseId, {
-        sql: response.sql,
-      });
+      const updatedResponse = await this.threadResponseRepository.updateOne(
+        task.threadResponseId,
+        {
+          sql: response.sql,
+        },
+      );
+
+      // Trigger text-based answer generation for rerun scenarios
+      // This ensures the answer is generated after the SQL is updated
+      if (
+        this.textBasedAnswerBackgroundTracker &&
+        task.rerunFromCancelled &&
+        updatedResponse
+      ) {
+        logger.info(
+          `[DEBUG] updateThreadResponseWhenTaskFinalized: Triggering text-based answer generation for rerun task ${task.queryId}`,
+        );
+        // Reset answerDetail status to NOT_STARTED so the tracker will process it
+        const responseWithResetStatus =
+          await this.threadResponseRepository.updateOne(task.threadResponseId, {
+            answerDetail: {
+              status: ThreadResponseAnswerStatus.NOT_STARTED,
+            },
+          });
+        this.textBasedAnswerBackgroundTracker.addTask(responseWithResetStatus);
+      }
     } else {
       logger.info(
         `[DEBUG] updateThreadResponseWhenTaskFinalized: No SQL or ViewID in response. Skipping update. Response keys: ${Object.keys(response)}`,
