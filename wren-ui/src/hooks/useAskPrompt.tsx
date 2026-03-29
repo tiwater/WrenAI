@@ -21,7 +21,6 @@ import {
 import useAskingStreamTask from './useAskingStreamTask';
 import { THREAD } from '@/apollo/client/graphql/home';
 import { ApolloClient, NormalizedCacheObject } from '@apollo/client';
-import { nextTick } from '@/utils/time';
 import { useProject } from '@/contexts/ProjectContext';
 export interface AskPromptData {
   originalQuestion: string;

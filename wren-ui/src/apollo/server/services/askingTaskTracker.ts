@@ -271,11 +271,11 @@ export class AskingTaskTracker implements IAskingTaskTracker {
       const askingTask = await this.askingTaskRepository.findOneBy({
         id: task.taskId,
       });
-      if (askingTask) {
+      if (askingTask && askingTask.detail) {
         const updatedDetail = {
           ...askingTask.detail,
           status: AskResultStatus.STOPPED,
-        };
+        } as typeof askingTask.detail;
         await this.askingTaskRepository.updateOne(task.taskId, {
           detail: updatedDetail,
         });
@@ -286,11 +286,11 @@ export class AskingTaskTracker implements IAskingTaskTracker {
     } else {
       // If taskId is not available, try to find by queryId
       const askingTask = await this.askingTaskRepository.findByQueryId(queryId);
-      if (askingTask) {
+      if (askingTask && askingTask.detail) {
         const updatedDetail = {
           ...askingTask.detail,
           status: AskResultStatus.STOPPED,
-        };
+        } as typeof askingTask.detail;
         await this.askingTaskRepository.updateOne(askingTask.id, {
           detail: updatedDetail,
         });
